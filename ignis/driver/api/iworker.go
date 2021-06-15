@@ -30,33 +30,33 @@ func NewIWorkerName(cluster *ICluster, tp, name string) (*IWorker, error) {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().NewInstance3a_(context.Background(), cluster.id, tp, name)
+	id, err2 := client.Services().GetWorkerService().NewInstance3_(context.Background(), cluster.id, tp, name)
 	if err2 != nil {
 		return nil, derror.NewGenericIDriverError(err2)
 	}
 	return &IWorker{cluster, id}, nil
 }
 
-func NewIWorkerCores(cluster *ICluster, tp string, cores int) (*IWorker, error) {
+func NewIWorkerCores(cluster *ICluster, tp string, cores int, instances int) (*IWorker, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().NewInstance3b_(context.Background(), cluster.id, tp, int32(cores))
+	id, err2 := client.Services().GetWorkerService().NewInstance4_(context.Background(), cluster.id, tp, int32(cores), int32(instances))
 	if err2 != nil {
 		return nil, derror.NewGenericIDriverError(err2)
 	}
 	return &IWorker{cluster, id}, nil
 }
 
-func NewIWorker(cluster *ICluster, tp, name string, cores int) (*IWorker, error) {
+func NewIWorker(cluster *ICluster, tp, name string, cores int, instances int) (*IWorker, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().NewInstance4_(context.Background(), cluster.id, tp, name, int32(cores))
+	id, err2 := client.Services().GetWorkerService().NewInstance5_(context.Background(), cluster.id, tp, name, int32(cores), int32(instances))
 	if err2 != nil {
 		return nil, derror.NewGenericIDriverError(err2)
 	}

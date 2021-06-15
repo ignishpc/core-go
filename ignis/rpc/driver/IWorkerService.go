@@ -183,18 +183,20 @@ type IWorkerService interface {
   //  - ID
   //  - Name
   //  - Type
-  NewInstance3a_(ctx context.Context, id int64, name string, type_a1 string) (_r *IWorkerId, _err error)
+  NewInstance3_(ctx context.Context, id int64, name string, type_a1 string) (_r *IWorkerId, _err error)
   // Parameters:
   //  - ID
   //  - Type
   //  - Cores
-  NewInstance3b_(ctx context.Context, id int64, type_a1 string, cores int32) (_r *IWorkerId, _err error)
+  //  - Instances
+  NewInstance4_(ctx context.Context, id int64, type_a1 string, cores int32, instances int32) (_r *IWorkerId, _err error)
   // Parameters:
   //  - ID
   //  - Name
   //  - Type
   //  - Cores
-  NewInstance4_(ctx context.Context, id int64, name string, type_a1 string, cores int32) (_r *IWorkerId, _err error)
+  //  - Instances
+  NewInstance5_(ctx context.Context, id int64, name string, type_a1 string, cores int32, instances int32) (_r *IWorkerId, _err error)
   // Parameters:
   //  - ID
   //  - Name
@@ -385,14 +387,14 @@ func (p *IWorkerServiceClient) NewInstance_(ctx context.Context, id int64, type_
 //  - ID
 //  - Name
 //  - Type
-func (p *IWorkerServiceClient) NewInstance3a_(ctx context.Context, id int64, name string, type_a1 string) (_r *IWorkerId, _err error) {
-  var _args9 IWorkerServiceNewInstance3aArgs_
+func (p *IWorkerServiceClient) NewInstance3_(ctx context.Context, id int64, name string, type_a1 string) (_r *IWorkerId, _err error) {
+  var _args9 IWorkerServiceNewInstance3Args_
   _args9.ID = id
   _args9.Name = name
   _args9.Type = type_a1
-  var _result11 IWorkerServiceNewInstance3aResult_
+  var _result11 IWorkerServiceNewInstance3Result_
   var _meta10 thrift.ResponseMeta
-  _meta10, _err = p.Client_().Call(ctx, "newInstance3a", &_args9, &_result11)
+  _meta10, _err = p.Client_().Call(ctx, "newInstance3", &_args9, &_result11)
   p.SetLastResponseMeta_(_meta10)
   if _err != nil {
     return
@@ -409,14 +411,16 @@ func (p *IWorkerServiceClient) NewInstance3a_(ctx context.Context, id int64, nam
 //  - ID
 //  - Type
 //  - Cores
-func (p *IWorkerServiceClient) NewInstance3b_(ctx context.Context, id int64, type_a1 string, cores int32) (_r *IWorkerId, _err error) {
-  var _args12 IWorkerServiceNewInstance3bArgs_
+//  - Instances
+func (p *IWorkerServiceClient) NewInstance4_(ctx context.Context, id int64, type_a1 string, cores int32, instances int32) (_r *IWorkerId, _err error) {
+  var _args12 IWorkerServiceNewInstance4Args_
   _args12.ID = id
   _args12.Type = type_a1
   _args12.Cores = cores
-  var _result14 IWorkerServiceNewInstance3bResult_
+  _args12.Instances = instances
+  var _result14 IWorkerServiceNewInstance4Result_
   var _meta13 thrift.ResponseMeta
-  _meta13, _err = p.Client_().Call(ctx, "newInstance3b", &_args12, &_result14)
+  _meta13, _err = p.Client_().Call(ctx, "newInstance4", &_args12, &_result14)
   p.SetLastResponseMeta_(_meta13)
   if _err != nil {
     return
@@ -434,15 +438,17 @@ func (p *IWorkerServiceClient) NewInstance3b_(ctx context.Context, id int64, typ
 //  - Name
 //  - Type
 //  - Cores
-func (p *IWorkerServiceClient) NewInstance4_(ctx context.Context, id int64, name string, type_a1 string, cores int32) (_r *IWorkerId, _err error) {
-  var _args15 IWorkerServiceNewInstance4Args_
+//  - Instances
+func (p *IWorkerServiceClient) NewInstance5_(ctx context.Context, id int64, name string, type_a1 string, cores int32, instances int32) (_r *IWorkerId, _err error) {
+  var _args15 IWorkerServiceNewInstance5Args_
   _args15.ID = id
   _args15.Name = name
   _args15.Type = type_a1
   _args15.Cores = cores
-  var _result17 IWorkerServiceNewInstance4Result_
+  _args15.Instances = instances
+  var _result17 IWorkerServiceNewInstance5Result_
   var _meta16 thrift.ResponseMeta
-  _meta16, _err = p.Client_().Call(ctx, "newInstance4", &_args15, &_result17)
+  _meta16, _err = p.Client_().Call(ctx, "newInstance5", &_args15, &_result17)
   p.SetLastResponseMeta_(_meta16)
   if _err != nil {
     return
@@ -967,9 +973,9 @@ func NewIWorkerServiceProcessor(handler IWorkerService) *IWorkerServiceProcessor
   self81.processorMap["start"] = &iWorkerServiceProcessorStart{handler:handler}
   self81.processorMap["destroy"] = &iWorkerServiceProcessorDestroy{handler:handler}
   self81.processorMap["newInstance"] = &iWorkerServiceProcessorNewInstance_{handler:handler}
-  self81.processorMap["newInstance3a"] = &iWorkerServiceProcessorNewInstance3a_{handler:handler}
-  self81.processorMap["newInstance3b"] = &iWorkerServiceProcessorNewInstance3b_{handler:handler}
+  self81.processorMap["newInstance3"] = &iWorkerServiceProcessorNewInstance3_{handler:handler}
   self81.processorMap["newInstance4"] = &iWorkerServiceProcessorNewInstance4_{handler:handler}
+  self81.processorMap["newInstance5"] = &iWorkerServiceProcessorNewInstance5_{handler:handler}
   self81.processorMap["setName"] = &iWorkerServiceProcessorSetName{handler:handler}
   self81.processorMap["parallelize"] = &iWorkerServiceProcessorParallelize{handler:handler}
   self81.processorMap["parallelize4"] = &iWorkerServiceProcessorParallelize4{handler:handler}
@@ -1247,17 +1253,17 @@ func (p *iWorkerServiceProcessorNewInstance_) Process(ctx context.Context, seqId
   return true, err
 }
 
-type iWorkerServiceProcessorNewInstance3a_ struct {
+type iWorkerServiceProcessorNewInstance3_ struct {
   handler IWorkerService
 }
 
-func (p *iWorkerServiceProcessorNewInstance3a_) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
-  args := IWorkerServiceNewInstance3aArgs_{}
+func (p *iWorkerServiceProcessorNewInstance3_) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IWorkerServiceNewInstance3Args_{}
   var err2 error
   if err2 = args.Read(ctx, iprot); err2 != nil {
     iprot.ReadMessageEnd(ctx)
     x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
-    oprot.WriteMessageBegin(ctx, "newInstance3a", thrift.EXCEPTION, seqId)
+    oprot.WriteMessageBegin(ctx, "newInstance3", thrift.EXCEPTION, seqId)
     x.Write(ctx, oprot)
     oprot.WriteMessageEnd(ctx)
     oprot.Flush(ctx)
@@ -1291,9 +1297,9 @@ func (p *iWorkerServiceProcessorNewInstance3a_) Process(ctx context.Context, seq
     }(tickerCtx, cancel)
   }
 
-  result := IWorkerServiceNewInstance3aResult_{}
+  result := IWorkerServiceNewInstance3Result_{}
   var retval *IWorkerId
-  if retval, err2 = p.handler.NewInstance3a_(ctx, args.ID, args.Name, args.Type); err2 != nil {
+  if retval, err2 = p.handler.NewInstance3_(ctx, args.ID, args.Name, args.Type); err2 != nil {
     tickerCancel()
   switch v := err2.(type) {
     case *IDriverException:
@@ -1302,8 +1308,8 @@ func (p *iWorkerServiceProcessorNewInstance3a_) Process(ctx context.Context, seq
     if err2 == thrift.ErrAbandonRequest {
       return false, thrift.WrapTException(err2)
     }
-    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing newInstance3a: " + err2.Error())
-    oprot.WriteMessageBegin(ctx, "newInstance3a", thrift.EXCEPTION, seqId)
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing newInstance3: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "newInstance3", thrift.EXCEPTION, seqId)
     x.Write(ctx, oprot)
     oprot.WriteMessageEnd(ctx)
     oprot.Flush(ctx)
@@ -1313,91 +1319,7 @@ func (p *iWorkerServiceProcessorNewInstance3a_) Process(ctx context.Context, seq
     result.Success = retval
   }
   tickerCancel()
-  if err2 = oprot.WriteMessageBegin(ctx, "newInstance3a", thrift.REPLY, seqId); err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err != nil {
-    return
-  }
-  return true, err
-}
-
-type iWorkerServiceProcessorNewInstance3b_ struct {
-  handler IWorkerService
-}
-
-func (p *iWorkerServiceProcessorNewInstance3b_) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
-  args := IWorkerServiceNewInstance3bArgs_{}
-  var err2 error
-  if err2 = args.Read(ctx, iprot); err2 != nil {
-    iprot.ReadMessageEnd(ctx)
-    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
-    oprot.WriteMessageBegin(ctx, "newInstance3b", thrift.EXCEPTION, seqId)
-    x.Write(ctx, oprot)
-    oprot.WriteMessageEnd(ctx)
-    oprot.Flush(ctx)
-    return false, thrift.WrapTException(err2)
-  }
-  iprot.ReadMessageEnd(ctx)
-
-  tickerCancel := func() {}
-  // Start a goroutine to do server side connectivity check.
-  if thrift.ServerConnectivityCheckInterval > 0 {
-    var cancel context.CancelFunc
-    ctx, cancel = context.WithCancel(ctx)
-    defer cancel()
-    var tickerCtx context.Context
-    tickerCtx, tickerCancel = context.WithCancel(context.Background())
-    defer tickerCancel()
-    go func(ctx context.Context, cancel context.CancelFunc) {
-      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
-      defer ticker.Stop()
-      for {
-        select {
-        case <-ctx.Done():
-          return
-        case <-ticker.C:
-          if !iprot.Transport().IsOpen() {
-            cancel()
-            return
-          }
-        }
-      }
-    }(tickerCtx, cancel)
-  }
-
-  result := IWorkerServiceNewInstance3bResult_{}
-  var retval *IWorkerId
-  if retval, err2 = p.handler.NewInstance3b_(ctx, args.ID, args.Type, args.Cores); err2 != nil {
-    tickerCancel()
-  switch v := err2.(type) {
-    case *IDriverException:
-  result.Ex = v
-    default:
-    if err2 == thrift.ErrAbandonRequest {
-      return false, thrift.WrapTException(err2)
-    }
-    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing newInstance3b: " + err2.Error())
-    oprot.WriteMessageBegin(ctx, "newInstance3b", thrift.EXCEPTION, seqId)
-    x.Write(ctx, oprot)
-    oprot.WriteMessageEnd(ctx)
-    oprot.Flush(ctx)
-    return true, thrift.WrapTException(err2)
-  }
-  } else {
-    result.Success = retval
-  }
-  tickerCancel()
-  if err2 = oprot.WriteMessageBegin(ctx, "newInstance3b", thrift.REPLY, seqId); err2 != nil {
+  if err2 = oprot.WriteMessageBegin(ctx, "newInstance3", thrift.REPLY, seqId); err2 != nil {
     err = thrift.WrapTException(err2)
   }
   if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
@@ -1461,7 +1383,7 @@ func (p *iWorkerServiceProcessorNewInstance4_) Process(ctx context.Context, seqI
 
   result := IWorkerServiceNewInstance4Result_{}
   var retval *IWorkerId
-  if retval, err2 = p.handler.NewInstance4_(ctx, args.ID, args.Name, args.Type, args.Cores); err2 != nil {
+  if retval, err2 = p.handler.NewInstance4_(ctx, args.ID, args.Type, args.Cores, args.Instances); err2 != nil {
     tickerCancel()
   switch v := err2.(type) {
     case *IDriverException:
@@ -1482,6 +1404,90 @@ func (p *iWorkerServiceProcessorNewInstance4_) Process(ctx context.Context, seqI
   }
   tickerCancel()
   if err2 = oprot.WriteMessageBegin(ctx, "newInstance4", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iWorkerServiceProcessorNewInstance5_ struct {
+  handler IWorkerService
+}
+
+func (p *iWorkerServiceProcessorNewInstance5_) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IWorkerServiceNewInstance5Args_{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "newInstance5", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IWorkerServiceNewInstance5Result_{}
+  var retval *IWorkerId
+  if retval, err2 = p.handler.NewInstance5_(ctx, args.ID, args.Name, args.Type, args.Cores, args.Instances); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing newInstance5: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "newInstance5", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "newInstance5", thrift.REPLY, seqId); err2 != nil {
     err = thrift.WrapTException(err2)
   }
   if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
@@ -3825,29 +3831,29 @@ func (p *IWorkerServiceNewInstanceResult_) String() string {
 //  - ID
 //  - Name
 //  - Type
-type IWorkerServiceNewInstance3aArgs_ struct {
+type IWorkerServiceNewInstance3Args_ struct {
   ID int64 `thrift:"id,1" db:"id" json:"id"`
   Name string `thrift:"name,2" db:"name" json:"name"`
   Type string `thrift:"type,3" db:"type" json:"type"`
 }
 
-func NewIWorkerServiceNewInstance3aArgs_() *IWorkerServiceNewInstance3aArgs_ {
-  return &IWorkerServiceNewInstance3aArgs_{}
+func NewIWorkerServiceNewInstance3Args_() *IWorkerServiceNewInstance3Args_ {
+  return &IWorkerServiceNewInstance3Args_{}
 }
 
 
-func (p *IWorkerServiceNewInstance3aArgs_) GetID() int64 {
+func (p *IWorkerServiceNewInstance3Args_) GetID() int64 {
   return p.ID
 }
 
-func (p *IWorkerServiceNewInstance3aArgs_) GetName() string {
+func (p *IWorkerServiceNewInstance3Args_) GetName() string {
   return p.Name
 }
 
-func (p *IWorkerServiceNewInstance3aArgs_) GetType() string {
+func (p *IWorkerServiceNewInstance3Args_) GetType() string {
   return p.Type
 }
-func (p *IWorkerServiceNewInstance3aArgs_) Read(ctx context.Context, iprot thrift.TProtocol) error {
+func (p *IWorkerServiceNewInstance3Args_) Read(ctx context.Context, iprot thrift.TProtocol) error {
   if _, err := iprot.ReadStructBegin(ctx); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
@@ -3905,7 +3911,7 @@ func (p *IWorkerServiceNewInstance3aArgs_) Read(ctx context.Context, iprot thrif
   return nil
 }
 
-func (p *IWorkerServiceNewInstance3aArgs_)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+func (p *IWorkerServiceNewInstance3Args_)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
   if v, err := iprot.ReadI64(ctx); err != nil {
   return thrift.PrependError("error reading field 1: ", err)
 } else {
@@ -3914,7 +3920,7 @@ func (p *IWorkerServiceNewInstance3aArgs_)  ReadField1(ctx context.Context, ipro
   return nil
 }
 
-func (p *IWorkerServiceNewInstance3aArgs_)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+func (p *IWorkerServiceNewInstance3Args_)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
   if v, err := iprot.ReadString(ctx); err != nil {
   return thrift.PrependError("error reading field 2: ", err)
 } else {
@@ -3923,7 +3929,7 @@ func (p *IWorkerServiceNewInstance3aArgs_)  ReadField2(ctx context.Context, ipro
   return nil
 }
 
-func (p *IWorkerServiceNewInstance3aArgs_)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+func (p *IWorkerServiceNewInstance3Args_)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
   if v, err := iprot.ReadString(ctx); err != nil {
   return thrift.PrependError("error reading field 3: ", err)
 } else {
@@ -3932,8 +3938,8 @@ func (p *IWorkerServiceNewInstance3aArgs_)  ReadField3(ctx context.Context, ipro
   return nil
 }
 
-func (p *IWorkerServiceNewInstance3aArgs_) Write(ctx context.Context, oprot thrift.TProtocol) error {
-  if err := oprot.WriteStructBegin(ctx, "newInstance3a_args"); err != nil {
+func (p *IWorkerServiceNewInstance3Args_) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "newInstance3_args"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if p != nil {
     if err := p.writeField1(ctx, oprot); err != nil { return err }
@@ -3947,7 +3953,7 @@ func (p *IWorkerServiceNewInstance3aArgs_) Write(ctx context.Context, oprot thri
   return nil
 }
 
-func (p *IWorkerServiceNewInstance3aArgs_) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+func (p *IWorkerServiceNewInstance3Args_) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
   if err := oprot.WriteFieldBegin(ctx, "id", thrift.I64, 1); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
   if err := oprot.WriteI64(ctx, int64(p.ID)); err != nil {
@@ -3957,7 +3963,7 @@ func (p *IWorkerServiceNewInstance3aArgs_) writeField1(ctx context.Context, opro
   return err
 }
 
-func (p *IWorkerServiceNewInstance3aArgs_) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+func (p *IWorkerServiceNewInstance3Args_) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
   if err := oprot.WriteFieldBegin(ctx, "name", thrift.STRING, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:name: ", p), err) }
   if err := oprot.WriteString(ctx, string(p.Name)); err != nil {
@@ -3967,7 +3973,7 @@ func (p *IWorkerServiceNewInstance3aArgs_) writeField2(ctx context.Context, opro
   return err
 }
 
-func (p *IWorkerServiceNewInstance3aArgs_) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+func (p *IWorkerServiceNewInstance3Args_) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
   if err := oprot.WriteFieldBegin(ctx, "type", thrift.STRING, 3); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:type: ", p), err) }
   if err := oprot.WriteString(ctx, string(p.Type)); err != nil {
@@ -3977,48 +3983,48 @@ func (p *IWorkerServiceNewInstance3aArgs_) writeField3(ctx context.Context, opro
   return err
 }
 
-func (p *IWorkerServiceNewInstance3aArgs_) String() string {
+func (p *IWorkerServiceNewInstance3Args_) String() string {
   if p == nil {
     return "<nil>"
   }
-  return fmt.Sprintf("IWorkerServiceNewInstance3aArgs_(%+v)", *p)
+  return fmt.Sprintf("IWorkerServiceNewInstance3Args_(%+v)", *p)
 }
 
 // Attributes:
 //  - Success
 //  - Ex
-type IWorkerServiceNewInstance3aResult_ struct {
+type IWorkerServiceNewInstance3Result_ struct {
   Success *IWorkerId `thrift:"success,0" db:"success" json:"success,omitempty"`
   Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
 }
 
-func NewIWorkerServiceNewInstance3aResult_() *IWorkerServiceNewInstance3aResult_ {
-  return &IWorkerServiceNewInstance3aResult_{}
+func NewIWorkerServiceNewInstance3Result_() *IWorkerServiceNewInstance3Result_ {
+  return &IWorkerServiceNewInstance3Result_{}
 }
 
-var IWorkerServiceNewInstance3aResult__Success_DEFAULT *IWorkerId
-func (p *IWorkerServiceNewInstance3aResult_) GetSuccess() *IWorkerId {
+var IWorkerServiceNewInstance3Result__Success_DEFAULT *IWorkerId
+func (p *IWorkerServiceNewInstance3Result_) GetSuccess() *IWorkerId {
   if !p.IsSetSuccess() {
-    return IWorkerServiceNewInstance3aResult__Success_DEFAULT
+    return IWorkerServiceNewInstance3Result__Success_DEFAULT
   }
 return p.Success
 }
-var IWorkerServiceNewInstance3aResult__Ex_DEFAULT *IDriverException
-func (p *IWorkerServiceNewInstance3aResult_) GetEx() *IDriverException {
+var IWorkerServiceNewInstance3Result__Ex_DEFAULT *IDriverException
+func (p *IWorkerServiceNewInstance3Result_) GetEx() *IDriverException {
   if !p.IsSetEx() {
-    return IWorkerServiceNewInstance3aResult__Ex_DEFAULT
+    return IWorkerServiceNewInstance3Result__Ex_DEFAULT
   }
 return p.Ex
 }
-func (p *IWorkerServiceNewInstance3aResult_) IsSetSuccess() bool {
+func (p *IWorkerServiceNewInstance3Result_) IsSetSuccess() bool {
   return p.Success != nil
 }
 
-func (p *IWorkerServiceNewInstance3aResult_) IsSetEx() bool {
+func (p *IWorkerServiceNewInstance3Result_) IsSetEx() bool {
   return p.Ex != nil
 }
 
-func (p *IWorkerServiceNewInstance3aResult_) Read(ctx context.Context, iprot thrift.TProtocol) error {
+func (p *IWorkerServiceNewInstance3Result_) Read(ctx context.Context, iprot thrift.TProtocol) error {
   if _, err := iprot.ReadStructBegin(ctx); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
@@ -4066,7 +4072,7 @@ func (p *IWorkerServiceNewInstance3aResult_) Read(ctx context.Context, iprot thr
   return nil
 }
 
-func (p *IWorkerServiceNewInstance3aResult_)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+func (p *IWorkerServiceNewInstance3Result_)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
   p.Success = &IWorkerId{}
   if err := p.Success.Read(ctx, iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
@@ -4074,7 +4080,7 @@ func (p *IWorkerServiceNewInstance3aResult_)  ReadField0(ctx context.Context, ip
   return nil
 }
 
-func (p *IWorkerServiceNewInstance3aResult_)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+func (p *IWorkerServiceNewInstance3Result_)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
   p.Ex = &IDriverException{}
   if err := p.Ex.Read(ctx, iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
@@ -4082,8 +4088,8 @@ func (p *IWorkerServiceNewInstance3aResult_)  ReadField1(ctx context.Context, ip
   return nil
 }
 
-func (p *IWorkerServiceNewInstance3aResult_) Write(ctx context.Context, oprot thrift.TProtocol) error {
-  if err := oprot.WriteStructBegin(ctx, "newInstance3a_result"); err != nil {
+func (p *IWorkerServiceNewInstance3Result_) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "newInstance3_result"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if p != nil {
     if err := p.writeField0(ctx, oprot); err != nil { return err }
@@ -4096,7 +4102,7 @@ func (p *IWorkerServiceNewInstance3aResult_) Write(ctx context.Context, oprot th
   return nil
 }
 
-func (p *IWorkerServiceNewInstance3aResult_) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+func (p *IWorkerServiceNewInstance3Result_) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
   if p.IsSetSuccess() {
     if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
@@ -4109,7 +4115,7 @@ func (p *IWorkerServiceNewInstance3aResult_) writeField0(ctx context.Context, op
   return err
 }
 
-func (p *IWorkerServiceNewInstance3aResult_) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+func (p *IWorkerServiceNewInstance3Result_) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
   if p.IsSetEx() {
     if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
@@ -4122,331 +4128,23 @@ func (p *IWorkerServiceNewInstance3aResult_) writeField1(ctx context.Context, op
   return err
 }
 
-func (p *IWorkerServiceNewInstance3aResult_) String() string {
+func (p *IWorkerServiceNewInstance3Result_) String() string {
   if p == nil {
     return "<nil>"
   }
-  return fmt.Sprintf("IWorkerServiceNewInstance3aResult_(%+v)", *p)
+  return fmt.Sprintf("IWorkerServiceNewInstance3Result_(%+v)", *p)
 }
 
 // Attributes:
 //  - ID
 //  - Type
 //  - Cores
-type IWorkerServiceNewInstance3bArgs_ struct {
+//  - Instances
+type IWorkerServiceNewInstance4Args_ struct {
   ID int64 `thrift:"id,1" db:"id" json:"id"`
   Type string `thrift:"type,2" db:"type" json:"type"`
   Cores int32 `thrift:"cores,3" db:"cores" json:"cores"`
-}
-
-func NewIWorkerServiceNewInstance3bArgs_() *IWorkerServiceNewInstance3bArgs_ {
-  return &IWorkerServiceNewInstance3bArgs_{}
-}
-
-
-func (p *IWorkerServiceNewInstance3bArgs_) GetID() int64 {
-  return p.ID
-}
-
-func (p *IWorkerServiceNewInstance3bArgs_) GetType() string {
-  return p.Type
-}
-
-func (p *IWorkerServiceNewInstance3bArgs_) GetCores() int32 {
-  return p.Cores
-}
-func (p *IWorkerServiceNewInstance3bArgs_) Read(ctx context.Context, iprot thrift.TProtocol) error {
-  if _, err := iprot.ReadStructBegin(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    switch fieldId {
-    case 1:
-      if fieldTypeId == thrift.I64 {
-        if err := p.ReadField1(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    case 2:
-      if fieldTypeId == thrift.STRING {
-        if err := p.ReadField2(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    case 3:
-      if fieldTypeId == thrift.I32 {
-        if err := p.ReadField3(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    default:
-      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-        return err
-      }
-    }
-    if err := iprot.ReadFieldEnd(ctx); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *IWorkerServiceNewInstance3bArgs_)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
-  if v, err := iprot.ReadI64(ctx); err != nil {
-  return thrift.PrependError("error reading field 1: ", err)
-} else {
-  p.ID = v
-}
-  return nil
-}
-
-func (p *IWorkerServiceNewInstance3bArgs_)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
-  if v, err := iprot.ReadString(ctx); err != nil {
-  return thrift.PrependError("error reading field 2: ", err)
-} else {
-  p.Type = v
-}
-  return nil
-}
-
-func (p *IWorkerServiceNewInstance3bArgs_)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
-  if v, err := iprot.ReadI32(ctx); err != nil {
-  return thrift.PrependError("error reading field 3: ", err)
-} else {
-  p.Cores = v
-}
-  return nil
-}
-
-func (p *IWorkerServiceNewInstance3bArgs_) Write(ctx context.Context, oprot thrift.TProtocol) error {
-  if err := oprot.WriteStructBegin(ctx, "newInstance3b_args"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if p != nil {
-    if err := p.writeField1(ctx, oprot); err != nil { return err }
-    if err := p.writeField2(ctx, oprot); err != nil { return err }
-    if err := p.writeField3(ctx, oprot); err != nil { return err }
-  }
-  if err := oprot.WriteFieldStop(ctx); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(ctx); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *IWorkerServiceNewInstance3bArgs_) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "id", thrift.I64, 1); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
-  if err := oprot.WriteI64(ctx, int64(p.ID)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.id (1) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
-  return err
-}
-
-func (p *IWorkerServiceNewInstance3bArgs_) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "type", thrift.STRING, 2); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:type: ", p), err) }
-  if err := oprot.WriteString(ctx, string(p.Type)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.type (2) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:type: ", p), err) }
-  return err
-}
-
-func (p *IWorkerServiceNewInstance3bArgs_) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "cores", thrift.I32, 3); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:cores: ", p), err) }
-  if err := oprot.WriteI32(ctx, int32(p.Cores)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.cores (3) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:cores: ", p), err) }
-  return err
-}
-
-func (p *IWorkerServiceNewInstance3bArgs_) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-  return fmt.Sprintf("IWorkerServiceNewInstance3bArgs_(%+v)", *p)
-}
-
-// Attributes:
-//  - Success
-//  - Ex
-type IWorkerServiceNewInstance3bResult_ struct {
-  Success *IWorkerId `thrift:"success,0" db:"success" json:"success,omitempty"`
-  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
-}
-
-func NewIWorkerServiceNewInstance3bResult_() *IWorkerServiceNewInstance3bResult_ {
-  return &IWorkerServiceNewInstance3bResult_{}
-}
-
-var IWorkerServiceNewInstance3bResult__Success_DEFAULT *IWorkerId
-func (p *IWorkerServiceNewInstance3bResult_) GetSuccess() *IWorkerId {
-  if !p.IsSetSuccess() {
-    return IWorkerServiceNewInstance3bResult__Success_DEFAULT
-  }
-return p.Success
-}
-var IWorkerServiceNewInstance3bResult__Ex_DEFAULT *IDriverException
-func (p *IWorkerServiceNewInstance3bResult_) GetEx() *IDriverException {
-  if !p.IsSetEx() {
-    return IWorkerServiceNewInstance3bResult__Ex_DEFAULT
-  }
-return p.Ex
-}
-func (p *IWorkerServiceNewInstance3bResult_) IsSetSuccess() bool {
-  return p.Success != nil
-}
-
-func (p *IWorkerServiceNewInstance3bResult_) IsSetEx() bool {
-  return p.Ex != nil
-}
-
-func (p *IWorkerServiceNewInstance3bResult_) Read(ctx context.Context, iprot thrift.TProtocol) error {
-  if _, err := iprot.ReadStructBegin(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    switch fieldId {
-    case 0:
-      if fieldTypeId == thrift.STRUCT {
-        if err := p.ReadField0(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    case 1:
-      if fieldTypeId == thrift.STRUCT {
-        if err := p.ReadField1(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    default:
-      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-        return err
-      }
-    }
-    if err := iprot.ReadFieldEnd(ctx); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *IWorkerServiceNewInstance3bResult_)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
-  p.Success = &IWorkerId{}
-  if err := p.Success.Read(ctx, iprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
-  }
-  return nil
-}
-
-func (p *IWorkerServiceNewInstance3bResult_)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
-  p.Ex = &IDriverException{}
-  if err := p.Ex.Read(ctx, iprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
-  }
-  return nil
-}
-
-func (p *IWorkerServiceNewInstance3bResult_) Write(ctx context.Context, oprot thrift.TProtocol) error {
-  if err := oprot.WriteStructBegin(ctx, "newInstance3b_result"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if p != nil {
-    if err := p.writeField0(ctx, oprot); err != nil { return err }
-    if err := p.writeField1(ctx, oprot); err != nil { return err }
-  }
-  if err := oprot.WriteFieldStop(ctx); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(ctx); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *IWorkerServiceNewInstance3bResult_) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if p.IsSetSuccess() {
-    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
-    if err := p.Success.Write(ctx, oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
-    }
-    if err := oprot.WriteFieldEnd(ctx); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
-  }
-  return err
-}
-
-func (p *IWorkerServiceNewInstance3bResult_) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if p.IsSetEx() {
-    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
-    if err := p.Ex.Write(ctx, oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
-    }
-    if err := oprot.WriteFieldEnd(ctx); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
-  }
-  return err
-}
-
-func (p *IWorkerServiceNewInstance3bResult_) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-  return fmt.Sprintf("IWorkerServiceNewInstance3bResult_(%+v)", *p)
-}
-
-// Attributes:
-//  - ID
-//  - Name
-//  - Type
-//  - Cores
-type IWorkerServiceNewInstance4Args_ struct {
-  ID int64 `thrift:"id,1" db:"id" json:"id"`
-  Name string `thrift:"name,2" db:"name" json:"name"`
-  Type string `thrift:"type,3" db:"type" json:"type"`
-  Cores int32 `thrift:"cores,4" db:"cores" json:"cores"`
+  Instances int32 `thrift:"instances,4" db:"instances" json:"instances"`
 }
 
 func NewIWorkerServiceNewInstance4Args_() *IWorkerServiceNewInstance4Args_ {
@@ -4458,16 +4156,16 @@ func (p *IWorkerServiceNewInstance4Args_) GetID() int64 {
   return p.ID
 }
 
-func (p *IWorkerServiceNewInstance4Args_) GetName() string {
-  return p.Name
-}
-
 func (p *IWorkerServiceNewInstance4Args_) GetType() string {
   return p.Type
 }
 
 func (p *IWorkerServiceNewInstance4Args_) GetCores() int32 {
   return p.Cores
+}
+
+func (p *IWorkerServiceNewInstance4Args_) GetInstances() int32 {
+  return p.Instances
 }
 func (p *IWorkerServiceNewInstance4Args_) Read(ctx context.Context, iprot thrift.TProtocol) error {
   if _, err := iprot.ReadStructBegin(ctx); err != nil {
@@ -4503,7 +4201,7 @@ func (p *IWorkerServiceNewInstance4Args_) Read(ctx context.Context, iprot thrift
         }
       }
     case 3:
-      if fieldTypeId == thrift.STRING {
+      if fieldTypeId == thrift.I32 {
         if err := p.ReadField3(ctx, iprot); err != nil {
           return err
         }
@@ -4550,16 +4248,16 @@ func (p *IWorkerServiceNewInstance4Args_)  ReadField2(ctx context.Context, iprot
   if v, err := iprot.ReadString(ctx); err != nil {
   return thrift.PrependError("error reading field 2: ", err)
 } else {
-  p.Name = v
+  p.Type = v
 }
   return nil
 }
 
 func (p *IWorkerServiceNewInstance4Args_)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
-  if v, err := iprot.ReadString(ctx); err != nil {
+  if v, err := iprot.ReadI32(ctx); err != nil {
   return thrift.PrependError("error reading field 3: ", err)
 } else {
-  p.Type = v
+  p.Cores = v
 }
   return nil
 }
@@ -4568,7 +4266,7 @@ func (p *IWorkerServiceNewInstance4Args_)  ReadField4(ctx context.Context, iprot
   if v, err := iprot.ReadI32(ctx); err != nil {
   return thrift.PrependError("error reading field 4: ", err)
 } else {
-  p.Cores = v
+  p.Instances = v
 }
   return nil
 }
@@ -4600,32 +4298,32 @@ func (p *IWorkerServiceNewInstance4Args_) writeField1(ctx context.Context, oprot
 }
 
 func (p *IWorkerServiceNewInstance4Args_) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "name", thrift.STRING, 2); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:name: ", p), err) }
-  if err := oprot.WriteString(ctx, string(p.Name)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.name (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldBegin(ctx, "type", thrift.STRING, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:type: ", p), err) }
+  if err := oprot.WriteString(ctx, string(p.Type)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.type (2) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:name: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:type: ", p), err) }
   return err
 }
 
 func (p *IWorkerServiceNewInstance4Args_) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "type", thrift.STRING, 3); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:type: ", p), err) }
-  if err := oprot.WriteString(ctx, string(p.Type)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.type (3) field write error: ", p), err) }
+  if err := oprot.WriteFieldBegin(ctx, "cores", thrift.I32, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:cores: ", p), err) }
+  if err := oprot.WriteI32(ctx, int32(p.Cores)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.cores (3) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:type: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:cores: ", p), err) }
   return err
 }
 
 func (p *IWorkerServiceNewInstance4Args_) writeField4(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "cores", thrift.I32, 4); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:cores: ", p), err) }
-  if err := oprot.WriteI32(ctx, int32(p.Cores)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.cores (4) field write error: ", p), err) }
+  if err := oprot.WriteFieldBegin(ctx, "instances", thrift.I32, 4); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:instances: ", p), err) }
+  if err := oprot.WriteI32(ctx, int32(p.Instances)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.instances (4) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 4:cores: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 4:instances: ", p), err) }
   return err
 }
 
@@ -4779,6 +4477,386 @@ func (p *IWorkerServiceNewInstance4Result_) String() string {
     return "<nil>"
   }
   return fmt.Sprintf("IWorkerServiceNewInstance4Result_(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - Name
+//  - Type
+//  - Cores
+//  - Instances
+type IWorkerServiceNewInstance5Args_ struct {
+  ID int64 `thrift:"id,1" db:"id" json:"id"`
+  Name string `thrift:"name,2" db:"name" json:"name"`
+  Type string `thrift:"type,3" db:"type" json:"type"`
+  Cores int32 `thrift:"cores,4" db:"cores" json:"cores"`
+  Instances int32 `thrift:"instances,5" db:"instances" json:"instances"`
+}
+
+func NewIWorkerServiceNewInstance5Args_() *IWorkerServiceNewInstance5Args_ {
+  return &IWorkerServiceNewInstance5Args_{}
+}
+
+
+func (p *IWorkerServiceNewInstance5Args_) GetID() int64 {
+  return p.ID
+}
+
+func (p *IWorkerServiceNewInstance5Args_) GetName() string {
+  return p.Name
+}
+
+func (p *IWorkerServiceNewInstance5Args_) GetType() string {
+  return p.Type
+}
+
+func (p *IWorkerServiceNewInstance5Args_) GetCores() int32 {
+  return p.Cores
+}
+
+func (p *IWorkerServiceNewInstance5Args_) GetInstances() int32 {
+  return p.Instances
+}
+func (p *IWorkerServiceNewInstance5Args_) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 4:
+      if fieldTypeId == thrift.I32 {
+        if err := p.ReadField4(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 5:
+      if fieldTypeId == thrift.I32 {
+        if err := p.ReadField5(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IWorkerServiceNewInstance5Args_)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.ID = v
+}
+  return nil
+}
+
+func (p *IWorkerServiceNewInstance5Args_)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.Name = v
+}
+  return nil
+}
+
+func (p *IWorkerServiceNewInstance5Args_)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 3: ", err)
+} else {
+  p.Type = v
+}
+  return nil
+}
+
+func (p *IWorkerServiceNewInstance5Args_)  ReadField4(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI32(ctx); err != nil {
+  return thrift.PrependError("error reading field 4: ", err)
+} else {
+  p.Cores = v
+}
+  return nil
+}
+
+func (p *IWorkerServiceNewInstance5Args_)  ReadField5(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI32(ctx); err != nil {
+  return thrift.PrependError("error reading field 5: ", err)
+} else {
+  p.Instances = v
+}
+  return nil
+}
+
+func (p *IWorkerServiceNewInstance5Args_) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "newInstance5_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+    if err := p.writeField4(ctx, oprot); err != nil { return err }
+    if err := p.writeField5(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IWorkerServiceNewInstance5Args_) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.ID)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.id (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IWorkerServiceNewInstance5Args_) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "name", thrift.STRING, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:name: ", p), err) }
+  if err := oprot.WriteString(ctx, string(p.Name)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.name (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:name: ", p), err) }
+  return err
+}
+
+func (p *IWorkerServiceNewInstance5Args_) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "type", thrift.STRING, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:type: ", p), err) }
+  if err := oprot.WriteString(ctx, string(p.Type)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.type (3) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:type: ", p), err) }
+  return err
+}
+
+func (p *IWorkerServiceNewInstance5Args_) writeField4(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "cores", thrift.I32, 4); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:cores: ", p), err) }
+  if err := oprot.WriteI32(ctx, int32(p.Cores)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.cores (4) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 4:cores: ", p), err) }
+  return err
+}
+
+func (p *IWorkerServiceNewInstance5Args_) writeField5(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "instances", thrift.I32, 5); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 5:instances: ", p), err) }
+  if err := oprot.WriteI32(ctx, int32(p.Instances)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.instances (5) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 5:instances: ", p), err) }
+  return err
+}
+
+func (p *IWorkerServiceNewInstance5Args_) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IWorkerServiceNewInstance5Args_(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IWorkerServiceNewInstance5Result_ struct {
+  Success *IWorkerId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIWorkerServiceNewInstance5Result_() *IWorkerServiceNewInstance5Result_ {
+  return &IWorkerServiceNewInstance5Result_{}
+}
+
+var IWorkerServiceNewInstance5Result__Success_DEFAULT *IWorkerId
+func (p *IWorkerServiceNewInstance5Result_) GetSuccess() *IWorkerId {
+  if !p.IsSetSuccess() {
+    return IWorkerServiceNewInstance5Result__Success_DEFAULT
+  }
+return p.Success
+}
+var IWorkerServiceNewInstance5Result__Ex_DEFAULT *IDriverException
+func (p *IWorkerServiceNewInstance5Result_) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IWorkerServiceNewInstance5Result__Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IWorkerServiceNewInstance5Result_) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IWorkerServiceNewInstance5Result_) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IWorkerServiceNewInstance5Result_) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IWorkerServiceNewInstance5Result_)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IWorkerId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IWorkerServiceNewInstance5Result_)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IWorkerServiceNewInstance5Result_) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "newInstance5_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IWorkerServiceNewInstance5Result_) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IWorkerServiceNewInstance5Result_) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IWorkerServiceNewInstance5Result_) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IWorkerServiceNewInstance5Result_(%+v)", *p)
 }
 
 // Attributes:
