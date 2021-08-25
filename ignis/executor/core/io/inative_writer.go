@@ -9,7 +9,7 @@ import (
 type _INativeWriter struct {
 }
 
-var INativeWriter _INativeWriter
+var INativeWriter = new(_INativeWriter)
 
 func (this _INativeWriter) Write(protocol thrift.TProtocol, obj interface{}) error {
 	enc := gob.NewEncoder(protocol.Transport())

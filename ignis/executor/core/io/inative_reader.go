@@ -18,8 +18,8 @@ type _name struct {
 	sub  [2]*_name
 }
 
-var types map[string]reflect.Type
-var INativeReader _INativeReader
+var types = map[string]reflect.Type{}
+var INativeReader = new(_INativeReader)
 
 func (this _INativeReader) Read(protocol thrift.TProtocol) (interface{}, error) {
 	dec := gob.NewDecoder(protocol.Transport())

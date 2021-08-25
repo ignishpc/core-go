@@ -8,17 +8,18 @@ import (
 )
 
 type IReaderType interface {
+	ReadIn(protocol thrift.TProtocol, obj *interface{}) error
 	Read(protocol thrift.TProtocol) (interface{}, error)
 	getStruct() reflect.Type
 }
 
-type ReadObj func(protocol thrift.TProtocol) (interface{}, error)
+type ReadObj func(protocol thrift.TProtocol, obj *interface{}) error
 
 type _IReader struct {
 }
 
 var readers = make([]IReaderType, 256)
-var IReader _IReader
+var IReader = _IReader{}
 
 func (this _IReader) Set(key int8, value IReaderType) {
 	readers[key] = value
@@ -65,8 +66,14 @@ type IReaderTypeImpl struct {
 	read ReadObj
 }
 
+func (this *IReaderTypeImpl) ReadIn(protocol thrift.TProtocol, obj *interface{}) error {
+	return this.read(protocol, obj)
+}
+
 func (this *IReaderTypeImpl) Read(protocol thrift.TProtocol) (interface{}, error) {
-	return this.read(protocol)
+	var obj interface{}
+	err := this.read(protocol, &obj)
+	return obj, err
 }
 
 func (this *IReaderTypeImpl) getStruct() reflect.Type {
@@ -81,12 +88,60 @@ func NewIReaderType(tp reflect.Type, read ReadObj) IReaderType {
 }
 
 func init() {
-	IReader.Set(I_VOID, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol) (interface{}, error) {
-		return nil, nil
+	IReader.Set(I_VOID, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		return nil
 	}))
-	IReader.Set(I_BOOL, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol) (interface{}, error) {
-		return protocol.ReadBool(ctx)
+	IReader.Set(I_BOOL, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		r, err := protocol.ReadBool(ctx)
+		*obj = &r
+		return err
 	}))
-	//TODO add readers
+	IReader.Set(I_I08, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		r, err := protocol.ReadByte(ctx)
+		*obj = &r
+		return err
+	}))
+	IReader.Set(I_I16, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		r, err := protocol.ReadI16(ctx)
+		*obj = &r
+		return err
+	}))
+	IReader.Set(I_I32, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		r, err := protocol.ReadI32(ctx)
+		*obj = &r
+		return err
+	}))
+	IReader.Set(I_I64, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		r, err := protocol.ReadI64(ctx)
+		*obj = &r
+		return err
+	}))
+	IReader.Set(I_DOUBLE, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		r, err := protocol.ReadDouble(ctx)
+		*obj = &r
+		return err
+	}))
+	IReader.Set(I_STRING, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		r, err := protocol.ReadString(ctx)
+		*obj = &r
+		return err
+	}))
+	IReader.Set(I_LIST, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		return nil//TODO
+	}))
+	IReader.Set(I_SET, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		return nil//TODO
+	}))
+	IReader.Set(I_MAP, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		return nil//TODO
+	}))
+	IReader.Set(I_PAIR, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		return nil//TODO
+	}))
+	IReader.Set(I_BINARY, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		return nil//TODO
+	}))
+	IReader.Set(I_PAIR_LIST, NewIReaderType(reflect.TypeOf(nil), func(protocol thrift.TProtocol, obj *interface{}) error {
+		return nil//TODO
+	}))
 }
-

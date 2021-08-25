@@ -38,7 +38,10 @@ func (this *IObjectProtocol) ReadObject() (interface{}, error) {
 	} else {
 		return io.IReader.Read(this)
 	}
+}
 
+func (this *IObjectProtocol) ReadInObject(obj interface{}) error {
+	return nil
 }
 
 func (this *IObjectProtocol) WriteObjectNative(obj interface{}, native bool) error {

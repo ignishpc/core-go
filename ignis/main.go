@@ -37,11 +37,14 @@ func _init_(args []string) error {
 	}
 
 	if _, present := os.LookupEnv(""); present {
-		mpi.Init_thread(mpi.THREAD_MULTIPLE)
+		err = mpi.MPI_Init_thread(nil, nil, mpi.MPI_THREAD_MULTIPLE, nil)
 	} else {
-		mpi.Init()
+		err = mpi.MPI_Init(nil, nil)
 	}
-	defer mpi.Finalize()
+	if err != nil {
+		return err
+	}
+	defer mpi.MPI_Finalize()
 
 	server := modules.NewIExecutorServerModule(executorData)
 	return server.Serve("IExecutorServer", port, compression, services)

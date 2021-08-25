@@ -22,8 +22,8 @@ type WriteObj func(protocol thrift.TProtocol, obj interface{}) error
 type _IWriter struct {
 }
 
-var writers map[reflect.Type]IWriterType
-var IWriter _IWriter
+var writers = map[reflect.Type]IWriterType{}
+var IWriter = _IWriter{}
 
 func (this _IWriter) Set(key reflect.Type, value IWriterType) {
 	writers[key] = value

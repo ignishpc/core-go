@@ -39,7 +39,7 @@ func NewIPropertiesCopy(props *IProperties) (*IProperties, error) {
 	}, nil
 }
 
-func (this *IProperties) SetProperty(key string, value string) (string, error) {
+func (this *IProperties) Set(key string, value string) (string, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return "", err
@@ -52,7 +52,7 @@ func (this *IProperties) SetProperty(key string, value string) (string, error) {
 	return old, nil
 }
 
-func (this *IProperties) GetProperty(key string) (string, error) {
+func (this *IProperties) Get(key string) (string, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return "", err
@@ -65,7 +65,7 @@ func (this *IProperties) GetProperty(key string) (string, error) {
 	return value, nil
 }
 
-func (this *IProperties) RmProperty(key string) (string, error) {
+func (this *IProperties) Rm(key string) (string, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return "", err
