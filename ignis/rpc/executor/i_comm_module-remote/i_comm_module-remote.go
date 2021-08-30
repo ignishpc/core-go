@@ -36,15 +36,12 @@ func Usage() {
   fmt.Fprintln(os.Stderr, "   getPartitions2(i8 protocol, i64 minPartitions)")
   fmt.Fprintln(os.Stderr, "  void setPartitions( partitions)")
   fmt.Fprintln(os.Stderr, "  void setPartitions2( partitions, ISource src)")
-  fmt.Fprintln(os.Stderr, "  void newEmptyPartitions(i64 n)")
-  fmt.Fprintln(os.Stderr, "  void newEmptyPartitions2(i64 n, ISource src)")
   fmt.Fprintln(os.Stderr, "  void driverGather(string group, ISource src)")
   fmt.Fprintln(os.Stderr, "  void driverGather0(string group, ISource src)")
   fmt.Fprintln(os.Stderr, "  void driverScatter(string group, i64 partitions)")
   fmt.Fprintln(os.Stderr, "  void driverScatter3(string group, i64 partitions, ISource src)")
-  fmt.Fprintln(os.Stderr, "  i32 enableMultithreading(string group)")
-  fmt.Fprintln(os.Stderr, "  void send(string group, i64 partition, i64 dest, i32 thread)")
-  fmt.Fprintln(os.Stderr, "  void recv(string group, i64 partition, i64 source, i32 thread)")
+  fmt.Fprintln(os.Stderr, "  void importData(string group, bool source, i64 threads)")
+  fmt.Fprintln(os.Stderr, "  void importData4(string group, bool source, i64 threads, ISource src)")
   fmt.Fprintln(os.Stderr)
   os.Exit(0)
 }
@@ -249,8 +246,8 @@ func main() {
       fmt.Fprintln(os.Stderr, "GetPartitions requires 1 args")
       flag.Usage()
     }
-    tmp0, err76 := (strconv.Atoi(flag.Arg(1)))
-    if err76 != nil {
+    tmp0, err67 := (strconv.Atoi(flag.Arg(1)))
+    if err67 != nil {
       Usage()
       return
     }
@@ -264,15 +261,15 @@ func main() {
       fmt.Fprintln(os.Stderr, "GetPartitions2 requires 2 args")
       flag.Usage()
     }
-    tmp0, err77 := (strconv.Atoi(flag.Arg(1)))
-    if err77 != nil {
+    tmp0, err68 := (strconv.Atoi(flag.Arg(1)))
+    if err68 != nil {
       Usage()
       return
     }
     argvalue0 := int8(tmp0)
     value0 := argvalue0
-    argvalue1, err78 := (strconv.ParseInt(flag.Arg(2), 10, 64))
-    if err78 != nil {
+    argvalue1, err69 := (strconv.ParseInt(flag.Arg(2), 10, 64))
+    if err69 != nil {
       Usage()
       return
     }
@@ -285,19 +282,19 @@ func main() {
       fmt.Fprintln(os.Stderr, "SetPartitions requires 1 args")
       flag.Usage()
     }
-    arg79 := flag.Arg(1)
-    mbTrans80 := thrift.NewTMemoryBufferLen(len(arg79))
-    defer mbTrans80.Close()
-    _, err81 := mbTrans80.WriteString(arg79)
-    if err81 != nil { 
+    arg70 := flag.Arg(1)
+    mbTrans71 := thrift.NewTMemoryBufferLen(len(arg70))
+    defer mbTrans71.Close()
+    _, err72 := mbTrans71.WriteString(arg70)
+    if err72 != nil { 
       Usage()
       return
     }
-    factory82 := thrift.NewTJSONProtocolFactory()
-    jsProt83 := factory82.GetProtocol(mbTrans80)
+    factory73 := thrift.NewTJSONProtocolFactory()
+    jsProt74 := factory73.GetProtocol(mbTrans71)
     containerStruct0 := executor.NewICommModuleSetPartitionsArgs()
-    err84 := containerStruct0.ReadField1(context.Background(), jsProt83)
-    if err84 != nil {
+    err75 := containerStruct0.ReadField1(context.Background(), jsProt74)
+    if err75 != nil {
       Usage()
       return
     }
@@ -311,87 +308,42 @@ func main() {
       fmt.Fprintln(os.Stderr, "SetPartitions2 requires 2 args")
       flag.Usage()
     }
-    arg85 := flag.Arg(1)
-    mbTrans86 := thrift.NewTMemoryBufferLen(len(arg85))
-    defer mbTrans86.Close()
-    _, err87 := mbTrans86.WriteString(arg85)
-    if err87 != nil { 
+    arg76 := flag.Arg(1)
+    mbTrans77 := thrift.NewTMemoryBufferLen(len(arg76))
+    defer mbTrans77.Close()
+    _, err78 := mbTrans77.WriteString(arg76)
+    if err78 != nil { 
       Usage()
       return
     }
-    factory88 := thrift.NewTJSONProtocolFactory()
-    jsProt89 := factory88.GetProtocol(mbTrans86)
+    factory79 := thrift.NewTJSONProtocolFactory()
+    jsProt80 := factory79.GetProtocol(mbTrans77)
     containerStruct0 := executor.NewICommModuleSetPartitions2Args()
-    err90 := containerStruct0.ReadField1(context.Background(), jsProt89)
-    if err90 != nil {
+    err81 := containerStruct0.ReadField1(context.Background(), jsProt80)
+    if err81 != nil {
       Usage()
       return
     }
     argvalue0 := containerStruct0.Partitions
     value0 := argvalue0
-    arg91 := flag.Arg(2)
-    mbTrans92 := thrift.NewTMemoryBufferLen(len(arg91))
-    defer mbTrans92.Close()
-    _, err93 := mbTrans92.WriteString(arg91)
-    if err93 != nil {
+    arg82 := flag.Arg(2)
+    mbTrans83 := thrift.NewTMemoryBufferLen(len(arg82))
+    defer mbTrans83.Close()
+    _, err84 := mbTrans83.WriteString(arg82)
+    if err84 != nil {
       Usage()
       return
     }
-    factory94 := thrift.NewTJSONProtocolFactory()
-    jsProt95 := factory94.GetProtocol(mbTrans92)
+    factory85 := thrift.NewTJSONProtocolFactory()
+    jsProt86 := factory85.GetProtocol(mbTrans83)
     argvalue1 := rpc.NewISource()
-    err96 := argvalue1.Read(context.Background(), jsProt95)
-    if err96 != nil {
+    err87 := argvalue1.Read(context.Background(), jsProt86)
+    if err87 != nil {
       Usage()
       return
     }
     value1 := argvalue1
     fmt.Print(client.SetPartitions2(context.Background(), value0, value1))
-    fmt.Print("\n")
-    break
-  case "newEmptyPartitions":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "NewEmptyPartitions_ requires 1 args")
-      flag.Usage()
-    }
-    argvalue0, err97 := (strconv.ParseInt(flag.Arg(1), 10, 64))
-    if err97 != nil {
-      Usage()
-      return
-    }
-    value0 := argvalue0
-    fmt.Print(client.NewEmptyPartitions_(context.Background(), value0))
-    fmt.Print("\n")
-    break
-  case "newEmptyPartitions2":
-    if flag.NArg() - 1 != 2 {
-      fmt.Fprintln(os.Stderr, "NewEmptyPartitions2_ requires 2 args")
-      flag.Usage()
-    }
-    argvalue0, err98 := (strconv.ParseInt(flag.Arg(1), 10, 64))
-    if err98 != nil {
-      Usage()
-      return
-    }
-    value0 := argvalue0
-    arg99 := flag.Arg(2)
-    mbTrans100 := thrift.NewTMemoryBufferLen(len(arg99))
-    defer mbTrans100.Close()
-    _, err101 := mbTrans100.WriteString(arg99)
-    if err101 != nil {
-      Usage()
-      return
-    }
-    factory102 := thrift.NewTJSONProtocolFactory()
-    jsProt103 := factory102.GetProtocol(mbTrans100)
-    argvalue1 := rpc.NewISource()
-    err104 := argvalue1.Read(context.Background(), jsProt103)
-    if err104 != nil {
-      Usage()
-      return
-    }
-    value1 := argvalue1
-    fmt.Print(client.NewEmptyPartitions2_(context.Background(), value0, value1))
     fmt.Print("\n")
     break
   case "driverGather":
@@ -401,19 +353,19 @@ func main() {
     }
     argvalue0 := flag.Arg(1)
     value0 := argvalue0
-    arg106 := flag.Arg(2)
-    mbTrans107 := thrift.NewTMemoryBufferLen(len(arg106))
-    defer mbTrans107.Close()
-    _, err108 := mbTrans107.WriteString(arg106)
-    if err108 != nil {
+    arg89 := flag.Arg(2)
+    mbTrans90 := thrift.NewTMemoryBufferLen(len(arg89))
+    defer mbTrans90.Close()
+    _, err91 := mbTrans90.WriteString(arg89)
+    if err91 != nil {
       Usage()
       return
     }
-    factory109 := thrift.NewTJSONProtocolFactory()
-    jsProt110 := factory109.GetProtocol(mbTrans107)
+    factory92 := thrift.NewTJSONProtocolFactory()
+    jsProt93 := factory92.GetProtocol(mbTrans90)
     argvalue1 := rpc.NewISource()
-    err111 := argvalue1.Read(context.Background(), jsProt110)
-    if err111 != nil {
+    err94 := argvalue1.Read(context.Background(), jsProt93)
+    if err94 != nil {
       Usage()
       return
     }
@@ -428,19 +380,19 @@ func main() {
     }
     argvalue0 := flag.Arg(1)
     value0 := argvalue0
-    arg113 := flag.Arg(2)
-    mbTrans114 := thrift.NewTMemoryBufferLen(len(arg113))
-    defer mbTrans114.Close()
-    _, err115 := mbTrans114.WriteString(arg113)
-    if err115 != nil {
+    arg96 := flag.Arg(2)
+    mbTrans97 := thrift.NewTMemoryBufferLen(len(arg96))
+    defer mbTrans97.Close()
+    _, err98 := mbTrans97.WriteString(arg96)
+    if err98 != nil {
       Usage()
       return
     }
-    factory116 := thrift.NewTJSONProtocolFactory()
-    jsProt117 := factory116.GetProtocol(mbTrans114)
+    factory99 := thrift.NewTJSONProtocolFactory()
+    jsProt100 := factory99.GetProtocol(mbTrans97)
     argvalue1 := rpc.NewISource()
-    err118 := argvalue1.Read(context.Background(), jsProt117)
-    if err118 != nil {
+    err101 := argvalue1.Read(context.Background(), jsProt100)
+    if err101 != nil {
       Usage()
       return
     }
@@ -455,8 +407,8 @@ func main() {
     }
     argvalue0 := flag.Arg(1)
     value0 := argvalue0
-    argvalue1, err120 := (strconv.ParseInt(flag.Arg(2), 10, 64))
-    if err120 != nil {
+    argvalue1, err103 := (strconv.ParseInt(flag.Arg(2), 10, 64))
+    if err103 != nil {
       Usage()
       return
     }
@@ -471,25 +423,25 @@ func main() {
     }
     argvalue0 := flag.Arg(1)
     value0 := argvalue0
-    argvalue1, err122 := (strconv.ParseInt(flag.Arg(2), 10, 64))
-    if err122 != nil {
+    argvalue1, err105 := (strconv.ParseInt(flag.Arg(2), 10, 64))
+    if err105 != nil {
       Usage()
       return
     }
     value1 := argvalue1
-    arg123 := flag.Arg(3)
-    mbTrans124 := thrift.NewTMemoryBufferLen(len(arg123))
-    defer mbTrans124.Close()
-    _, err125 := mbTrans124.WriteString(arg123)
-    if err125 != nil {
+    arg106 := flag.Arg(3)
+    mbTrans107 := thrift.NewTMemoryBufferLen(len(arg106))
+    defer mbTrans107.Close()
+    _, err108 := mbTrans107.WriteString(arg106)
+    if err108 != nil {
       Usage()
       return
     }
-    factory126 := thrift.NewTJSONProtocolFactory()
-    jsProt127 := factory126.GetProtocol(mbTrans124)
+    factory109 := thrift.NewTJSONProtocolFactory()
+    jsProt110 := factory109.GetProtocol(mbTrans107)
     argvalue2 := rpc.NewISource()
-    err128 := argvalue2.Read(context.Background(), jsProt127)
-    if err128 != nil {
+    err111 := argvalue2.Read(context.Background(), jsProt110)
+    if err111 != nil {
       Usage()
       return
     }
@@ -497,72 +449,57 @@ func main() {
     fmt.Print(client.DriverScatter3(context.Background(), value0, value1, value2))
     fmt.Print("\n")
     break
-  case "enableMultithreading":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "EnableMultithreading requires 1 args")
+  case "importData":
+    if flag.NArg() - 1 != 3 {
+      fmt.Fprintln(os.Stderr, "ImportData requires 3 args")
       flag.Usage()
     }
     argvalue0 := flag.Arg(1)
     value0 := argvalue0
-    fmt.Print(client.EnableMultithreading(context.Background(), value0))
-    fmt.Print("\n")
-    break
-  case "send":
-    if flag.NArg() - 1 != 4 {
-      fmt.Fprintln(os.Stderr, "Send requires 4 args")
-      flag.Usage()
-    }
-    argvalue0 := flag.Arg(1)
-    value0 := argvalue0
-    argvalue1, err131 := (strconv.ParseInt(flag.Arg(2), 10, 64))
-    if err131 != nil {
-      Usage()
-      return
-    }
+    argvalue1 := flag.Arg(2) == "true"
     value1 := argvalue1
-    argvalue2, err132 := (strconv.ParseInt(flag.Arg(3), 10, 64))
-    if err132 != nil {
+    argvalue2, err114 := (strconv.ParseInt(flag.Arg(3), 10, 64))
+    if err114 != nil {
       Usage()
       return
     }
     value2 := argvalue2
-    tmp3, err133 := (strconv.Atoi(flag.Arg(4)))
-    if err133 != nil {
-      Usage()
-      return
-    }
-    argvalue3 := int32(tmp3)
-    value3 := argvalue3
-    fmt.Print(client.Send(context.Background(), value0, value1, value2, value3))
+    fmt.Print(client.ImportData(context.Background(), value0, value1, value2))
     fmt.Print("\n")
     break
-  case "recv":
+  case "importData4":
     if flag.NArg() - 1 != 4 {
-      fmt.Fprintln(os.Stderr, "Recv requires 4 args")
+      fmt.Fprintln(os.Stderr, "ImportData4 requires 4 args")
       flag.Usage()
     }
     argvalue0 := flag.Arg(1)
     value0 := argvalue0
-    argvalue1, err135 := (strconv.ParseInt(flag.Arg(2), 10, 64))
-    if err135 != nil {
-      Usage()
-      return
-    }
+    argvalue1 := flag.Arg(2) == "true"
     value1 := argvalue1
-    argvalue2, err136 := (strconv.ParseInt(flag.Arg(3), 10, 64))
-    if err136 != nil {
+    argvalue2, err117 := (strconv.ParseInt(flag.Arg(3), 10, 64))
+    if err117 != nil {
       Usage()
       return
     }
     value2 := argvalue2
-    tmp3, err137 := (strconv.Atoi(flag.Arg(4)))
-    if err137 != nil {
+    arg118 := flag.Arg(4)
+    mbTrans119 := thrift.NewTMemoryBufferLen(len(arg118))
+    defer mbTrans119.Close()
+    _, err120 := mbTrans119.WriteString(arg118)
+    if err120 != nil {
       Usage()
       return
     }
-    argvalue3 := int32(tmp3)
+    factory121 := thrift.NewTJSONProtocolFactory()
+    jsProt122 := factory121.GetProtocol(mbTrans119)
+    argvalue3 := rpc.NewISource()
+    err123 := argvalue3.Read(context.Background(), jsProt122)
+    if err123 != nil {
+      Usage()
+      return
+    }
     value3 := argvalue3
-    fmt.Print(client.Recv(context.Background(), value0, value1, value2, value3))
+    fmt.Print(client.ImportData4(context.Background(), value0, value1, value2, value3))
     fmt.Print("\n")
     break
   case "":

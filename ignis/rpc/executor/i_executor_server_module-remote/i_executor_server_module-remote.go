@@ -24,7 +24,7 @@ func Usage() {
   fmt.Fprintln(os.Stderr, "Usage of ", os.Args[0], " [-h host:port] [-u url] [-f[ramed]] function [arg1 [arg2...]]:")
   flag.PrintDefaults()
   fmt.Fprintln(os.Stderr, "\nFunctions:")
-  fmt.Fprintln(os.Stderr, "  void start( properties)")
+  fmt.Fprintln(os.Stderr, "  void start( properties,  env)")
   fmt.Fprintln(os.Stderr, "  void stop()")
   fmt.Fprintln(os.Stderr, "  bool test()")
   fmt.Fprintln(os.Stderr)
@@ -149,29 +149,47 @@ func main() {
   
   switch cmd {
   case "start":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "Start requires 1 args")
+    if flag.NArg() - 1 != 2 {
+      fmt.Fprintln(os.Stderr, "Start requires 2 args")
       flag.Usage()
     }
-    arg13 := flag.Arg(1)
-    mbTrans14 := thrift.NewTMemoryBufferLen(len(arg13))
-    defer mbTrans14.Close()
-    _, err15 := mbTrans14.WriteString(arg13)
-    if err15 != nil { 
+    arg15 := flag.Arg(1)
+    mbTrans16 := thrift.NewTMemoryBufferLen(len(arg15))
+    defer mbTrans16.Close()
+    _, err17 := mbTrans16.WriteString(arg15)
+    if err17 != nil { 
       Usage()
       return
     }
-    factory16 := thrift.NewTJSONProtocolFactory()
-    jsProt17 := factory16.GetProtocol(mbTrans14)
+    factory18 := thrift.NewTJSONProtocolFactory()
+    jsProt19 := factory18.GetProtocol(mbTrans16)
     containerStruct0 := executor.NewIExecutorServerModuleStartArgs()
-    err18 := containerStruct0.ReadField1(context.Background(), jsProt17)
-    if err18 != nil {
+    err20 := containerStruct0.ReadField1(context.Background(), jsProt19)
+    if err20 != nil {
       Usage()
       return
     }
     argvalue0 := containerStruct0.Properties
     value0 := argvalue0
-    fmt.Print(client.Start(context.Background(), value0))
+    arg21 := flag.Arg(2)
+    mbTrans22 := thrift.NewTMemoryBufferLen(len(arg21))
+    defer mbTrans22.Close()
+    _, err23 := mbTrans22.WriteString(arg21)
+    if err23 != nil { 
+      Usage()
+      return
+    }
+    factory24 := thrift.NewTJSONProtocolFactory()
+    jsProt25 := factory24.GetProtocol(mbTrans22)
+    containerStruct1 := executor.NewIExecutorServerModuleStartArgs()
+    err26 := containerStruct1.ReadField2(context.Background(), jsProt25)
+    if err26 != nil {
+      Usage()
+      return
+    }
+    argvalue1 := containerStruct1.Env
+    value1 := argvalue1
+    fmt.Print(client.Start(context.Background(), value0, value1))
     fmt.Print("\n")
     break
   case "stop":

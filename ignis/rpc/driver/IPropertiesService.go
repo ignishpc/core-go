@@ -46,8 +46,8 @@ type IPropertiesService interface {
   ToMap(ctx context.Context, id int64, defaults bool) (_r map[string]string, _err error)
   // Parameters:
   //  - ID
-  //  - _map
-  FromMap(ctx context.Context, id int64, _map map[string]string) (_err error)
+  //  - Map_
+  FromMap(ctx context.Context, id int64, map_ map[string]string) (_err error)
   // Parameters:
   //  - ID
   //  - Path
@@ -247,11 +247,11 @@ func (p *IPropertiesServiceClient) ToMap(ctx context.Context, id int64, defaults
 
 // Parameters:
 //  - ID
-//  - _map
-func (p *IPropertiesServiceClient) FromMap(ctx context.Context, id int64, _map map[string]string) (_err error) {
+//  - Map_
+func (p *IPropertiesServiceClient) FromMap(ctx context.Context, id int64, map_ map[string]string) (_err error) {
   var _args21 IPropertiesServiceFromMapArgs
   _args21.ID = id
-  _args21._map = _map
+  _args21.Map_ = map_
   var _result23 IPropertiesServiceFromMapResult
   var _meta22 thrift.ResponseMeta
   _meta22, _err = p.Client_().Call(ctx, "fromMap", &_args21, &_result23)
@@ -1016,7 +1016,7 @@ func (p *iPropertiesServiceProcessorFromMap) Process(ctx context.Context, seqId 
   }
 
   result := IPropertiesServiceFromMapResult{}
-  if err2 = p.handler.FromMap(ctx, args.ID, args._map); err2 != nil {
+  if err2 = p.handler.FromMap(ctx, args.ID, args.Map_); err2 != nil {
     tickerCancel()
   switch v := err2.(type) {
     case *IDriverException:
@@ -3155,10 +3155,10 @@ func (p *IPropertiesServiceToMapResult) String() string {
 
 // Attributes:
 //  - ID
-//  - _map
+//  - Map_
 type IPropertiesServiceFromMapArgs struct {
   ID int64 `thrift:"id,1" db:"id" json:"id"`
-  _map map[string]string `thrift:"_map,2" db:"_map" json:"_map"`
+  Map_ map[string]string `thrift:"map_,2" db:"map_" json:"map_"`
 }
 
 func NewIPropertiesServiceFromMapArgs() *IPropertiesServiceFromMapArgs {
@@ -3170,8 +3170,8 @@ func (p *IPropertiesServiceFromMapArgs) GetID() int64 {
   return p.ID
 }
 
-func (p *IPropertiesServiceFromMapArgs) Get_map() map[string]string {
-  return p._map
+func (p *IPropertiesServiceFromMapArgs) GetMap_() map[string]string {
+  return p.Map_
 }
 func (p *IPropertiesServiceFromMapArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
   if _, err := iprot.ReadStructBegin(ctx); err != nil {
@@ -3236,7 +3236,7 @@ func (p *IPropertiesServiceFromMapArgs)  ReadField2(ctx context.Context, iprot t
     return thrift.PrependError("error reading map begin: ", err)
   }
   tMap := make(map[string]string, size)
-  p._map =  tMap
+  p.Map_ =  tMap
   for i := 0; i < size; i ++ {
 var _key37 string
     if v, err := iprot.ReadString(ctx); err != nil {
@@ -3250,7 +3250,7 @@ var _val38 string
 } else {
     _val38 = v
 }
-    p._map[_key37] = _val38
+    p.Map_[_key37] = _val38
   }
   if err := iprot.ReadMapEnd(ctx); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -3283,12 +3283,12 @@ func (p *IPropertiesServiceFromMapArgs) writeField1(ctx context.Context, oprot t
 }
 
 func (p *IPropertiesServiceFromMapArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "_map", thrift.MAP, 2); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:_map: ", p), err) }
-  if err := oprot.WriteMapBegin(ctx, thrift.STRING, thrift.STRING, len(p._map)); err != nil {
+  if err := oprot.WriteFieldBegin(ctx, "map_", thrift.MAP, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:map_: ", p), err) }
+  if err := oprot.WriteMapBegin(ctx, thrift.STRING, thrift.STRING, len(p.Map_)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
   }
-  for k, v := range p._map {
+  for k, v := range p.Map_ {
     if err := oprot.WriteString(ctx, string(k)); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
     if err := oprot.WriteString(ctx, string(v)); err != nil {
@@ -3298,7 +3298,7 @@ func (p *IPropertiesServiceFromMapArgs) writeField2(ctx context.Context, oprot t
     return thrift.PrependError("error writing map end: ", err)
   }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:_map: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:map_: ", p), err) }
   return err
 }
 

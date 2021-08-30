@@ -19,10 +19,10 @@ var _ = bytes.Equal
 
 // Attributes:
 //  - Message
-//  - _cause
+//  - Cause_
 type IExecutorException struct {
   Message string `thrift:"message,1,required" db:"message" json:"message"`
-  _cause string `thrift:"_cause,2,required" db:"_cause" json:"_cause"`
+  Cause_ string `thrift:"cause_,2,required" db:"cause_" json:"cause_"`
 }
 
 func NewIExecutorException() *IExecutorException {
@@ -34,8 +34,8 @@ func (p *IExecutorException) GetMessage() string {
   return p.Message
 }
 
-func (p *IExecutorException) Get_cause() string {
-  return p._cause
+func (p *IExecutorException) GetCause_() string {
+  return p.Cause_
 }
 func (p *IExecutorException) Read(ctx context.Context, iprot thrift.TProtocol) error {
   if _, err := iprot.ReadStructBegin(ctx); err != nil {
@@ -43,7 +43,7 @@ func (p *IExecutorException) Read(ctx context.Context, iprot thrift.TProtocol) e
   }
 
   var issetMessage bool = false;
-  var isset_cause bool = false;
+  var issetCause_ bool = false;
 
   for {
     _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
@@ -68,7 +68,7 @@ func (p *IExecutorException) Read(ctx context.Context, iprot thrift.TProtocol) e
         if err := p.ReadField2(ctx, iprot); err != nil {
           return err
         }
-        isset_cause = true
+        issetCause_ = true
       } else {
         if err := iprot.Skip(ctx, fieldTypeId); err != nil {
           return err
@@ -89,8 +89,8 @@ func (p *IExecutorException) Read(ctx context.Context, iprot thrift.TProtocol) e
   if !issetMessage{
     return thrift.NewTProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field Message is not set"));
   }
-  if !isset_cause{
-    return thrift.NewTProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field _cause is not set"));
+  if !issetCause_{
+    return thrift.NewTProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field Cause_ is not set"));
   }
   return nil
 }
@@ -108,7 +108,7 @@ func (p *IExecutorException)  ReadField2(ctx context.Context, iprot thrift.TProt
   if v, err := iprot.ReadString(ctx); err != nil {
   return thrift.PrependError("error reading field 2: ", err)
 } else {
-  p._cause = v
+  p.Cause_ = v
 }
   return nil
 }
@@ -138,12 +138,12 @@ func (p *IExecutorException) writeField1(ctx context.Context, oprot thrift.TProt
 }
 
 func (p *IExecutorException) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "_cause", thrift.STRING, 2); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:_cause: ", p), err) }
-  if err := oprot.WriteString(ctx, string(p._cause)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T._cause (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldBegin(ctx, "cause_", thrift.STRING, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:cause_: ", p), err) }
+  if err := oprot.WriteString(ctx, string(p.Cause_)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.cause_ (2) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:_cause: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:cause_: ", p), err) }
   return err
 }
 
@@ -154,7 +154,7 @@ func (p *IExecutorException) Equals(other *IExecutorException) bool {
     return false
   }
   if p.Message != other.Message { return false }
-  if p._cause != other._cause { return false }
+  if p.Cause_ != other.Cause_ { return false }
   return true
 }
 

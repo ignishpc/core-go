@@ -70,6 +70,46 @@ type IGeneralModule interface {
   //  - NumPartitions
   SortBy3(ctx context.Context, src *rpc.ISource, ascending bool, numPartitions int64) (_err error)
   // Parameters:
+  //  - Other
+  //  - PreserveOrder
+  Union_(ctx context.Context, other string, preserveOrder bool) (_err error)
+  // Parameters:
+  //  - Other
+  //  - PreserveOrder
+  //  - Src
+  Union2(ctx context.Context, other string, preserveOrder bool, src *rpc.ISource) (_err error)
+  // Parameters:
+  //  - Other
+  //  - NumPartitions
+  Join(ctx context.Context, other string, numPartitions int64) (_err error)
+  // Parameters:
+  //  - Other
+  //  - NumPartitions
+  //  - Src
+  Join3(ctx context.Context, other string, numPartitions int64, src *rpc.ISource) (_err error)
+  // Parameters:
+  //  - NumPartitions
+  Distinct(ctx context.Context, numPartitions int64) (_err error)
+  // Parameters:
+  //  - NumPartitions
+  //  - Src
+  Distinct2(ctx context.Context, numPartitions int64, src *rpc.ISource) (_err error)
+  // Parameters:
+  //  - NumPartitions
+  //  - PreserveOrdering
+  //  - Global_
+  Repartition(ctx context.Context, numPartitions int64, preserveOrdering bool, global_ bool) (_err error)
+  // Parameters:
+  //  - NumPartitions
+  PartitionByRandom(ctx context.Context, numPartitions int64) (_err error)
+  // Parameters:
+  //  - NumPartitions
+  PartitionByHash(ctx context.Context, numPartitions int64) (_err error)
+  // Parameters:
+  //  - Src
+  //  - NumPartitions
+  PartitionBy(ctx context.Context, src *rpc.ISource, numPartitions int64) (_err error)
+  // Parameters:
   //  - Src
   FlatMapValues(ctx context.Context, src *rpc.ISource) (_err error)
   // Parameters:
@@ -450,13 +490,15 @@ func (p *IGeneralModuleClient) SortBy3(ctx context.Context, src *rpc.ISource, as
 }
 
 // Parameters:
-//  - Src
-func (p *IGeneralModuleClient) FlatMapValues(ctx context.Context, src *rpc.ISource) (_err error) {
-  var _args42 IGeneralModuleFlatMapValuesArgs
-  _args42.Src = src
-  var _result44 IGeneralModuleFlatMapValuesResult
+//  - Other
+//  - PreserveOrder
+func (p *IGeneralModuleClient) Union_(ctx context.Context, other string, preserveOrder bool) (_err error) {
+  var _args42 IGeneralModuleUnion_Args
+  _args42.Other = other
+  _args42.PreserveOrder = preserveOrder
+  var _result44 IGeneralModuleUnion_Result
   var _meta43 thrift.ResponseMeta
-  _meta43, _err = p.Client_().Call(ctx, "flatMapValues", &_args42, &_result44)
+  _meta43, _err = p.Client_().Call(ctx, "union_", &_args42, &_result44)
   p.SetLastResponseMeta_(_meta43)
   if _err != nil {
     return
@@ -470,13 +512,17 @@ func (p *IGeneralModuleClient) FlatMapValues(ctx context.Context, src *rpc.ISour
 }
 
 // Parameters:
+//  - Other
+//  - PreserveOrder
 //  - Src
-func (p *IGeneralModuleClient) MapValues(ctx context.Context, src *rpc.ISource) (_err error) {
-  var _args45 IGeneralModuleMapValuesArgs
+func (p *IGeneralModuleClient) Union2(ctx context.Context, other string, preserveOrder bool, src *rpc.ISource) (_err error) {
+  var _args45 IGeneralModuleUnion2Args
+  _args45.Other = other
+  _args45.PreserveOrder = preserveOrder
   _args45.Src = src
-  var _result47 IGeneralModuleMapValuesResult
+  var _result47 IGeneralModuleUnion2Result
   var _meta46 thrift.ResponseMeta
-  _meta46, _err = p.Client_().Call(ctx, "mapValues", &_args45, &_result47)
+  _meta46, _err = p.Client_().Call(ctx, "union2", &_args45, &_result47)
   p.SetLastResponseMeta_(_meta46)
   if _err != nil {
     return
@@ -490,13 +536,15 @@ func (p *IGeneralModuleClient) MapValues(ctx context.Context, src *rpc.ISource) 
 }
 
 // Parameters:
+//  - Other
 //  - NumPartitions
-func (p *IGeneralModuleClient) GroupByKey(ctx context.Context, numPartitions int64) (_err error) {
-  var _args48 IGeneralModuleGroupByKeyArgs
+func (p *IGeneralModuleClient) Join(ctx context.Context, other string, numPartitions int64) (_err error) {
+  var _args48 IGeneralModuleJoinArgs
+  _args48.Other = other
   _args48.NumPartitions = numPartitions
-  var _result50 IGeneralModuleGroupByKeyResult
+  var _result50 IGeneralModuleJoinResult
   var _meta49 thrift.ResponseMeta
-  _meta49, _err = p.Client_().Call(ctx, "groupByKey", &_args48, &_result50)
+  _meta49, _err = p.Client_().Call(ctx, "join", &_args48, &_result50)
   p.SetLastResponseMeta_(_meta49)
   if _err != nil {
     return
@@ -510,15 +558,17 @@ func (p *IGeneralModuleClient) GroupByKey(ctx context.Context, numPartitions int
 }
 
 // Parameters:
+//  - Other
 //  - NumPartitions
 //  - Src
-func (p *IGeneralModuleClient) GroupByKey2(ctx context.Context, numPartitions int64, src *rpc.ISource) (_err error) {
-  var _args51 IGeneralModuleGroupByKey2Args
+func (p *IGeneralModuleClient) Join3(ctx context.Context, other string, numPartitions int64, src *rpc.ISource) (_err error) {
+  var _args51 IGeneralModuleJoin3Args
+  _args51.Other = other
   _args51.NumPartitions = numPartitions
   _args51.Src = src
-  var _result53 IGeneralModuleGroupByKey2Result
+  var _result53 IGeneralModuleJoin3Result
   var _meta52 thrift.ResponseMeta
-  _meta52, _err = p.Client_().Call(ctx, "groupByKey2", &_args51, &_result53)
+  _meta52, _err = p.Client_().Call(ctx, "join3", &_args51, &_result53)
   p.SetLastResponseMeta_(_meta52)
   if _err != nil {
     return
@@ -532,17 +582,13 @@ func (p *IGeneralModuleClient) GroupByKey2(ctx context.Context, numPartitions in
 }
 
 // Parameters:
-//  - Src
 //  - NumPartitions
-//  - LocalReduce
-func (p *IGeneralModuleClient) ReduceByKey(ctx context.Context, src *rpc.ISource, numPartitions int64, localReduce bool) (_err error) {
-  var _args54 IGeneralModuleReduceByKeyArgs
-  _args54.Src = src
+func (p *IGeneralModuleClient) Distinct(ctx context.Context, numPartitions int64) (_err error) {
+  var _args54 IGeneralModuleDistinctArgs
   _args54.NumPartitions = numPartitions
-  _args54.LocalReduce = localReduce
-  var _result56 IGeneralModuleReduceByKeyResult
+  var _result56 IGeneralModuleDistinctResult
   var _meta55 thrift.ResponseMeta
-  _meta55, _err = p.Client_().Call(ctx, "reduceByKey", &_args54, &_result56)
+  _meta55, _err = p.Client_().Call(ctx, "distinct", &_args54, &_result56)
   p.SetLastResponseMeta_(_meta55)
   if _err != nil {
     return
@@ -556,17 +602,15 @@ func (p *IGeneralModuleClient) ReduceByKey(ctx context.Context, src *rpc.ISource
 }
 
 // Parameters:
-//  - Zero
-//  - SeqOp
 //  - NumPartitions
-func (p *IGeneralModuleClient) AggregateByKey(ctx context.Context, zero *rpc.ISource, seqOp *rpc.ISource, numPartitions int64) (_err error) {
-  var _args57 IGeneralModuleAggregateByKeyArgs
-  _args57.Zero = zero
-  _args57.SeqOp = seqOp
+//  - Src
+func (p *IGeneralModuleClient) Distinct2(ctx context.Context, numPartitions int64, src *rpc.ISource) (_err error) {
+  var _args57 IGeneralModuleDistinct2Args
   _args57.NumPartitions = numPartitions
-  var _result59 IGeneralModuleAggregateByKeyResult
+  _args57.Src = src
+  var _result59 IGeneralModuleDistinct2Result
   var _meta58 thrift.ResponseMeta
-  _meta58, _err = p.Client_().Call(ctx, "aggregateByKey", &_args57, &_result59)
+  _meta58, _err = p.Client_().Call(ctx, "distinct2", &_args57, &_result59)
   p.SetLastResponseMeta_(_meta58)
   if _err != nil {
     return
@@ -580,19 +624,17 @@ func (p *IGeneralModuleClient) AggregateByKey(ctx context.Context, zero *rpc.ISo
 }
 
 // Parameters:
-//  - Zero
-//  - SeqOp
-//  - CombOp
 //  - NumPartitions
-func (p *IGeneralModuleClient) AggregateByKey4(ctx context.Context, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, numPartitions int64) (_err error) {
-  var _args60 IGeneralModuleAggregateByKey4Args
-  _args60.Zero = zero
-  _args60.SeqOp = seqOp
-  _args60.CombOp = combOp
+//  - PreserveOrdering
+//  - Global_
+func (p *IGeneralModuleClient) Repartition(ctx context.Context, numPartitions int64, preserveOrdering bool, global_ bool) (_err error) {
+  var _args60 IGeneralModuleRepartitionArgs
   _args60.NumPartitions = numPartitions
-  var _result62 IGeneralModuleAggregateByKey4Result
+  _args60.PreserveOrdering = preserveOrdering
+  _args60.Global_ = global_
+  var _result62 IGeneralModuleRepartitionResult
   var _meta61 thrift.ResponseMeta
-  _meta61, _err = p.Client_().Call(ctx, "aggregateByKey4", &_args60, &_result62)
+  _meta61, _err = p.Client_().Call(ctx, "repartition", &_args60, &_result62)
   p.SetLastResponseMeta_(_meta61)
   if _err != nil {
     return
@@ -606,19 +648,13 @@ func (p *IGeneralModuleClient) AggregateByKey4(ctx context.Context, zero *rpc.IS
 }
 
 // Parameters:
-//  - Zero
-//  - Src
 //  - NumPartitions
-//  - LocalFold
-func (p *IGeneralModuleClient) FoldByKey(ctx context.Context, zero *rpc.ISource, src *rpc.ISource, numPartitions int64, localFold bool) (_err error) {
-  var _args63 IGeneralModuleFoldByKeyArgs
-  _args63.Zero = zero
-  _args63.Src = src
+func (p *IGeneralModuleClient) PartitionByRandom(ctx context.Context, numPartitions int64) (_err error) {
+  var _args63 IGeneralModulePartitionByRandomArgs
   _args63.NumPartitions = numPartitions
-  _args63.LocalFold = localFold
-  var _result65 IGeneralModuleFoldByKeyResult
+  var _result65 IGeneralModulePartitionByRandomResult
   var _meta64 thrift.ResponseMeta
-  _meta64, _err = p.Client_().Call(ctx, "foldByKey", &_args63, &_result65)
+  _meta64, _err = p.Client_().Call(ctx, "partitionByRandom", &_args63, &_result65)
   p.SetLastResponseMeta_(_meta64)
   if _err != nil {
     return
@@ -632,13 +668,13 @@ func (p *IGeneralModuleClient) FoldByKey(ctx context.Context, zero *rpc.ISource,
 }
 
 // Parameters:
-//  - Ascending
-func (p *IGeneralModuleClient) SortByKey(ctx context.Context, ascending bool) (_err error) {
-  var _args66 IGeneralModuleSortByKeyArgs
-  _args66.Ascending = ascending
-  var _result68 IGeneralModuleSortByKeyResult
+//  - NumPartitions
+func (p *IGeneralModuleClient) PartitionByHash(ctx context.Context, numPartitions int64) (_err error) {
+  var _args66 IGeneralModulePartitionByHashArgs
+  _args66.NumPartitions = numPartitions
+  var _result68 IGeneralModulePartitionByHashResult
   var _meta67 thrift.ResponseMeta
-  _meta67, _err = p.Client_().Call(ctx, "sortByKey", &_args66, &_result68)
+  _meta67, _err = p.Client_().Call(ctx, "partitionByHash", &_args66, &_result68)
   p.SetLastResponseMeta_(_meta67)
   if _err != nil {
     return
@@ -652,15 +688,15 @@ func (p *IGeneralModuleClient) SortByKey(ctx context.Context, ascending bool) (_
 }
 
 // Parameters:
-//  - Ascending
+//  - Src
 //  - NumPartitions
-func (p *IGeneralModuleClient) SortByKey2a(ctx context.Context, ascending bool, numPartitions int64) (_err error) {
-  var _args69 IGeneralModuleSortByKey2aArgs
-  _args69.Ascending = ascending
+func (p *IGeneralModuleClient) PartitionBy(ctx context.Context, src *rpc.ISource, numPartitions int64) (_err error) {
+  var _args69 IGeneralModulePartitionByArgs
+  _args69.Src = src
   _args69.NumPartitions = numPartitions
-  var _result71 IGeneralModuleSortByKey2aResult
+  var _result71 IGeneralModulePartitionByResult
   var _meta70 thrift.ResponseMeta
-  _meta70, _err = p.Client_().Call(ctx, "sortByKey2a", &_args69, &_result71)
+  _meta70, _err = p.Client_().Call(ctx, "partitionBy", &_args69, &_result71)
   p.SetLastResponseMeta_(_meta70)
   if _err != nil {
     return
@@ -675,14 +711,12 @@ func (p *IGeneralModuleClient) SortByKey2a(ctx context.Context, ascending bool, 
 
 // Parameters:
 //  - Src
-//  - Ascending
-func (p *IGeneralModuleClient) SortByKey2b(ctx context.Context, src *rpc.ISource, ascending bool) (_err error) {
-  var _args72 IGeneralModuleSortByKey2bArgs
+func (p *IGeneralModuleClient) FlatMapValues(ctx context.Context, src *rpc.ISource) (_err error) {
+  var _args72 IGeneralModuleFlatMapValuesArgs
   _args72.Src = src
-  _args72.Ascending = ascending
-  var _result74 IGeneralModuleSortByKey2bResult
+  var _result74 IGeneralModuleFlatMapValuesResult
   var _meta73 thrift.ResponseMeta
-  _meta73, _err = p.Client_().Call(ctx, "sortByKey2b", &_args72, &_result74)
+  _meta73, _err = p.Client_().Call(ctx, "flatMapValues", &_args72, &_result74)
   p.SetLastResponseMeta_(_meta73)
   if _err != nil {
     return
@@ -697,16 +731,12 @@ func (p *IGeneralModuleClient) SortByKey2b(ctx context.Context, src *rpc.ISource
 
 // Parameters:
 //  - Src
-//  - Ascending
-//  - NumPartitions
-func (p *IGeneralModuleClient) SortByKey3(ctx context.Context, src *rpc.ISource, ascending bool, numPartitions int64) (_err error) {
-  var _args75 IGeneralModuleSortByKey3Args
+func (p *IGeneralModuleClient) MapValues(ctx context.Context, src *rpc.ISource) (_err error) {
+  var _args75 IGeneralModuleMapValuesArgs
   _args75.Src = src
-  _args75.Ascending = ascending
-  _args75.NumPartitions = numPartitions
-  var _result77 IGeneralModuleSortByKey3Result
+  var _result77 IGeneralModuleMapValuesResult
   var _meta76 thrift.ResponseMeta
-  _meta76, _err = p.Client_().Call(ctx, "sortByKey3", &_args75, &_result77)
+  _meta76, _err = p.Client_().Call(ctx, "mapValues", &_args75, &_result77)
   p.SetLastResponseMeta_(_meta76)
   if _err != nil {
     return
@@ -714,6 +744,236 @@ func (p *IGeneralModuleClient) SortByKey3(ctx context.Context, src *rpc.ISource,
   switch {
   case _result77.Ex!= nil:
     return _result77.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - NumPartitions
+func (p *IGeneralModuleClient) GroupByKey(ctx context.Context, numPartitions int64) (_err error) {
+  var _args78 IGeneralModuleGroupByKeyArgs
+  _args78.NumPartitions = numPartitions
+  var _result80 IGeneralModuleGroupByKeyResult
+  var _meta79 thrift.ResponseMeta
+  _meta79, _err = p.Client_().Call(ctx, "groupByKey", &_args78, &_result80)
+  p.SetLastResponseMeta_(_meta79)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result80.Ex!= nil:
+    return _result80.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - NumPartitions
+//  - Src
+func (p *IGeneralModuleClient) GroupByKey2(ctx context.Context, numPartitions int64, src *rpc.ISource) (_err error) {
+  var _args81 IGeneralModuleGroupByKey2Args
+  _args81.NumPartitions = numPartitions
+  _args81.Src = src
+  var _result83 IGeneralModuleGroupByKey2Result
+  var _meta82 thrift.ResponseMeta
+  _meta82, _err = p.Client_().Call(ctx, "groupByKey2", &_args81, &_result83)
+  p.SetLastResponseMeta_(_meta82)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result83.Ex!= nil:
+    return _result83.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - Src
+//  - NumPartitions
+//  - LocalReduce
+func (p *IGeneralModuleClient) ReduceByKey(ctx context.Context, src *rpc.ISource, numPartitions int64, localReduce bool) (_err error) {
+  var _args84 IGeneralModuleReduceByKeyArgs
+  _args84.Src = src
+  _args84.NumPartitions = numPartitions
+  _args84.LocalReduce = localReduce
+  var _result86 IGeneralModuleReduceByKeyResult
+  var _meta85 thrift.ResponseMeta
+  _meta85, _err = p.Client_().Call(ctx, "reduceByKey", &_args84, &_result86)
+  p.SetLastResponseMeta_(_meta85)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result86.Ex!= nil:
+    return _result86.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - Zero
+//  - SeqOp
+//  - NumPartitions
+func (p *IGeneralModuleClient) AggregateByKey(ctx context.Context, zero *rpc.ISource, seqOp *rpc.ISource, numPartitions int64) (_err error) {
+  var _args87 IGeneralModuleAggregateByKeyArgs
+  _args87.Zero = zero
+  _args87.SeqOp = seqOp
+  _args87.NumPartitions = numPartitions
+  var _result89 IGeneralModuleAggregateByKeyResult
+  var _meta88 thrift.ResponseMeta
+  _meta88, _err = p.Client_().Call(ctx, "aggregateByKey", &_args87, &_result89)
+  p.SetLastResponseMeta_(_meta88)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result89.Ex!= nil:
+    return _result89.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - Zero
+//  - SeqOp
+//  - CombOp
+//  - NumPartitions
+func (p *IGeneralModuleClient) AggregateByKey4(ctx context.Context, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, numPartitions int64) (_err error) {
+  var _args90 IGeneralModuleAggregateByKey4Args
+  _args90.Zero = zero
+  _args90.SeqOp = seqOp
+  _args90.CombOp = combOp
+  _args90.NumPartitions = numPartitions
+  var _result92 IGeneralModuleAggregateByKey4Result
+  var _meta91 thrift.ResponseMeta
+  _meta91, _err = p.Client_().Call(ctx, "aggregateByKey4", &_args90, &_result92)
+  p.SetLastResponseMeta_(_meta91)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result92.Ex!= nil:
+    return _result92.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - Zero
+//  - Src
+//  - NumPartitions
+//  - LocalFold
+func (p *IGeneralModuleClient) FoldByKey(ctx context.Context, zero *rpc.ISource, src *rpc.ISource, numPartitions int64, localFold bool) (_err error) {
+  var _args93 IGeneralModuleFoldByKeyArgs
+  _args93.Zero = zero
+  _args93.Src = src
+  _args93.NumPartitions = numPartitions
+  _args93.LocalFold = localFold
+  var _result95 IGeneralModuleFoldByKeyResult
+  var _meta94 thrift.ResponseMeta
+  _meta94, _err = p.Client_().Call(ctx, "foldByKey", &_args93, &_result95)
+  p.SetLastResponseMeta_(_meta94)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result95.Ex!= nil:
+    return _result95.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - Ascending
+func (p *IGeneralModuleClient) SortByKey(ctx context.Context, ascending bool) (_err error) {
+  var _args96 IGeneralModuleSortByKeyArgs
+  _args96.Ascending = ascending
+  var _result98 IGeneralModuleSortByKeyResult
+  var _meta97 thrift.ResponseMeta
+  _meta97, _err = p.Client_().Call(ctx, "sortByKey", &_args96, &_result98)
+  p.SetLastResponseMeta_(_meta97)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result98.Ex!= nil:
+    return _result98.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - Ascending
+//  - NumPartitions
+func (p *IGeneralModuleClient) SortByKey2a(ctx context.Context, ascending bool, numPartitions int64) (_err error) {
+  var _args99 IGeneralModuleSortByKey2aArgs
+  _args99.Ascending = ascending
+  _args99.NumPartitions = numPartitions
+  var _result101 IGeneralModuleSortByKey2aResult
+  var _meta100 thrift.ResponseMeta
+  _meta100, _err = p.Client_().Call(ctx, "sortByKey2a", &_args99, &_result101)
+  p.SetLastResponseMeta_(_meta100)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result101.Ex!= nil:
+    return _result101.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - Src
+//  - Ascending
+func (p *IGeneralModuleClient) SortByKey2b(ctx context.Context, src *rpc.ISource, ascending bool) (_err error) {
+  var _args102 IGeneralModuleSortByKey2bArgs
+  _args102.Src = src
+  _args102.Ascending = ascending
+  var _result104 IGeneralModuleSortByKey2bResult
+  var _meta103 thrift.ResponseMeta
+  _meta103, _err = p.Client_().Call(ctx, "sortByKey2b", &_args102, &_result104)
+  p.SetLastResponseMeta_(_meta103)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result104.Ex!= nil:
+    return _result104.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - Src
+//  - Ascending
+//  - NumPartitions
+func (p *IGeneralModuleClient) SortByKey3(ctx context.Context, src *rpc.ISource, ascending bool, numPartitions int64) (_err error) {
+  var _args105 IGeneralModuleSortByKey3Args
+  _args105.Src = src
+  _args105.Ascending = ascending
+  _args105.NumPartitions = numPartitions
+  var _result107 IGeneralModuleSortByKey3Result
+  var _meta106 thrift.ResponseMeta
+  _meta106, _err = p.Client_().Call(ctx, "sortByKey3", &_args105, &_result107)
+  p.SetLastResponseMeta_(_meta106)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result107.Ex!= nil:
+    return _result107.Ex
   }
 
   return nil
@@ -739,34 +999,44 @@ func (p *IGeneralModuleProcessor) ProcessorMap() map[string]thrift.TProcessorFun
 
 func NewIGeneralModuleProcessor(handler IGeneralModule) *IGeneralModuleProcessor {
 
-  self78 := &IGeneralModuleProcessor{handler:handler, processorMap:make(map[string]thrift.TProcessorFunction)}
-  self78.processorMap["executeTo"] = &iGeneralModuleProcessorExecuteTo{handler:handler}
-  self78.processorMap["map_"] = &iGeneralModuleProcessorMap_{handler:handler}
-  self78.processorMap["filter"] = &iGeneralModuleProcessorFilter{handler:handler}
-  self78.processorMap["flatmap"] = &iGeneralModuleProcessorFlatmap{handler:handler}
-  self78.processorMap["keyBy"] = &iGeneralModuleProcessorKeyBy{handler:handler}
-  self78.processorMap["mapPartitions"] = &iGeneralModuleProcessorMapPartitions{handler:handler}
-  self78.processorMap["mapPartitionsWithIndex"] = &iGeneralModuleProcessorMapPartitionsWithIndex{handler:handler}
-  self78.processorMap["mapExecutor"] = &iGeneralModuleProcessorMapExecutor{handler:handler}
-  self78.processorMap["mapExecutorTo"] = &iGeneralModuleProcessorMapExecutorTo{handler:handler}
-  self78.processorMap["groupBy"] = &iGeneralModuleProcessorGroupBy{handler:handler}
-  self78.processorMap["sort"] = &iGeneralModuleProcessorSort{handler:handler}
-  self78.processorMap["sort2"] = &iGeneralModuleProcessorSort2{handler:handler}
-  self78.processorMap["sortBy"] = &iGeneralModuleProcessorSortBy{handler:handler}
-  self78.processorMap["sortBy3"] = &iGeneralModuleProcessorSortBy3{handler:handler}
-  self78.processorMap["flatMapValues"] = &iGeneralModuleProcessorFlatMapValues{handler:handler}
-  self78.processorMap["mapValues"] = &iGeneralModuleProcessorMapValues{handler:handler}
-  self78.processorMap["groupByKey"] = &iGeneralModuleProcessorGroupByKey{handler:handler}
-  self78.processorMap["groupByKey2"] = &iGeneralModuleProcessorGroupByKey2{handler:handler}
-  self78.processorMap["reduceByKey"] = &iGeneralModuleProcessorReduceByKey{handler:handler}
-  self78.processorMap["aggregateByKey"] = &iGeneralModuleProcessorAggregateByKey{handler:handler}
-  self78.processorMap["aggregateByKey4"] = &iGeneralModuleProcessorAggregateByKey4{handler:handler}
-  self78.processorMap["foldByKey"] = &iGeneralModuleProcessorFoldByKey{handler:handler}
-  self78.processorMap["sortByKey"] = &iGeneralModuleProcessorSortByKey{handler:handler}
-  self78.processorMap["sortByKey2a"] = &iGeneralModuleProcessorSortByKey2a{handler:handler}
-  self78.processorMap["sortByKey2b"] = &iGeneralModuleProcessorSortByKey2b{handler:handler}
-  self78.processorMap["sortByKey3"] = &iGeneralModuleProcessorSortByKey3{handler:handler}
-return self78
+  self108 := &IGeneralModuleProcessor{handler:handler, processorMap:make(map[string]thrift.TProcessorFunction)}
+  self108.processorMap["executeTo"] = &iGeneralModuleProcessorExecuteTo{handler:handler}
+  self108.processorMap["map_"] = &iGeneralModuleProcessorMap_{handler:handler}
+  self108.processorMap["filter"] = &iGeneralModuleProcessorFilter{handler:handler}
+  self108.processorMap["flatmap"] = &iGeneralModuleProcessorFlatmap{handler:handler}
+  self108.processorMap["keyBy"] = &iGeneralModuleProcessorKeyBy{handler:handler}
+  self108.processorMap["mapPartitions"] = &iGeneralModuleProcessorMapPartitions{handler:handler}
+  self108.processorMap["mapPartitionsWithIndex"] = &iGeneralModuleProcessorMapPartitionsWithIndex{handler:handler}
+  self108.processorMap["mapExecutor"] = &iGeneralModuleProcessorMapExecutor{handler:handler}
+  self108.processorMap["mapExecutorTo"] = &iGeneralModuleProcessorMapExecutorTo{handler:handler}
+  self108.processorMap["groupBy"] = &iGeneralModuleProcessorGroupBy{handler:handler}
+  self108.processorMap["sort"] = &iGeneralModuleProcessorSort{handler:handler}
+  self108.processorMap["sort2"] = &iGeneralModuleProcessorSort2{handler:handler}
+  self108.processorMap["sortBy"] = &iGeneralModuleProcessorSortBy{handler:handler}
+  self108.processorMap["sortBy3"] = &iGeneralModuleProcessorSortBy3{handler:handler}
+  self108.processorMap["union_"] = &iGeneralModuleProcessorUnion_{handler:handler}
+  self108.processorMap["union2"] = &iGeneralModuleProcessorUnion2{handler:handler}
+  self108.processorMap["join"] = &iGeneralModuleProcessorJoin{handler:handler}
+  self108.processorMap["join3"] = &iGeneralModuleProcessorJoin3{handler:handler}
+  self108.processorMap["distinct"] = &iGeneralModuleProcessorDistinct{handler:handler}
+  self108.processorMap["distinct2"] = &iGeneralModuleProcessorDistinct2{handler:handler}
+  self108.processorMap["repartition"] = &iGeneralModuleProcessorRepartition{handler:handler}
+  self108.processorMap["partitionByRandom"] = &iGeneralModuleProcessorPartitionByRandom{handler:handler}
+  self108.processorMap["partitionByHash"] = &iGeneralModuleProcessorPartitionByHash{handler:handler}
+  self108.processorMap["partitionBy"] = &iGeneralModuleProcessorPartitionBy{handler:handler}
+  self108.processorMap["flatMapValues"] = &iGeneralModuleProcessorFlatMapValues{handler:handler}
+  self108.processorMap["mapValues"] = &iGeneralModuleProcessorMapValues{handler:handler}
+  self108.processorMap["groupByKey"] = &iGeneralModuleProcessorGroupByKey{handler:handler}
+  self108.processorMap["groupByKey2"] = &iGeneralModuleProcessorGroupByKey2{handler:handler}
+  self108.processorMap["reduceByKey"] = &iGeneralModuleProcessorReduceByKey{handler:handler}
+  self108.processorMap["aggregateByKey"] = &iGeneralModuleProcessorAggregateByKey{handler:handler}
+  self108.processorMap["aggregateByKey4"] = &iGeneralModuleProcessorAggregateByKey4{handler:handler}
+  self108.processorMap["foldByKey"] = &iGeneralModuleProcessorFoldByKey{handler:handler}
+  self108.processorMap["sortByKey"] = &iGeneralModuleProcessorSortByKey{handler:handler}
+  self108.processorMap["sortByKey2a"] = &iGeneralModuleProcessorSortByKey2a{handler:handler}
+  self108.processorMap["sortByKey2b"] = &iGeneralModuleProcessorSortByKey2b{handler:handler}
+  self108.processorMap["sortByKey3"] = &iGeneralModuleProcessorSortByKey3{handler:handler}
+return self108
 }
 
 func (p *IGeneralModuleProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -777,12 +1047,12 @@ func (p *IGeneralModuleProcessor) Process(ctx context.Context, iprot, oprot thri
   }
   iprot.Skip(ctx, thrift.STRUCT)
   iprot.ReadMessageEnd(ctx)
-  x79 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function " + name)
+  x109 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function " + name)
   oprot.WriteMessageBegin(ctx, name, thrift.EXCEPTION, seqId)
-  x79.Write(ctx, oprot)
+  x109.Write(ctx, oprot)
   oprot.WriteMessageEnd(ctx)
   oprot.Flush(ctx)
-  return false, x79
+  return false, x109
 
 }
 
@@ -1903,6 +2173,816 @@ func (p *iGeneralModuleProcessorSortBy3) Process(ctx context.Context, seqId int3
   }
   tickerCancel()
   if err2 = oprot.WriteMessageBegin(ctx, "sortBy3", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iGeneralModuleProcessorUnion_ struct {
+  handler IGeneralModule
+}
+
+func (p *iGeneralModuleProcessorUnion_) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IGeneralModuleUnion_Args{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "union_", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IGeneralModuleUnion_Result{}
+  if err2 = p.handler.Union_(ctx, args.Other, args.PreserveOrder); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing union_: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "union_", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "union_", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iGeneralModuleProcessorUnion2 struct {
+  handler IGeneralModule
+}
+
+func (p *iGeneralModuleProcessorUnion2) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IGeneralModuleUnion2Args{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "union2", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IGeneralModuleUnion2Result{}
+  if err2 = p.handler.Union2(ctx, args.Other, args.PreserveOrder, args.Src); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing union2: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "union2", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "union2", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iGeneralModuleProcessorJoin struct {
+  handler IGeneralModule
+}
+
+func (p *iGeneralModuleProcessorJoin) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IGeneralModuleJoinArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "join", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IGeneralModuleJoinResult{}
+  if err2 = p.handler.Join(ctx, args.Other, args.NumPartitions); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing join: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "join", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "join", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iGeneralModuleProcessorJoin3 struct {
+  handler IGeneralModule
+}
+
+func (p *iGeneralModuleProcessorJoin3) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IGeneralModuleJoin3Args{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "join3", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IGeneralModuleJoin3Result{}
+  if err2 = p.handler.Join3(ctx, args.Other, args.NumPartitions, args.Src); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing join3: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "join3", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "join3", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iGeneralModuleProcessorDistinct struct {
+  handler IGeneralModule
+}
+
+func (p *iGeneralModuleProcessorDistinct) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IGeneralModuleDistinctArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IGeneralModuleDistinctResult{}
+  if err2 = p.handler.Distinct(ctx, args.NumPartitions); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing distinct: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "distinct", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iGeneralModuleProcessorDistinct2 struct {
+  handler IGeneralModule
+}
+
+func (p *iGeneralModuleProcessorDistinct2) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IGeneralModuleDistinct2Args{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct2", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IGeneralModuleDistinct2Result{}
+  if err2 = p.handler.Distinct2(ctx, args.NumPartitions, args.Src); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing distinct2: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct2", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "distinct2", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iGeneralModuleProcessorRepartition struct {
+  handler IGeneralModule
+}
+
+func (p *iGeneralModuleProcessorRepartition) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IGeneralModuleRepartitionArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "repartition", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IGeneralModuleRepartitionResult{}
+  if err2 = p.handler.Repartition(ctx, args.NumPartitions, args.PreserveOrdering, args.Global_); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing repartition: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "repartition", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "repartition", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iGeneralModuleProcessorPartitionByRandom struct {
+  handler IGeneralModule
+}
+
+func (p *iGeneralModuleProcessorPartitionByRandom) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IGeneralModulePartitionByRandomArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionByRandom", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IGeneralModulePartitionByRandomResult{}
+  if err2 = p.handler.PartitionByRandom(ctx, args.NumPartitions); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing partitionByRandom: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionByRandom", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "partitionByRandom", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iGeneralModuleProcessorPartitionByHash struct {
+  handler IGeneralModule
+}
+
+func (p *iGeneralModuleProcessorPartitionByHash) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IGeneralModulePartitionByHashArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionByHash", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IGeneralModulePartitionByHashResult{}
+  if err2 = p.handler.PartitionByHash(ctx, args.NumPartitions); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing partitionByHash: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionByHash", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "partitionByHash", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iGeneralModuleProcessorPartitionBy struct {
+  handler IGeneralModule
+}
+
+func (p *iGeneralModuleProcessorPartitionBy) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IGeneralModulePartitionByArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionBy", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IGeneralModulePartitionByResult{}
+  if err2 = p.handler.PartitionBy(ctx, args.Src, args.NumPartitions); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing partitionBy: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionBy", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "partitionBy", thrift.REPLY, seqId); err2 != nil {
     err = thrift.WrapTException(err2)
   }
   if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
@@ -5903,6 +6983,2316 @@ func (p *IGeneralModuleSortBy3Result) String() string {
     return "<nil>"
   }
   return fmt.Sprintf("IGeneralModuleSortBy3Result(%+v)", *p)
+}
+
+// Attributes:
+//  - Other
+//  - PreserveOrder
+type IGeneralModuleUnion_Args struct {
+  Other string `thrift:"other,1" db:"other" json:"other"`
+  PreserveOrder bool `thrift:"preserveOrder,2" db:"preserveOrder" json:"preserveOrder"`
+}
+
+func NewIGeneralModuleUnion_Args() *IGeneralModuleUnion_Args {
+  return &IGeneralModuleUnion_Args{}
+}
+
+
+func (p *IGeneralModuleUnion_Args) GetOther() string {
+  return p.Other
+}
+
+func (p *IGeneralModuleUnion_Args) GetPreserveOrder() bool {
+  return p.PreserveOrder
+}
+func (p *IGeneralModuleUnion_Args) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.BOOL {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleUnion_Args)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.Other = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleUnion_Args)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadBool(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.PreserveOrder = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleUnion_Args) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "union__args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleUnion_Args) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "other", thrift.STRING, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:other: ", p), err) }
+  if err := oprot.WriteString(ctx, string(p.Other)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.other (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:other: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleUnion_Args) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "preserveOrder", thrift.BOOL, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:preserveOrder: ", p), err) }
+  if err := oprot.WriteBool(ctx, bool(p.PreserveOrder)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.preserveOrder (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:preserveOrder: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleUnion_Args) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleUnion_Args(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type IGeneralModuleUnion_Result struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIGeneralModuleUnion_Result() *IGeneralModuleUnion_Result {
+  return &IGeneralModuleUnion_Result{}
+}
+
+var IGeneralModuleUnion_Result_Ex_DEFAULT *rpc.IExecutorException
+func (p *IGeneralModuleUnion_Result) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return IGeneralModuleUnion_Result_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IGeneralModuleUnion_Result) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IGeneralModuleUnion_Result) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleUnion_Result)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleUnion_Result) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "union__result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleUnion_Result) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IGeneralModuleUnion_Result) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleUnion_Result(%+v)", *p)
+}
+
+// Attributes:
+//  - Other
+//  - PreserveOrder
+//  - Src
+type IGeneralModuleUnion2Args struct {
+  Other string `thrift:"other,1" db:"other" json:"other"`
+  PreserveOrder bool `thrift:"preserveOrder,2" db:"preserveOrder" json:"preserveOrder"`
+  Src *rpc.ISource `thrift:"src,3" db:"src" json:"src"`
+}
+
+func NewIGeneralModuleUnion2Args() *IGeneralModuleUnion2Args {
+  return &IGeneralModuleUnion2Args{}
+}
+
+
+func (p *IGeneralModuleUnion2Args) GetOther() string {
+  return p.Other
+}
+
+func (p *IGeneralModuleUnion2Args) GetPreserveOrder() bool {
+  return p.PreserveOrder
+}
+var IGeneralModuleUnion2Args_Src_DEFAULT *rpc.ISource
+func (p *IGeneralModuleUnion2Args) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IGeneralModuleUnion2Args_Src_DEFAULT
+  }
+return p.Src
+}
+func (p *IGeneralModuleUnion2Args) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IGeneralModuleUnion2Args) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.BOOL {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleUnion2Args)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.Other = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleUnion2Args)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadBool(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.PreserveOrder = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleUnion2Args)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleUnion2Args) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "union2_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleUnion2Args) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "other", thrift.STRING, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:other: ", p), err) }
+  if err := oprot.WriteString(ctx, string(p.Other)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.other (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:other: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleUnion2Args) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "preserveOrder", thrift.BOOL, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:preserveOrder: ", p), err) }
+  if err := oprot.WriteBool(ctx, bool(p.PreserveOrder)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.preserveOrder (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:preserveOrder: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleUnion2Args) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:src: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleUnion2Args) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleUnion2Args(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type IGeneralModuleUnion2Result struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIGeneralModuleUnion2Result() *IGeneralModuleUnion2Result {
+  return &IGeneralModuleUnion2Result{}
+}
+
+var IGeneralModuleUnion2Result_Ex_DEFAULT *rpc.IExecutorException
+func (p *IGeneralModuleUnion2Result) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return IGeneralModuleUnion2Result_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IGeneralModuleUnion2Result) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IGeneralModuleUnion2Result) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleUnion2Result)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleUnion2Result) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "union2_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleUnion2Result) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IGeneralModuleUnion2Result) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleUnion2Result(%+v)", *p)
+}
+
+// Attributes:
+//  - Other
+//  - NumPartitions
+type IGeneralModuleJoinArgs struct {
+  Other string `thrift:"other,1" db:"other" json:"other"`
+  NumPartitions int64 `thrift:"numPartitions,2" db:"numPartitions" json:"numPartitions"`
+}
+
+func NewIGeneralModuleJoinArgs() *IGeneralModuleJoinArgs {
+  return &IGeneralModuleJoinArgs{}
+}
+
+
+func (p *IGeneralModuleJoinArgs) GetOther() string {
+  return p.Other
+}
+
+func (p *IGeneralModuleJoinArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+func (p *IGeneralModuleJoinArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleJoinArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.Other = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleJoinArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleJoinArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleJoinArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "other", thrift.STRING, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:other: ", p), err) }
+  if err := oprot.WriteString(ctx, string(p.Other)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.other (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:other: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleJoinArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleJoinArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleJoinArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type IGeneralModuleJoinResult struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIGeneralModuleJoinResult() *IGeneralModuleJoinResult {
+  return &IGeneralModuleJoinResult{}
+}
+
+var IGeneralModuleJoinResult_Ex_DEFAULT *rpc.IExecutorException
+func (p *IGeneralModuleJoinResult) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return IGeneralModuleJoinResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IGeneralModuleJoinResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IGeneralModuleJoinResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleJoinResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleJoinResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleJoinResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IGeneralModuleJoinResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleJoinResult(%+v)", *p)
+}
+
+// Attributes:
+//  - Other
+//  - NumPartitions
+//  - Src
+type IGeneralModuleJoin3Args struct {
+  Other string `thrift:"other,1" db:"other" json:"other"`
+  NumPartitions int64 `thrift:"numPartitions,2" db:"numPartitions" json:"numPartitions"`
+  Src *rpc.ISource `thrift:"src,3" db:"src" json:"src"`
+}
+
+func NewIGeneralModuleJoin3Args() *IGeneralModuleJoin3Args {
+  return &IGeneralModuleJoin3Args{}
+}
+
+
+func (p *IGeneralModuleJoin3Args) GetOther() string {
+  return p.Other
+}
+
+func (p *IGeneralModuleJoin3Args) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+var IGeneralModuleJoin3Args_Src_DEFAULT *rpc.ISource
+func (p *IGeneralModuleJoin3Args) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IGeneralModuleJoin3Args_Src_DEFAULT
+  }
+return p.Src
+}
+func (p *IGeneralModuleJoin3Args) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IGeneralModuleJoin3Args) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleJoin3Args)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.Other = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleJoin3Args)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleJoin3Args)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleJoin3Args) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join3_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleJoin3Args) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "other", thrift.STRING, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:other: ", p), err) }
+  if err := oprot.WriteString(ctx, string(p.Other)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.other (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:other: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleJoin3Args) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleJoin3Args) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:src: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleJoin3Args) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleJoin3Args(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type IGeneralModuleJoin3Result struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIGeneralModuleJoin3Result() *IGeneralModuleJoin3Result {
+  return &IGeneralModuleJoin3Result{}
+}
+
+var IGeneralModuleJoin3Result_Ex_DEFAULT *rpc.IExecutorException
+func (p *IGeneralModuleJoin3Result) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return IGeneralModuleJoin3Result_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IGeneralModuleJoin3Result) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IGeneralModuleJoin3Result) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleJoin3Result)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleJoin3Result) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join3_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleJoin3Result) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IGeneralModuleJoin3Result) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleJoin3Result(%+v)", *p)
+}
+
+// Attributes:
+//  - NumPartitions
+type IGeneralModuleDistinctArgs struct {
+  NumPartitions int64 `thrift:"numPartitions,1" db:"numPartitions" json:"numPartitions"`
+}
+
+func NewIGeneralModuleDistinctArgs() *IGeneralModuleDistinctArgs {
+  return &IGeneralModuleDistinctArgs{}
+}
+
+
+func (p *IGeneralModuleDistinctArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+func (p *IGeneralModuleDistinctArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleDistinctArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleDistinctArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleDistinctArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleDistinctArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleDistinctArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type IGeneralModuleDistinctResult struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIGeneralModuleDistinctResult() *IGeneralModuleDistinctResult {
+  return &IGeneralModuleDistinctResult{}
+}
+
+var IGeneralModuleDistinctResult_Ex_DEFAULT *rpc.IExecutorException
+func (p *IGeneralModuleDistinctResult) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return IGeneralModuleDistinctResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IGeneralModuleDistinctResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IGeneralModuleDistinctResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleDistinctResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleDistinctResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleDistinctResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IGeneralModuleDistinctResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleDistinctResult(%+v)", *p)
+}
+
+// Attributes:
+//  - NumPartitions
+//  - Src
+type IGeneralModuleDistinct2Args struct {
+  NumPartitions int64 `thrift:"numPartitions,1" db:"numPartitions" json:"numPartitions"`
+  Src *rpc.ISource `thrift:"src,2" db:"src" json:"src"`
+}
+
+func NewIGeneralModuleDistinct2Args() *IGeneralModuleDistinct2Args {
+  return &IGeneralModuleDistinct2Args{}
+}
+
+
+func (p *IGeneralModuleDistinct2Args) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+var IGeneralModuleDistinct2Args_Src_DEFAULT *rpc.ISource
+func (p *IGeneralModuleDistinct2Args) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IGeneralModuleDistinct2Args_Src_DEFAULT
+  }
+return p.Src
+}
+func (p *IGeneralModuleDistinct2Args) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IGeneralModuleDistinct2Args) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleDistinct2Args)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleDistinct2Args)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleDistinct2Args) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct2_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleDistinct2Args) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleDistinct2Args) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:src: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleDistinct2Args) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleDistinct2Args(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type IGeneralModuleDistinct2Result struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIGeneralModuleDistinct2Result() *IGeneralModuleDistinct2Result {
+  return &IGeneralModuleDistinct2Result{}
+}
+
+var IGeneralModuleDistinct2Result_Ex_DEFAULT *rpc.IExecutorException
+func (p *IGeneralModuleDistinct2Result) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return IGeneralModuleDistinct2Result_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IGeneralModuleDistinct2Result) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IGeneralModuleDistinct2Result) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleDistinct2Result)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleDistinct2Result) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct2_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleDistinct2Result) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IGeneralModuleDistinct2Result) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleDistinct2Result(%+v)", *p)
+}
+
+// Attributes:
+//  - NumPartitions
+//  - PreserveOrdering
+//  - Global_
+type IGeneralModuleRepartitionArgs struct {
+  NumPartitions int64 `thrift:"numPartitions,1" db:"numPartitions" json:"numPartitions"`
+  PreserveOrdering bool `thrift:"preserveOrdering,2" db:"preserveOrdering" json:"preserveOrdering"`
+  Global_ bool `thrift:"global_,3" db:"global_" json:"global_"`
+}
+
+func NewIGeneralModuleRepartitionArgs() *IGeneralModuleRepartitionArgs {
+  return &IGeneralModuleRepartitionArgs{}
+}
+
+
+func (p *IGeneralModuleRepartitionArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+
+func (p *IGeneralModuleRepartitionArgs) GetPreserveOrdering() bool {
+  return p.PreserveOrdering
+}
+
+func (p *IGeneralModuleRepartitionArgs) GetGlobal_() bool {
+  return p.Global_
+}
+func (p *IGeneralModuleRepartitionArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.BOOL {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.BOOL {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleRepartitionArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleRepartitionArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadBool(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.PreserveOrdering = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleRepartitionArgs)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadBool(ctx); err != nil {
+  return thrift.PrependError("error reading field 3: ", err)
+} else {
+  p.Global_ = v
+}
+  return nil
+}
+
+func (p *IGeneralModuleRepartitionArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "repartition_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleRepartitionArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleRepartitionArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "preserveOrdering", thrift.BOOL, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:preserveOrdering: ", p), err) }
+  if err := oprot.WriteBool(ctx, bool(p.PreserveOrdering)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.preserveOrdering (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:preserveOrdering: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleRepartitionArgs) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "global_", thrift.BOOL, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:global_: ", p), err) }
+  if err := oprot.WriteBool(ctx, bool(p.Global_)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.global_ (3) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:global_: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleRepartitionArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleRepartitionArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type IGeneralModuleRepartitionResult struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIGeneralModuleRepartitionResult() *IGeneralModuleRepartitionResult {
+  return &IGeneralModuleRepartitionResult{}
+}
+
+var IGeneralModuleRepartitionResult_Ex_DEFAULT *rpc.IExecutorException
+func (p *IGeneralModuleRepartitionResult) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return IGeneralModuleRepartitionResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IGeneralModuleRepartitionResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IGeneralModuleRepartitionResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleRepartitionResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleRepartitionResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "repartition_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleRepartitionResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IGeneralModuleRepartitionResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleRepartitionResult(%+v)", *p)
+}
+
+// Attributes:
+//  - NumPartitions
+type IGeneralModulePartitionByRandomArgs struct {
+  NumPartitions int64 `thrift:"numPartitions,1" db:"numPartitions" json:"numPartitions"`
+}
+
+func NewIGeneralModulePartitionByRandomArgs() *IGeneralModulePartitionByRandomArgs {
+  return &IGeneralModulePartitionByRandomArgs{}
+}
+
+
+func (p *IGeneralModulePartitionByRandomArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+func (p *IGeneralModulePartitionByRandomArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByRandomArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IGeneralModulePartitionByRandomArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionByRandom_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByRandomArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModulePartitionByRandomArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModulePartitionByRandomArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type IGeneralModulePartitionByRandomResult struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIGeneralModulePartitionByRandomResult() *IGeneralModulePartitionByRandomResult {
+  return &IGeneralModulePartitionByRandomResult{}
+}
+
+var IGeneralModulePartitionByRandomResult_Ex_DEFAULT *rpc.IExecutorException
+func (p *IGeneralModulePartitionByRandomResult) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return IGeneralModulePartitionByRandomResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IGeneralModulePartitionByRandomResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IGeneralModulePartitionByRandomResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByRandomResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByRandomResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionByRandom_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByRandomResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IGeneralModulePartitionByRandomResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModulePartitionByRandomResult(%+v)", *p)
+}
+
+// Attributes:
+//  - NumPartitions
+type IGeneralModulePartitionByHashArgs struct {
+  NumPartitions int64 `thrift:"numPartitions,1" db:"numPartitions" json:"numPartitions"`
+}
+
+func NewIGeneralModulePartitionByHashArgs() *IGeneralModulePartitionByHashArgs {
+  return &IGeneralModulePartitionByHashArgs{}
+}
+
+
+func (p *IGeneralModulePartitionByHashArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+func (p *IGeneralModulePartitionByHashArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByHashArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IGeneralModulePartitionByHashArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionByHash_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByHashArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModulePartitionByHashArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModulePartitionByHashArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type IGeneralModulePartitionByHashResult struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIGeneralModulePartitionByHashResult() *IGeneralModulePartitionByHashResult {
+  return &IGeneralModulePartitionByHashResult{}
+}
+
+var IGeneralModulePartitionByHashResult_Ex_DEFAULT *rpc.IExecutorException
+func (p *IGeneralModulePartitionByHashResult) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return IGeneralModulePartitionByHashResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IGeneralModulePartitionByHashResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IGeneralModulePartitionByHashResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByHashResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByHashResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionByHash_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByHashResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IGeneralModulePartitionByHashResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModulePartitionByHashResult(%+v)", *p)
+}
+
+// Attributes:
+//  - Src
+//  - NumPartitions
+type IGeneralModulePartitionByArgs struct {
+  Src *rpc.ISource `thrift:"src,1" db:"src" json:"src"`
+  NumPartitions int64 `thrift:"numPartitions,2" db:"numPartitions" json:"numPartitions"`
+}
+
+func NewIGeneralModulePartitionByArgs() *IGeneralModulePartitionByArgs {
+  return &IGeneralModulePartitionByArgs{}
+}
+
+var IGeneralModulePartitionByArgs_Src_DEFAULT *rpc.ISource
+func (p *IGeneralModulePartitionByArgs) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IGeneralModulePartitionByArgs_Src_DEFAULT
+  }
+return p.Src
+}
+
+func (p *IGeneralModulePartitionByArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+func (p *IGeneralModulePartitionByArgs) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IGeneralModulePartitionByArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IGeneralModulePartitionByArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionBy_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:src: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModulePartitionByArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModulePartitionByArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModulePartitionByArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type IGeneralModulePartitionByResult struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIGeneralModulePartitionByResult() *IGeneralModulePartitionByResult {
+  return &IGeneralModulePartitionByResult{}
+}
+
+var IGeneralModulePartitionByResult_Ex_DEFAULT *rpc.IExecutorException
+func (p *IGeneralModulePartitionByResult) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return IGeneralModulePartitionByResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IGeneralModulePartitionByResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IGeneralModulePartitionByResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionBy_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModulePartitionByResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IGeneralModulePartitionByResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModulePartitionByResult(%+v)", *p)
 }
 
 // Attributes:

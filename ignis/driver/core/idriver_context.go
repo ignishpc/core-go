@@ -26,6 +26,10 @@ func (this *IDriverContext) ClearContext(ctx context.Context) (_err error) { ret
 
 func (this *IDriverContext) LoadContext(ctx context.Context, id int64) (_err error) { return nil }
 
+func (this *IDriverContext) LoadContextAsVariable(ctx context.Context, id int64, name string) (_err error) {
+	return nil
+}
+
 func (this *IDriverContext) Cache(ctx context.Context, id int64, level int8) (_err error) {
 	return nil
 }

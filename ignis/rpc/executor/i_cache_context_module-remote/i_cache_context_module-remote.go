@@ -27,6 +27,7 @@ func Usage() {
   fmt.Fprintln(os.Stderr, "  i64 saveContext()")
   fmt.Fprintln(os.Stderr, "  void clearContext()")
   fmt.Fprintln(os.Stderr, "  void loadContext(i64 id)")
+  fmt.Fprintln(os.Stderr, "  void loadContextAsVariable(i64 id, string name)")
   fmt.Fprintln(os.Stderr, "  void cache(i64 id, i8 level)")
   fmt.Fprintln(os.Stderr, "  void loadCache(i64 id)")
   fmt.Fprintln(os.Stderr)
@@ -171,8 +172,8 @@ func main() {
       fmt.Fprintln(os.Stderr, "LoadContext requires 1 args")
       flag.Usage()
     }
-    argvalue0, err17 := (strconv.ParseInt(flag.Arg(1), 10, 64))
-    if err17 != nil {
+    argvalue0, err20 := (strconv.ParseInt(flag.Arg(1), 10, 64))
+    if err20 != nil {
       Usage()
       return
     }
@@ -180,19 +181,35 @@ func main() {
     fmt.Print(client.LoadContext(context.Background(), value0))
     fmt.Print("\n")
     break
+  case "loadContextAsVariable":
+    if flag.NArg() - 1 != 2 {
+      fmt.Fprintln(os.Stderr, "LoadContextAsVariable requires 2 args")
+      flag.Usage()
+    }
+    argvalue0, err21 := (strconv.ParseInt(flag.Arg(1), 10, 64))
+    if err21 != nil {
+      Usage()
+      return
+    }
+    value0 := argvalue0
+    argvalue1 := flag.Arg(2)
+    value1 := argvalue1
+    fmt.Print(client.LoadContextAsVariable(context.Background(), value0, value1))
+    fmt.Print("\n")
+    break
   case "cache":
     if flag.NArg() - 1 != 2 {
       fmt.Fprintln(os.Stderr, "Cache requires 2 args")
       flag.Usage()
     }
-    argvalue0, err18 := (strconv.ParseInt(flag.Arg(1), 10, 64))
-    if err18 != nil {
+    argvalue0, err23 := (strconv.ParseInt(flag.Arg(1), 10, 64))
+    if err23 != nil {
       Usage()
       return
     }
     value0 := argvalue0
-    tmp1, err19 := (strconv.Atoi(flag.Arg(2)))
-    if err19 != nil {
+    tmp1, err24 := (strconv.Atoi(flag.Arg(2)))
+    if err24 != nil {
       Usage()
       return
     }
@@ -206,8 +223,8 @@ func main() {
       fmt.Fprintln(os.Stderr, "LoadCache requires 1 args")
       flag.Usage()
     }
-    argvalue0, err20 := (strconv.ParseInt(flag.Arg(1), 10, 64))
-    if err20 != nil {
+    argvalue0, err25 := (strconv.ParseInt(flag.Arg(1), 10, 64))
+    if err25 != nil {
       Usage()
       return
     }

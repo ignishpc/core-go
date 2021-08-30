@@ -29,7 +29,7 @@ func Usage() {
   fmt.Fprintln(os.Stderr, "  string rmProperty(i64 id, string key)")
   fmt.Fprintln(os.Stderr, "  bool contains(i64 id, string key)")
   fmt.Fprintln(os.Stderr, "   toMap(i64 id, bool defaults)")
-  fmt.Fprintln(os.Stderr, "  void fromMap(i64 id,  _map)")
+  fmt.Fprintln(os.Stderr, "  void fromMap(i64 id,  map_)")
   fmt.Fprintln(os.Stderr, "  void load(i64 id, string path)")
   fmt.Fprintln(os.Stderr, "  void store(i64 id, string path)")
   fmt.Fprintln(os.Stderr, "  void clear(i64 id)")
@@ -285,7 +285,7 @@ func main() {
       Usage()
       return
     }
-    argvalue1 := containerStruct1._map
+    argvalue1 := containerStruct1.Map_
     value1 := argvalue1
     fmt.Print(client.FromMap(context.Background(), value0, value1))
     fmt.Print("\n")

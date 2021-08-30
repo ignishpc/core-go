@@ -21,6 +21,8 @@ func (this *ICacheContextModule) ClearContext(ctx context.Context) (_err error) 
 
 func (this *ICacheContextModule) LoadContext(ctx context.Context, id int64) (_err error) { return nil }
 
+func (this *ICacheContextModule) LoadContextAsVariable(ctx context.Context, id int64, name string) (_err error){return nil}
+
 func (this *ICacheContextModule) Cache(ctx context.Context, id int64, level int8) (_err error) {
 	return nil
 }

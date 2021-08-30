@@ -28,6 +28,10 @@ type ICacheContextModule interface {
   LoadContext(ctx context.Context, id int64) (_err error)
   // Parameters:
   //  - ID
+  //  - Name
+  LoadContextAsVariable(ctx context.Context, id int64, name string) (_err error)
+  // Parameters:
+  //  - ID
   //  - Level
   Cache(ctx context.Context, id int64, level int8) (_err error)
   // Parameters:
@@ -126,14 +130,14 @@ func (p *ICacheContextModuleClient) LoadContext(ctx context.Context, id int64) (
 
 // Parameters:
 //  - ID
-//  - Level
-func (p *ICacheContextModuleClient) Cache(ctx context.Context, id int64, level int8) (_err error) {
-  var _args9 ICacheContextModuleCacheArgs
+//  - Name
+func (p *ICacheContextModuleClient) LoadContextAsVariable(ctx context.Context, id int64, name string) (_err error) {
+  var _args9 ICacheContextModuleLoadContextAsVariableArgs
   _args9.ID = id
-  _args9.Level = level
-  var _result11 ICacheContextModuleCacheResult
+  _args9.Name = name
+  var _result11 ICacheContextModuleLoadContextAsVariableResult
   var _meta10 thrift.ResponseMeta
-  _meta10, _err = p.Client_().Call(ctx, "cache", &_args9, &_result11)
+  _meta10, _err = p.Client_().Call(ctx, "loadContextAsVariable", &_args9, &_result11)
   p.SetLastResponseMeta_(_meta10)
   if _err != nil {
     return
@@ -148,12 +152,14 @@ func (p *ICacheContextModuleClient) Cache(ctx context.Context, id int64, level i
 
 // Parameters:
 //  - ID
-func (p *ICacheContextModuleClient) LoadCache(ctx context.Context, id int64) (_err error) {
-  var _args12 ICacheContextModuleLoadCacheArgs
+//  - Level
+func (p *ICacheContextModuleClient) Cache(ctx context.Context, id int64, level int8) (_err error) {
+  var _args12 ICacheContextModuleCacheArgs
   _args12.ID = id
-  var _result14 ICacheContextModuleLoadCacheResult
+  _args12.Level = level
+  var _result14 ICacheContextModuleCacheResult
   var _meta13 thrift.ResponseMeta
-  _meta13, _err = p.Client_().Call(ctx, "loadCache", &_args12, &_result14)
+  _meta13, _err = p.Client_().Call(ctx, "cache", &_args12, &_result14)
   p.SetLastResponseMeta_(_meta13)
   if _err != nil {
     return
@@ -161,6 +167,26 @@ func (p *ICacheContextModuleClient) LoadCache(ctx context.Context, id int64) (_e
   switch {
   case _result14.Ex!= nil:
     return _result14.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - ID
+func (p *ICacheContextModuleClient) LoadCache(ctx context.Context, id int64) (_err error) {
+  var _args15 ICacheContextModuleLoadCacheArgs
+  _args15.ID = id
+  var _result17 ICacheContextModuleLoadCacheResult
+  var _meta16 thrift.ResponseMeta
+  _meta16, _err = p.Client_().Call(ctx, "loadCache", &_args15, &_result17)
+  p.SetLastResponseMeta_(_meta16)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result17.Ex!= nil:
+    return _result17.Ex
   }
 
   return nil
@@ -186,13 +212,14 @@ func (p *ICacheContextModuleProcessor) ProcessorMap() map[string]thrift.TProcess
 
 func NewICacheContextModuleProcessor(handler ICacheContextModule) *ICacheContextModuleProcessor {
 
-  self15 := &ICacheContextModuleProcessor{handler:handler, processorMap:make(map[string]thrift.TProcessorFunction)}
-  self15.processorMap["saveContext"] = &iCacheContextModuleProcessorSaveContext{handler:handler}
-  self15.processorMap["clearContext"] = &iCacheContextModuleProcessorClearContext{handler:handler}
-  self15.processorMap["loadContext"] = &iCacheContextModuleProcessorLoadContext{handler:handler}
-  self15.processorMap["cache"] = &iCacheContextModuleProcessorCache{handler:handler}
-  self15.processorMap["loadCache"] = &iCacheContextModuleProcessorLoadCache{handler:handler}
-return self15
+  self18 := &ICacheContextModuleProcessor{handler:handler, processorMap:make(map[string]thrift.TProcessorFunction)}
+  self18.processorMap["saveContext"] = &iCacheContextModuleProcessorSaveContext{handler:handler}
+  self18.processorMap["clearContext"] = &iCacheContextModuleProcessorClearContext{handler:handler}
+  self18.processorMap["loadContext"] = &iCacheContextModuleProcessorLoadContext{handler:handler}
+  self18.processorMap["loadContextAsVariable"] = &iCacheContextModuleProcessorLoadContextAsVariable{handler:handler}
+  self18.processorMap["cache"] = &iCacheContextModuleProcessorCache{handler:handler}
+  self18.processorMap["loadCache"] = &iCacheContextModuleProcessorLoadCache{handler:handler}
+return self18
 }
 
 func (p *ICacheContextModuleProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -203,12 +230,12 @@ func (p *ICacheContextModuleProcessor) Process(ctx context.Context, iprot, oprot
   }
   iprot.Skip(ctx, thrift.STRUCT)
   iprot.ReadMessageEnd(ctx)
-  x16 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function " + name)
+  x19 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function " + name)
   oprot.WriteMessageBegin(ctx, name, thrift.EXCEPTION, seqId)
-  x16.Write(ctx, oprot)
+  x19.Write(ctx, oprot)
   oprot.WriteMessageEnd(ctx)
   oprot.Flush(ctx)
-  return false, x16
+  return false, x19
 
 }
 
@@ -441,6 +468,87 @@ func (p *iCacheContextModuleProcessorLoadContext) Process(ctx context.Context, s
   }
   tickerCancel()
   if err2 = oprot.WriteMessageBegin(ctx, "loadContext", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iCacheContextModuleProcessorLoadContextAsVariable struct {
+  handler ICacheContextModule
+}
+
+func (p *iCacheContextModuleProcessorLoadContextAsVariable) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := ICacheContextModuleLoadContextAsVariableArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "loadContextAsVariable", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := ICacheContextModuleLoadContextAsVariableResult{}
+  if err2 = p.handler.LoadContextAsVariable(ctx, args.ID, args.Name); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing loadContextAsVariable: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "loadContextAsVariable", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "loadContextAsVariable", thrift.REPLY, seqId); err2 != nil {
     err = thrift.WrapTException(err2)
   }
   if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
@@ -1159,6 +1267,233 @@ func (p *ICacheContextModuleLoadContextResult) String() string {
     return "<nil>"
   }
   return fmt.Sprintf("ICacheContextModuleLoadContextResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - Name
+type ICacheContextModuleLoadContextAsVariableArgs struct {
+  ID int64 `thrift:"id,1" db:"id" json:"id"`
+  Name string `thrift:"name,2" db:"name" json:"name"`
+}
+
+func NewICacheContextModuleLoadContextAsVariableArgs() *ICacheContextModuleLoadContextAsVariableArgs {
+  return &ICacheContextModuleLoadContextAsVariableArgs{}
+}
+
+
+func (p *ICacheContextModuleLoadContextAsVariableArgs) GetID() int64 {
+  return p.ID
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableArgs) GetName() string {
+  return p.Name
+}
+func (p *ICacheContextModuleLoadContextAsVariableArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.ID = v
+}
+  return nil
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.Name = v
+}
+  return nil
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "loadContextAsVariable_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.ID)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.id (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "name", thrift.STRING, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:name: ", p), err) }
+  if err := oprot.WriteString(ctx, string(p.Name)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.name (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:name: ", p), err) }
+  return err
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("ICacheContextModuleLoadContextAsVariableArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type ICacheContextModuleLoadContextAsVariableResult struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewICacheContextModuleLoadContextAsVariableResult() *ICacheContextModuleLoadContextAsVariableResult {
+  return &ICacheContextModuleLoadContextAsVariableResult{}
+}
+
+var ICacheContextModuleLoadContextAsVariableResult_Ex_DEFAULT *rpc.IExecutorException
+func (p *ICacheContextModuleLoadContextAsVariableResult) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return ICacheContextModuleLoadContextAsVariableResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *ICacheContextModuleLoadContextAsVariableResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "loadContextAsVariable_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *ICacheContextModuleLoadContextAsVariableResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("ICacheContextModuleLoadContextAsVariableResult(%+v)", *p)
 }
 
 // Attributes:

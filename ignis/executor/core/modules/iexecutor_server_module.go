@@ -7,7 +7,9 @@ import (
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/logger"
+	"ignis/executor/core/mpi"
 	"ignis/rpc/executor"
+	"os"
 )
 
 type IExecutorServerModule struct {
@@ -51,16 +53,31 @@ func (this *IExecutorServerModule) Serve(name string, port int, compression int,
 	return err
 }
 
-func (this *IExecutorServerModule) Start(ctx context.Context, properties map[string]string) (_err error) {
+func (this *IExecutorServerModule) Start(ctx context.Context, properties map[string]string, env map[string]string) (_err error) {
 	for key, value := range properties {
 		this.executorData.GetContext().Vars()[key] = value
 	}
 	this.executorData.SetCores(this.executorData.GetCores())
+	for key, value := range env {
+		os.Setenv(key, value)
+	}
+	var err error
+	if _, present := os.LookupEnv("MPI_THREAD_MULTIPLE"); present {
+		err = mpi.MPI_Init_thread(nil, nil, mpi.MPI_THREAD_MULTIPLE, nil)
+		logger.Info("ServerModule: Mpi started in thread mode")
+	} else {
+		err = mpi.MPI_Init(nil, nil)
+		logger.Info("ServerModule: Mpi started")
+	}
+	if err != nil {
+		return err
+	}
 	logger.Info("ServerModule: go executor ready")
 	return nil
 }
 
 func (this *IExecutorServerModule) Stop(ctx context.Context) (_err error) {
+	mpi.MPI_Finalize()
 	err := this.server.Stop()
 	this.processor = nil
 	this.server = nil

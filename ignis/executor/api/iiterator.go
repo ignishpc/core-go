@@ -1,6 +1,7 @@
 package api
 
 type IReadIterator interface {
+	HasNext() bool
 	Next() (interface{}, error)
 }
 

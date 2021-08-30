@@ -230,15 +230,6 @@ type IDataFrameService interface {
   Uncache(ctx context.Context, id *IDataFrameId) (_err error)
   // Parameters:
   //  - ID
-  //  - NumPartitions
-  Repartition(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error)
-  // Parameters:
-  //  - ID
-  //  - NumPartitions
-  //  - Shuffle
-  Coalesce(ctx context.Context, id *IDataFrameId, numPartitions int64, shuffle bool) (_r *IDataFrameId, _err error)
-  // Parameters:
-  //  - ID
   Partitions(ctx context.Context, id *IDataFrameId) (_r int64, _err error)
   // Parameters:
   //  - ID
@@ -254,6 +245,25 @@ type IDataFrameService interface {
   //  - Path
   //  - Pretty
   SaveAsJsonFile(ctx context.Context, id *IDataFrameId, path string, pretty bool) (_err error)
+  // Parameters:
+  //  - ID
+  //  - NumPartitions
+  //  - PreserveOrdering
+  //  - Global_
+  Repartition(ctx context.Context, id *IDataFrameId, numPartitions int64, preserveOrdering bool, global_ bool) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - NumPartitions
+  PartitionByRandom(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - NumPartitions
+  PartitionByHash(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - Src
+  //  - NumPartitions
+  PartitionBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error)
   // Parameters:
   //  - ID
   //  - Src
@@ -317,6 +327,53 @@ type IDataFrameService interface {
   //  - Ascending
   //  - NumPartitions
   SortBy3(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - Other
+  //  - PreserveOrder
+  Union_(ctx context.Context, id *IDataFrameId, other *IDataFrameId, preserveOrder bool) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - Other
+  //  - PreserveOrder
+  //  - Src
+  Union4(ctx context.Context, id *IDataFrameId, other *IDataFrameId, preserveOrder bool, src *rpc.ISource) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - Other
+  Join(ctx context.Context, id *IDataFrameId, other *IDataFrameId) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - Other
+  //  - NumPartitions
+  Join3a(ctx context.Context, id *IDataFrameId, other *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - Other
+  //  - Src
+  Join3b(ctx context.Context, id *IDataFrameId, other *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - Other
+  //  - NumPartitions
+  //  - Src
+  Join4(ctx context.Context, id *IDataFrameId, other *IDataFrameId, numPartitions int64, src *rpc.ISource) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  Distinct(ctx context.Context, id *IDataFrameId) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - NumPartitions
+  Distinct2a(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - Src
+  Distinct2b(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - NumPartitions
+  //  - Src
+  Distinct3(ctx context.Context, id *IDataFrameId, numPartitions int64, src *rpc.ISource) (_r *IDataFrameId, _err error)
   // Parameters:
   //  - ID
   //  - Src
@@ -689,14 +746,12 @@ func (p *IDataFrameServiceClient) Uncache(ctx context.Context, id *IDataFrameId)
 
 // Parameters:
 //  - ID
-//  - NumPartitions
-func (p *IDataFrameServiceClient) Repartition(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args15 IDataFrameServiceRepartitionArgs
+func (p *IDataFrameServiceClient) Partitions(ctx context.Context, id *IDataFrameId) (_r int64, _err error) {
+  var _args15 IDataFrameServicePartitionsArgs
   _args15.ID = id
-  _args15.NumPartitions = numPartitions
-  var _result17 IDataFrameServiceRepartitionResult
+  var _result17 IDataFrameServicePartitionsResult
   var _meta16 thrift.ResponseMeta
-  _meta16, _err = p.Client_().Call(ctx, "repartition", &_args15, &_result17)
+  _meta16, _err = p.Client_().Call(ctx, "partitions", &_args15, &_result17)
   p.SetLastResponseMeta_(_meta16)
   if _err != nil {
     return
@@ -711,60 +766,62 @@ func (p *IDataFrameServiceClient) Repartition(ctx context.Context, id *IDataFram
 
 // Parameters:
 //  - ID
-//  - NumPartitions
-//  - Shuffle
-func (p *IDataFrameServiceClient) Coalesce(ctx context.Context, id *IDataFrameId, numPartitions int64, shuffle bool) (_r *IDataFrameId, _err error) {
-  var _args18 IDataFrameServiceCoalesceArgs
+//  - Path
+//  - Compression
+func (p *IDataFrameServiceClient) SaveAsObjectFile(ctx context.Context, id *IDataFrameId, path string, compression int8) (_err error) {
+  var _args18 IDataFrameServiceSaveAsObjectFileArgs
   _args18.ID = id
-  _args18.NumPartitions = numPartitions
-  _args18.Shuffle = shuffle
-  var _result20 IDataFrameServiceCoalesceResult
+  _args18.Path = path
+  _args18.Compression = compression
+  var _result20 IDataFrameServiceSaveAsObjectFileResult
   var _meta19 thrift.ResponseMeta
-  _meta19, _err = p.Client_().Call(ctx, "coalesce", &_args18, &_result20)
+  _meta19, _err = p.Client_().Call(ctx, "saveAsObjectFile", &_args18, &_result20)
   p.SetLastResponseMeta_(_meta19)
   if _err != nil {
     return
   }
   switch {
   case _result20.Ex!= nil:
-    return _r, _result20.Ex
+    return _result20.Ex
   }
 
-  return _result20.GetSuccess(), nil
+  return nil
 }
 
 // Parameters:
 //  - ID
-func (p *IDataFrameServiceClient) Partitions(ctx context.Context, id *IDataFrameId) (_r int64, _err error) {
-  var _args21 IDataFrameServicePartitionsArgs
+//  - Path
+func (p *IDataFrameServiceClient) SaveAsTextFile(ctx context.Context, id *IDataFrameId, path string) (_err error) {
+  var _args21 IDataFrameServiceSaveAsTextFileArgs
   _args21.ID = id
-  var _result23 IDataFrameServicePartitionsResult
+  _args21.Path = path
+  var _result23 IDataFrameServiceSaveAsTextFileResult
   var _meta22 thrift.ResponseMeta
-  _meta22, _err = p.Client_().Call(ctx, "partitions", &_args21, &_result23)
+  _meta22, _err = p.Client_().Call(ctx, "saveAsTextFile", &_args21, &_result23)
   p.SetLastResponseMeta_(_meta22)
   if _err != nil {
     return
   }
   switch {
   case _result23.Ex!= nil:
-    return _r, _result23.Ex
+    return _result23.Ex
   }
 
-  return _result23.GetSuccess(), nil
+  return nil
 }
 
 // Parameters:
 //  - ID
 //  - Path
-//  - Compression
-func (p *IDataFrameServiceClient) SaveAsObjectFile(ctx context.Context, id *IDataFrameId, path string, compression int8) (_err error) {
-  var _args24 IDataFrameServiceSaveAsObjectFileArgs
+//  - Pretty
+func (p *IDataFrameServiceClient) SaveAsJsonFile(ctx context.Context, id *IDataFrameId, path string, pretty bool) (_err error) {
+  var _args24 IDataFrameServiceSaveAsJsonFileArgs
   _args24.ID = id
   _args24.Path = path
-  _args24.Compression = compression
-  var _result26 IDataFrameServiceSaveAsObjectFileResult
+  _args24.Pretty = pretty
+  var _result26 IDataFrameServiceSaveAsJsonFileResult
   var _meta25 thrift.ResponseMeta
-  _meta25, _err = p.Client_().Call(ctx, "saveAsObjectFile", &_args24, &_result26)
+  _meta25, _err = p.Client_().Call(ctx, "saveAsJsonFile", &_args24, &_result26)
   p.SetLastResponseMeta_(_meta25)
   if _err != nil {
     return
@@ -779,60 +836,62 @@ func (p *IDataFrameServiceClient) SaveAsObjectFile(ctx context.Context, id *IDat
 
 // Parameters:
 //  - ID
-//  - Path
-func (p *IDataFrameServiceClient) SaveAsTextFile(ctx context.Context, id *IDataFrameId, path string) (_err error) {
-  var _args27 IDataFrameServiceSaveAsTextFileArgs
+//  - NumPartitions
+//  - PreserveOrdering
+//  - Global_
+func (p *IDataFrameServiceClient) Repartition(ctx context.Context, id *IDataFrameId, numPartitions int64, preserveOrdering bool, global_ bool) (_r *IDataFrameId, _err error) {
+  var _args27 IDataFrameServiceRepartitionArgs
   _args27.ID = id
-  _args27.Path = path
-  var _result29 IDataFrameServiceSaveAsTextFileResult
+  _args27.NumPartitions = numPartitions
+  _args27.PreserveOrdering = preserveOrdering
+  _args27.Global_ = global_
+  var _result29 IDataFrameServiceRepartitionResult
   var _meta28 thrift.ResponseMeta
-  _meta28, _err = p.Client_().Call(ctx, "saveAsTextFile", &_args27, &_result29)
+  _meta28, _err = p.Client_().Call(ctx, "repartition", &_args27, &_result29)
   p.SetLastResponseMeta_(_meta28)
   if _err != nil {
     return
   }
   switch {
   case _result29.Ex!= nil:
-    return _result29.Ex
+    return _r, _result29.Ex
   }
 
-  return nil
+  return _result29.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
-//  - Path
-//  - Pretty
-func (p *IDataFrameServiceClient) SaveAsJsonFile(ctx context.Context, id *IDataFrameId, path string, pretty bool) (_err error) {
-  var _args30 IDataFrameServiceSaveAsJsonFileArgs
+//  - NumPartitions
+func (p *IDataFrameServiceClient) PartitionByRandom(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args30 IDataFrameServicePartitionByRandomArgs
   _args30.ID = id
-  _args30.Path = path
-  _args30.Pretty = pretty
-  var _result32 IDataFrameServiceSaveAsJsonFileResult
+  _args30.NumPartitions = numPartitions
+  var _result32 IDataFrameServicePartitionByRandomResult
   var _meta31 thrift.ResponseMeta
-  _meta31, _err = p.Client_().Call(ctx, "saveAsJsonFile", &_args30, &_result32)
+  _meta31, _err = p.Client_().Call(ctx, "partitionByRandom", &_args30, &_result32)
   p.SetLastResponseMeta_(_meta31)
   if _err != nil {
     return
   }
   switch {
   case _result32.Ex!= nil:
-    return _result32.Ex
+    return _r, _result32.Ex
   }
 
-  return nil
+  return _result32.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
-//  - Src
-func (p *IDataFrameServiceClient) Map_(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args33 IDataFrameServiceMap_Args
+//  - NumPartitions
+func (p *IDataFrameServiceClient) PartitionByHash(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args33 IDataFrameServicePartitionByHashArgs
   _args33.ID = id
-  _args33.Src = src
-  var _result35 IDataFrameServiceMap_Result
+  _args33.NumPartitions = numPartitions
+  var _result35 IDataFrameServicePartitionByHashResult
   var _meta34 thrift.ResponseMeta
-  _meta34, _err = p.Client_().Call(ctx, "map_", &_args33, &_result35)
+  _meta34, _err = p.Client_().Call(ctx, "partitionByHash", &_args33, &_result35)
   p.SetLastResponseMeta_(_meta34)
   if _err != nil {
     return
@@ -848,13 +907,15 @@ func (p *IDataFrameServiceClient) Map_(ctx context.Context, id *IDataFrameId, sr
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) Filter(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args36 IDataFrameServiceFilterArgs
+//  - NumPartitions
+func (p *IDataFrameServiceClient) PartitionBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args36 IDataFrameServicePartitionByArgs
   _args36.ID = id
   _args36.Src = src
-  var _result38 IDataFrameServiceFilterResult
+  _args36.NumPartitions = numPartitions
+  var _result38 IDataFrameServicePartitionByResult
   var _meta37 thrift.ResponseMeta
-  _meta37, _err = p.Client_().Call(ctx, "filter", &_args36, &_result38)
+  _meta37, _err = p.Client_().Call(ctx, "partitionBy", &_args36, &_result38)
   p.SetLastResponseMeta_(_meta37)
   if _err != nil {
     return
@@ -870,13 +931,13 @@ func (p *IDataFrameServiceClient) Filter(ctx context.Context, id *IDataFrameId, 
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) Flatmap(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args39 IDataFrameServiceFlatmapArgs
+func (p *IDataFrameServiceClient) Map_(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args39 IDataFrameServiceMap_Args
   _args39.ID = id
   _args39.Src = src
-  var _result41 IDataFrameServiceFlatmapResult
+  var _result41 IDataFrameServiceMap_Result
   var _meta40 thrift.ResponseMeta
-  _meta40, _err = p.Client_().Call(ctx, "flatmap", &_args39, &_result41)
+  _meta40, _err = p.Client_().Call(ctx, "map_", &_args39, &_result41)
   p.SetLastResponseMeta_(_meta40)
   if _err != nil {
     return
@@ -892,13 +953,13 @@ func (p *IDataFrameServiceClient) Flatmap(ctx context.Context, id *IDataFrameId,
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) KeyBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args42 IDataFrameServiceKeyByArgs
+func (p *IDataFrameServiceClient) Filter(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args42 IDataFrameServiceFilterArgs
   _args42.ID = id
   _args42.Src = src
-  var _result44 IDataFrameServiceKeyByResult
+  var _result44 IDataFrameServiceFilterResult
   var _meta43 thrift.ResponseMeta
-  _meta43, _err = p.Client_().Call(ctx, "keyBy", &_args42, &_result44)
+  _meta43, _err = p.Client_().Call(ctx, "filter", &_args42, &_result44)
   p.SetLastResponseMeta_(_meta43)
   if _err != nil {
     return
@@ -914,15 +975,13 @@ func (p *IDataFrameServiceClient) KeyBy(ctx context.Context, id *IDataFrameId, s
 // Parameters:
 //  - ID
 //  - Src
-//  - PreservesPartitioning
-func (p *IDataFrameServiceClient) MapPartitions(ctx context.Context, id *IDataFrameId, src *rpc.ISource, preservesPartitioning bool) (_r *IDataFrameId, _err error) {
-  var _args45 IDataFrameServiceMapPartitionsArgs
+func (p *IDataFrameServiceClient) Flatmap(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args45 IDataFrameServiceFlatmapArgs
   _args45.ID = id
   _args45.Src = src
-  _args45.PreservesPartitioning = preservesPartitioning
-  var _result47 IDataFrameServiceMapPartitionsResult
+  var _result47 IDataFrameServiceFlatmapResult
   var _meta46 thrift.ResponseMeta
-  _meta46, _err = p.Client_().Call(ctx, "mapPartitions", &_args45, &_result47)
+  _meta46, _err = p.Client_().Call(ctx, "flatmap", &_args45, &_result47)
   p.SetLastResponseMeta_(_meta46)
   if _err != nil {
     return
@@ -938,15 +997,13 @@ func (p *IDataFrameServiceClient) MapPartitions(ctx context.Context, id *IDataFr
 // Parameters:
 //  - ID
 //  - Src
-//  - PreservesPartitioning
-func (p *IDataFrameServiceClient) MapPartitionsWithIndex(ctx context.Context, id *IDataFrameId, src *rpc.ISource, preservesPartitioning bool) (_r *IDataFrameId, _err error) {
-  var _args48 IDataFrameServiceMapPartitionsWithIndexArgs
+func (p *IDataFrameServiceClient) KeyBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args48 IDataFrameServiceKeyByArgs
   _args48.ID = id
   _args48.Src = src
-  _args48.PreservesPartitioning = preservesPartitioning
-  var _result50 IDataFrameServiceMapPartitionsWithIndexResult
+  var _result50 IDataFrameServiceKeyByResult
   var _meta49 thrift.ResponseMeta
-  _meta49, _err = p.Client_().Call(ctx, "mapPartitionsWithIndex", &_args48, &_result50)
+  _meta49, _err = p.Client_().Call(ctx, "keyBy", &_args48, &_result50)
   p.SetLastResponseMeta_(_meta49)
   if _err != nil {
     return
@@ -962,13 +1019,15 @@ func (p *IDataFrameServiceClient) MapPartitionsWithIndex(ctx context.Context, id
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) MapExecutor(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args51 IDataFrameServiceMapExecutorArgs
+//  - PreservesPartitioning
+func (p *IDataFrameServiceClient) MapPartitions(ctx context.Context, id *IDataFrameId, src *rpc.ISource, preservesPartitioning bool) (_r *IDataFrameId, _err error) {
+  var _args51 IDataFrameServiceMapPartitionsArgs
   _args51.ID = id
   _args51.Src = src
-  var _result53 IDataFrameServiceMapExecutorResult
+  _args51.PreservesPartitioning = preservesPartitioning
+  var _result53 IDataFrameServiceMapPartitionsResult
   var _meta52 thrift.ResponseMeta
-  _meta52, _err = p.Client_().Call(ctx, "mapExecutor", &_args51, &_result53)
+  _meta52, _err = p.Client_().Call(ctx, "mapPartitions", &_args51, &_result53)
   p.SetLastResponseMeta_(_meta52)
   if _err != nil {
     return
@@ -984,13 +1043,15 @@ func (p *IDataFrameServiceClient) MapExecutor(ctx context.Context, id *IDataFram
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) MapExecutorTo(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args54 IDataFrameServiceMapExecutorToArgs
+//  - PreservesPartitioning
+func (p *IDataFrameServiceClient) MapPartitionsWithIndex(ctx context.Context, id *IDataFrameId, src *rpc.ISource, preservesPartitioning bool) (_r *IDataFrameId, _err error) {
+  var _args54 IDataFrameServiceMapPartitionsWithIndexArgs
   _args54.ID = id
   _args54.Src = src
-  var _result56 IDataFrameServiceMapExecutorToResult
+  _args54.PreservesPartitioning = preservesPartitioning
+  var _result56 IDataFrameServiceMapPartitionsWithIndexResult
   var _meta55 thrift.ResponseMeta
-  _meta55, _err = p.Client_().Call(ctx, "mapExecutorTo", &_args54, &_result56)
+  _meta55, _err = p.Client_().Call(ctx, "mapPartitionsWithIndex", &_args54, &_result56)
   p.SetLastResponseMeta_(_meta55)
   if _err != nil {
     return
@@ -1006,13 +1067,13 @@ func (p *IDataFrameServiceClient) MapExecutorTo(ctx context.Context, id *IDataFr
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) GroupBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args57 IDataFrameServiceGroupByArgs
+func (p *IDataFrameServiceClient) MapExecutor(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args57 IDataFrameServiceMapExecutorArgs
   _args57.ID = id
   _args57.Src = src
-  var _result59 IDataFrameServiceGroupByResult
+  var _result59 IDataFrameServiceMapExecutorResult
   var _meta58 thrift.ResponseMeta
-  _meta58, _err = p.Client_().Call(ctx, "groupBy", &_args57, &_result59)
+  _meta58, _err = p.Client_().Call(ctx, "mapExecutor", &_args57, &_result59)
   p.SetLastResponseMeta_(_meta58)
   if _err != nil {
     return
@@ -1028,15 +1089,13 @@ func (p *IDataFrameServiceClient) GroupBy(ctx context.Context, id *IDataFrameId,
 // Parameters:
 //  - ID
 //  - Src
-//  - NumPartitions
-func (p *IDataFrameServiceClient) GroupBy2(ctx context.Context, id *IDataFrameId, src *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args60 IDataFrameServiceGroupBy2Args
+func (p *IDataFrameServiceClient) MapExecutorTo(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args60 IDataFrameServiceMapExecutorToArgs
   _args60.ID = id
   _args60.Src = src
-  _args60.NumPartitions = numPartitions
-  var _result62 IDataFrameServiceGroupBy2Result
+  var _result62 IDataFrameServiceMapExecutorToResult
   var _meta61 thrift.ResponseMeta
-  _meta61, _err = p.Client_().Call(ctx, "groupBy2", &_args60, &_result62)
+  _meta61, _err = p.Client_().Call(ctx, "mapExecutorTo", &_args60, &_result62)
   p.SetLastResponseMeta_(_meta61)
   if _err != nil {
     return
@@ -1051,14 +1110,14 @@ func (p *IDataFrameServiceClient) GroupBy2(ctx context.Context, id *IDataFrameId
 
 // Parameters:
 //  - ID
-//  - Ascending
-func (p *IDataFrameServiceClient) Sort(ctx context.Context, id *IDataFrameId, ascending bool) (_r *IDataFrameId, _err error) {
-  var _args63 IDataFrameServiceSortArgs
+//  - Src
+func (p *IDataFrameServiceClient) GroupBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args63 IDataFrameServiceGroupByArgs
   _args63.ID = id
-  _args63.Ascending = ascending
-  var _result65 IDataFrameServiceSortResult
+  _args63.Src = src
+  var _result65 IDataFrameServiceGroupByResult
   var _meta64 thrift.ResponseMeta
-  _meta64, _err = p.Client_().Call(ctx, "sort", &_args63, &_result65)
+  _meta64, _err = p.Client_().Call(ctx, "groupBy", &_args63, &_result65)
   p.SetLastResponseMeta_(_meta64)
   if _err != nil {
     return
@@ -1073,16 +1132,16 @@ func (p *IDataFrameServiceClient) Sort(ctx context.Context, id *IDataFrameId, as
 
 // Parameters:
 //  - ID
-//  - Ascending
+//  - Src
 //  - NumPartitions
-func (p *IDataFrameServiceClient) Sort2(ctx context.Context, id *IDataFrameId, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args66 IDataFrameServiceSort2Args
+func (p *IDataFrameServiceClient) GroupBy2(ctx context.Context, id *IDataFrameId, src *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args66 IDataFrameServiceGroupBy2Args
   _args66.ID = id
-  _args66.Ascending = ascending
+  _args66.Src = src
   _args66.NumPartitions = numPartitions
-  var _result68 IDataFrameServiceSort2Result
+  var _result68 IDataFrameServiceGroupBy2Result
   var _meta67 thrift.ResponseMeta
-  _meta67, _err = p.Client_().Call(ctx, "sort2", &_args66, &_result68)
+  _meta67, _err = p.Client_().Call(ctx, "groupBy2", &_args66, &_result68)
   p.SetLastResponseMeta_(_meta67)
   if _err != nil {
     return
@@ -1097,16 +1156,14 @@ func (p *IDataFrameServiceClient) Sort2(ctx context.Context, id *IDataFrameId, a
 
 // Parameters:
 //  - ID
-//  - Src
 //  - Ascending
-func (p *IDataFrameServiceClient) SortBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool) (_r *IDataFrameId, _err error) {
-  var _args69 IDataFrameServiceSortByArgs
+func (p *IDataFrameServiceClient) Sort(ctx context.Context, id *IDataFrameId, ascending bool) (_r *IDataFrameId, _err error) {
+  var _args69 IDataFrameServiceSortArgs
   _args69.ID = id
-  _args69.Src = src
   _args69.Ascending = ascending
-  var _result71 IDataFrameServiceSortByResult
+  var _result71 IDataFrameServiceSortResult
   var _meta70 thrift.ResponseMeta
-  _meta70, _err = p.Client_().Call(ctx, "sortBy", &_args69, &_result71)
+  _meta70, _err = p.Client_().Call(ctx, "sort", &_args69, &_result71)
   p.SetLastResponseMeta_(_meta70)
   if _err != nil {
     return
@@ -1121,18 +1178,16 @@ func (p *IDataFrameServiceClient) SortBy(ctx context.Context, id *IDataFrameId, 
 
 // Parameters:
 //  - ID
-//  - Src
 //  - Ascending
 //  - NumPartitions
-func (p *IDataFrameServiceClient) SortBy3(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args72 IDataFrameServiceSortBy3Args
+func (p *IDataFrameServiceClient) Sort2(ctx context.Context, id *IDataFrameId, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args72 IDataFrameServiceSort2Args
   _args72.ID = id
-  _args72.Src = src
   _args72.Ascending = ascending
   _args72.NumPartitions = numPartitions
-  var _result74 IDataFrameServiceSortBy3Result
+  var _result74 IDataFrameServiceSort2Result
   var _meta73 thrift.ResponseMeta
-  _meta73, _err = p.Client_().Call(ctx, "sortBy3", &_args72, &_result74)
+  _meta73, _err = p.Client_().Call(ctx, "sort2", &_args72, &_result74)
   p.SetLastResponseMeta_(_meta73)
   if _err != nil {
     return
@@ -1148,15 +1203,15 @@ func (p *IDataFrameServiceClient) SortBy3(ctx context.Context, id *IDataFrameId,
 // Parameters:
 //  - ID
 //  - Src
-//  - Tp
-func (p *IDataFrameServiceClient) Reduce(ctx context.Context, id *IDataFrameId, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args75 IDataFrameServiceReduceArgs
+//  - Ascending
+func (p *IDataFrameServiceClient) SortBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool) (_r *IDataFrameId, _err error) {
+  var _args75 IDataFrameServiceSortByArgs
   _args75.ID = id
   _args75.Src = src
-  _args75.Tp = tp
-  var _result77 IDataFrameServiceReduceResult
+  _args75.Ascending = ascending
+  var _result77 IDataFrameServiceSortByResult
   var _meta76 thrift.ResponseMeta
-  _meta76, _err = p.Client_().Call(ctx, "reduce", &_args75, &_result77)
+  _meta76, _err = p.Client_().Call(ctx, "sortBy", &_args75, &_result77)
   p.SetLastResponseMeta_(_meta76)
   if _err != nil {
     return
@@ -1172,15 +1227,17 @@ func (p *IDataFrameServiceClient) Reduce(ctx context.Context, id *IDataFrameId, 
 // Parameters:
 //  - ID
 //  - Src
-//  - Tp
-func (p *IDataFrameServiceClient) TreeReduce(ctx context.Context, id *IDataFrameId, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args78 IDataFrameServiceTreeReduceArgs
+//  - Ascending
+//  - NumPartitions
+func (p *IDataFrameServiceClient) SortBy3(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args78 IDataFrameServiceSortBy3Args
   _args78.ID = id
   _args78.Src = src
-  _args78.Tp = tp
-  var _result80 IDataFrameServiceTreeReduceResult
+  _args78.Ascending = ascending
+  _args78.NumPartitions = numPartitions
+  var _result80 IDataFrameServiceSortBy3Result
   var _meta79 thrift.ResponseMeta
-  _meta79, _err = p.Client_().Call(ctx, "treeReduce", &_args78, &_result80)
+  _meta79, _err = p.Client_().Call(ctx, "sortBy3", &_args78, &_result80)
   p.SetLastResponseMeta_(_meta79)
   if _err != nil {
     return
@@ -1195,14 +1252,16 @@ func (p *IDataFrameServiceClient) TreeReduce(ctx context.Context, id *IDataFrame
 
 // Parameters:
 //  - ID
-//  - Tp
-func (p *IDataFrameServiceClient) Collect(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args81 IDataFrameServiceCollectArgs
+//  - Other
+//  - PreserveOrder
+func (p *IDataFrameServiceClient) Union_(ctx context.Context, id *IDataFrameId, other *IDataFrameId, preserveOrder bool) (_r *IDataFrameId, _err error) {
+  var _args81 IDataFrameServiceUnion_Args
   _args81.ID = id
-  _args81.Tp = tp
-  var _result83 IDataFrameServiceCollectResult
+  _args81.Other = other
+  _args81.PreserveOrder = preserveOrder
+  var _result83 IDataFrameServiceUnion_Result
   var _meta82 thrift.ResponseMeta
-  _meta82, _err = p.Client_().Call(ctx, "collect", &_args81, &_result83)
+  _meta82, _err = p.Client_().Call(ctx, "union_", &_args81, &_result83)
   p.SetLastResponseMeta_(_meta82)
   if _err != nil {
     return
@@ -1217,20 +1276,18 @@ func (p *IDataFrameServiceClient) Collect(ctx context.Context, id *IDataFrameId,
 
 // Parameters:
 //  - ID
-//  - Zero
-//  - SeqOp
-//  - CombOp
-//  - Tp
-func (p *IDataFrameServiceClient) Aggregate(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args84 IDataFrameServiceAggregateArgs
+//  - Other
+//  - PreserveOrder
+//  - Src
+func (p *IDataFrameServiceClient) Union4(ctx context.Context, id *IDataFrameId, other *IDataFrameId, preserveOrder bool, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args84 IDataFrameServiceUnion4Args
   _args84.ID = id
-  _args84.Zero = zero
-  _args84.SeqOp = seqOp
-  _args84.CombOp = combOp
-  _args84.Tp = tp
-  var _result86 IDataFrameServiceAggregateResult
+  _args84.Other = other
+  _args84.PreserveOrder = preserveOrder
+  _args84.Src = src
+  var _result86 IDataFrameServiceUnion4Result
   var _meta85 thrift.ResponseMeta
-  _meta85, _err = p.Client_().Call(ctx, "aggregate", &_args84, &_result86)
+  _meta85, _err = p.Client_().Call(ctx, "union4", &_args84, &_result86)
   p.SetLastResponseMeta_(_meta85)
   if _err != nil {
     return
@@ -1245,20 +1302,14 @@ func (p *IDataFrameServiceClient) Aggregate(ctx context.Context, id *IDataFrameI
 
 // Parameters:
 //  - ID
-//  - Zero
-//  - SeqOp
-//  - CombOp
-//  - Tp
-func (p *IDataFrameServiceClient) TreeAggregate(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args87 IDataFrameServiceTreeAggregateArgs
+//  - Other
+func (p *IDataFrameServiceClient) Join(ctx context.Context, id *IDataFrameId, other *IDataFrameId) (_r *IDataFrameId, _err error) {
+  var _args87 IDataFrameServiceJoinArgs
   _args87.ID = id
-  _args87.Zero = zero
-  _args87.SeqOp = seqOp
-  _args87.CombOp = combOp
-  _args87.Tp = tp
-  var _result89 IDataFrameServiceTreeAggregateResult
+  _args87.Other = other
+  var _result89 IDataFrameServiceJoinResult
   var _meta88 thrift.ResponseMeta
-  _meta88, _err = p.Client_().Call(ctx, "treeAggregate", &_args87, &_result89)
+  _meta88, _err = p.Client_().Call(ctx, "join", &_args87, &_result89)
   p.SetLastResponseMeta_(_meta88)
   if _err != nil {
     return
@@ -1273,18 +1324,16 @@ func (p *IDataFrameServiceClient) TreeAggregate(ctx context.Context, id *IDataFr
 
 // Parameters:
 //  - ID
-//  - Zero
-//  - Src
-//  - Tp
-func (p *IDataFrameServiceClient) Fold(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args90 IDataFrameServiceFoldArgs
+//  - Other
+//  - NumPartitions
+func (p *IDataFrameServiceClient) Join3a(ctx context.Context, id *IDataFrameId, other *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args90 IDataFrameServiceJoin3aArgs
   _args90.ID = id
-  _args90.Zero = zero
-  _args90.Src = src
-  _args90.Tp = tp
-  var _result92 IDataFrameServiceFoldResult
+  _args90.Other = other
+  _args90.NumPartitions = numPartitions
+  var _result92 IDataFrameServiceJoin3aResult
   var _meta91 thrift.ResponseMeta
-  _meta91, _err = p.Client_().Call(ctx, "fold", &_args90, &_result92)
+  _meta91, _err = p.Client_().Call(ctx, "join3a", &_args90, &_result92)
   p.SetLastResponseMeta_(_meta91)
   if _err != nil {
     return
@@ -1299,42 +1348,37 @@ func (p *IDataFrameServiceClient) Fold(ctx context.Context, id *IDataFrameId, ze
 
 // Parameters:
 //  - ID
-//  - Zero
+//  - Other
 //  - Src
-//  - Tp
-func (p *IDataFrameServiceClient) TreeFold(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args93 IDataFrameServiceTreeFoldArgs
+func (p *IDataFrameServiceClient) Join3b(ctx context.Context, id *IDataFrameId, other *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args93 IDataFrameServiceJoin3bArgs
   _args93.ID = id
-  _args93.Zero = zero
+  _args93.Other = other
   _args93.Src = src
-  _args93.Tp = tp
-  var _result95 IDataFrameServiceTreeFoldResult
+  var _result95 IDataFrameServiceJoin3bResult
   var _meta94 thrift.ResponseMeta
-  _meta94, _err = p.Client_().Call(ctx, "treeFold", &_args93, &_result95)
+  _meta94, _err = p.Client_().Call(ctx, "join3b", &_args93, &_result95)
   p.SetLastResponseMeta_(_meta94)
   if _err != nil {
     return
   }
-  switch {
-  case _result95.Ex!= nil:
-    return _r, _result95.Ex
-  }
-
   return _result95.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
-//  - Num
-//  - Tp
-func (p *IDataFrameServiceClient) Take(ctx context.Context, id *IDataFrameId, num int64, tp *rpc.ISource) (_r int64, _err error) {
-  var _args96 IDataFrameServiceTakeArgs
+//  - Other
+//  - NumPartitions
+//  - Src
+func (p *IDataFrameServiceClient) Join4(ctx context.Context, id *IDataFrameId, other *IDataFrameId, numPartitions int64, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args96 IDataFrameServiceJoin4Args
   _args96.ID = id
-  _args96.Num = num
-  _args96.Tp = tp
-  var _result98 IDataFrameServiceTakeResult
+  _args96.Other = other
+  _args96.NumPartitions = numPartitions
+  _args96.Src = src
+  var _result98 IDataFrameServiceJoin4Result
   var _meta97 thrift.ResponseMeta
-  _meta97, _err = p.Client_().Call(ctx, "take", &_args96, &_result98)
+  _meta97, _err = p.Client_().Call(ctx, "join4", &_args96, &_result98)
   p.SetLastResponseMeta_(_meta97)
   if _err != nil {
     return
@@ -1349,82 +1393,80 @@ func (p *IDataFrameServiceClient) Take(ctx context.Context, id *IDataFrameId, nu
 
 // Parameters:
 //  - ID
-//  - Src
-func (p *IDataFrameServiceClient) Foreach_(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_err error) {
-  var _args99 IDataFrameServiceForeach_Args
+func (p *IDataFrameServiceClient) Distinct(ctx context.Context, id *IDataFrameId) (_r *IDataFrameId, _err error) {
+  var _args99 IDataFrameServiceDistinctArgs
   _args99.ID = id
-  _args99.Src = src
-  var _result101 IDataFrameServiceForeach_Result
+  var _result101 IDataFrameServiceDistinctResult
   var _meta100 thrift.ResponseMeta
-  _meta100, _err = p.Client_().Call(ctx, "foreach_", &_args99, &_result101)
+  _meta100, _err = p.Client_().Call(ctx, "distinct", &_args99, &_result101)
   p.SetLastResponseMeta_(_meta100)
   if _err != nil {
     return
   }
   switch {
   case _result101.Ex!= nil:
-    return _result101.Ex
+    return _r, _result101.Ex
   }
 
-  return nil
+  return _result101.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
-//  - Src
-func (p *IDataFrameServiceClient) ForeachPartition(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_err error) {
-  var _args102 IDataFrameServiceForeachPartitionArgs
+//  - NumPartitions
+func (p *IDataFrameServiceClient) Distinct2a(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args102 IDataFrameServiceDistinct2aArgs
   _args102.ID = id
-  _args102.Src = src
-  var _result104 IDataFrameServiceForeachPartitionResult
+  _args102.NumPartitions = numPartitions
+  var _result104 IDataFrameServiceDistinct2aResult
   var _meta103 thrift.ResponseMeta
-  _meta103, _err = p.Client_().Call(ctx, "foreachPartition", &_args102, &_result104)
+  _meta103, _err = p.Client_().Call(ctx, "distinct2a", &_args102, &_result104)
   p.SetLastResponseMeta_(_meta103)
   if _err != nil {
     return
   }
   switch {
   case _result104.Ex!= nil:
-    return _result104.Ex
+    return _r, _result104.Ex
   }
 
-  return nil
+  return _result104.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) ForeachExecutor(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_err error) {
-  var _args105 IDataFrameServiceForeachExecutorArgs
+func (p *IDataFrameServiceClient) Distinct2b(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args105 IDataFrameServiceDistinct2bArgs
   _args105.ID = id
   _args105.Src = src
-  var _result107 IDataFrameServiceForeachExecutorResult
+  var _result107 IDataFrameServiceDistinct2bResult
   var _meta106 thrift.ResponseMeta
-  _meta106, _err = p.Client_().Call(ctx, "foreachExecutor", &_args105, &_result107)
+  _meta106, _err = p.Client_().Call(ctx, "distinct2b", &_args105, &_result107)
   p.SetLastResponseMeta_(_meta106)
   if _err != nil {
     return
   }
   switch {
   case _result107.Ex!= nil:
-    return _result107.Ex
+    return _r, _result107.Ex
   }
 
-  return nil
+  return _result107.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
-//  - Num
-//  - Tp
-func (p *IDataFrameServiceClient) Top(ctx context.Context, id *IDataFrameId, num int64, tp *rpc.ISource) (_r int64, _err error) {
-  var _args108 IDataFrameServiceTopArgs
+//  - NumPartitions
+//  - Src
+func (p *IDataFrameServiceClient) Distinct3(ctx context.Context, id *IDataFrameId, numPartitions int64, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args108 IDataFrameServiceDistinct3Args
   _args108.ID = id
-  _args108.Num = num
-  _args108.Tp = tp
-  var _result110 IDataFrameServiceTopResult
+  _args108.NumPartitions = numPartitions
+  _args108.Src = src
+  var _result110 IDataFrameServiceDistinct3Result
   var _meta109 thrift.ResponseMeta
-  _meta109, _err = p.Client_().Call(ctx, "top", &_args108, &_result110)
+  _meta109, _err = p.Client_().Call(ctx, "distinct3", &_args108, &_result110)
   p.SetLastResponseMeta_(_meta109)
   if _err != nil {
     return
@@ -1439,18 +1481,16 @@ func (p *IDataFrameServiceClient) Top(ctx context.Context, id *IDataFrameId, num
 
 // Parameters:
 //  - ID
-//  - Num
-//  - Cmp
+//  - Src
 //  - Tp
-func (p *IDataFrameServiceClient) Top4(ctx context.Context, id *IDataFrameId, num int64, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args111 IDataFrameServiceTop4Args
+func (p *IDataFrameServiceClient) Reduce(ctx context.Context, id *IDataFrameId, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
+  var _args111 IDataFrameServiceReduceArgs
   _args111.ID = id
-  _args111.Num = num
-  _args111.Cmp = cmp
+  _args111.Src = src
   _args111.Tp = tp
-  var _result113 IDataFrameServiceTop4Result
+  var _result113 IDataFrameServiceReduceResult
   var _meta112 thrift.ResponseMeta
-  _meta112, _err = p.Client_().Call(ctx, "top4", &_args111, &_result113)
+  _meta112, _err = p.Client_().Call(ctx, "reduce", &_args111, &_result113)
   p.SetLastResponseMeta_(_meta112)
   if _err != nil {
     return
@@ -1465,16 +1505,16 @@ func (p *IDataFrameServiceClient) Top4(ctx context.Context, id *IDataFrameId, nu
 
 // Parameters:
 //  - ID
-//  - Num
+//  - Src
 //  - Tp
-func (p *IDataFrameServiceClient) TakeOrdered(ctx context.Context, id *IDataFrameId, num int64, tp *rpc.ISource) (_r int64, _err error) {
-  var _args114 IDataFrameServiceTakeOrderedArgs
+func (p *IDataFrameServiceClient) TreeReduce(ctx context.Context, id *IDataFrameId, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
+  var _args114 IDataFrameServiceTreeReduceArgs
   _args114.ID = id
-  _args114.Num = num
+  _args114.Src = src
   _args114.Tp = tp
-  var _result116 IDataFrameServiceTakeOrderedResult
+  var _result116 IDataFrameServiceTreeReduceResult
   var _meta115 thrift.ResponseMeta
-  _meta115, _err = p.Client_().Call(ctx, "takeOrdered", &_args114, &_result116)
+  _meta115, _err = p.Client_().Call(ctx, "treeReduce", &_args114, &_result116)
   p.SetLastResponseMeta_(_meta115)
   if _err != nil {
     return
@@ -1489,18 +1529,14 @@ func (p *IDataFrameServiceClient) TakeOrdered(ctx context.Context, id *IDataFram
 
 // Parameters:
 //  - ID
-//  - Num
-//  - Cmp
 //  - Tp
-func (p *IDataFrameServiceClient) TakeOrdered4(ctx context.Context, id *IDataFrameId, num int64, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args117 IDataFrameServiceTakeOrdered4Args
+func (p *IDataFrameServiceClient) Collect(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
+  var _args117 IDataFrameServiceCollectArgs
   _args117.ID = id
-  _args117.Num = num
-  _args117.Cmp = cmp
   _args117.Tp = tp
-  var _result119 IDataFrameServiceTakeOrdered4Result
+  var _result119 IDataFrameServiceCollectResult
   var _meta118 thrift.ResponseMeta
-  _meta118, _err = p.Client_().Call(ctx, "takeOrdered4", &_args117, &_result119)
+  _meta118, _err = p.Client_().Call(ctx, "collect", &_args117, &_result119)
   p.SetLastResponseMeta_(_meta118)
   if _err != nil {
     return
@@ -1515,18 +1551,20 @@ func (p *IDataFrameServiceClient) TakeOrdered4(ctx context.Context, id *IDataFra
 
 // Parameters:
 //  - ID
-//  - WithReplacement
-//  - Fraction
-//  - Seed
-func (p *IDataFrameServiceClient) Sample(ctx context.Context, id *IDataFrameId, withReplacement bool, fraction float64, seed int32) (_r *IDataFrameId, _err error) {
-  var _args120 IDataFrameServiceSampleArgs
+//  - Zero
+//  - SeqOp
+//  - CombOp
+//  - Tp
+func (p *IDataFrameServiceClient) Aggregate(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
+  var _args120 IDataFrameServiceAggregateArgs
   _args120.ID = id
-  _args120.WithReplacement = withReplacement
-  _args120.Fraction = fraction
-  _args120.Seed = seed
-  var _result122 IDataFrameServiceSampleResult
+  _args120.Zero = zero
+  _args120.SeqOp = seqOp
+  _args120.CombOp = combOp
+  _args120.Tp = tp
+  var _result122 IDataFrameServiceAggregateResult
   var _meta121 thrift.ResponseMeta
-  _meta121, _err = p.Client_().Call(ctx, "sample", &_args120, &_result122)
+  _meta121, _err = p.Client_().Call(ctx, "aggregate", &_args120, &_result122)
   p.SetLastResponseMeta_(_meta121)
   if _err != nil {
     return
@@ -1541,20 +1579,20 @@ func (p *IDataFrameServiceClient) Sample(ctx context.Context, id *IDataFrameId, 
 
 // Parameters:
 //  - ID
-//  - WithReplacement
-//  - Num
-//  - Seed
+//  - Zero
+//  - SeqOp
+//  - CombOp
 //  - Tp
-func (p *IDataFrameServiceClient) TakeSample(ctx context.Context, id *IDataFrameId, withReplacement bool, num int64, seed int32, tp *rpc.ISource) (_r int64, _err error) {
-  var _args123 IDataFrameServiceTakeSampleArgs
+func (p *IDataFrameServiceClient) TreeAggregate(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
+  var _args123 IDataFrameServiceTreeAggregateArgs
   _args123.ID = id
-  _args123.WithReplacement = withReplacement
-  _args123.Num = num
-  _args123.Seed = seed
+  _args123.Zero = zero
+  _args123.SeqOp = seqOp
+  _args123.CombOp = combOp
   _args123.Tp = tp
-  var _result125 IDataFrameServiceTakeSampleResult
+  var _result125 IDataFrameServiceTreeAggregateResult
   var _meta124 thrift.ResponseMeta
-  _meta124, _err = p.Client_().Call(ctx, "takeSample", &_args123, &_result125)
+  _meta124, _err = p.Client_().Call(ctx, "treeAggregate", &_args123, &_result125)
   p.SetLastResponseMeta_(_meta124)
   if _err != nil {
     return
@@ -1569,12 +1607,18 @@ func (p *IDataFrameServiceClient) TakeSample(ctx context.Context, id *IDataFrame
 
 // Parameters:
 //  - ID
-func (p *IDataFrameServiceClient) Count(ctx context.Context, id *IDataFrameId) (_r int64, _err error) {
-  var _args126 IDataFrameServiceCountArgs
+//  - Zero
+//  - Src
+//  - Tp
+func (p *IDataFrameServiceClient) Fold(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
+  var _args126 IDataFrameServiceFoldArgs
   _args126.ID = id
-  var _result128 IDataFrameServiceCountResult
+  _args126.Zero = zero
+  _args126.Src = src
+  _args126.Tp = tp
+  var _result128 IDataFrameServiceFoldResult
   var _meta127 thrift.ResponseMeta
-  _meta127, _err = p.Client_().Call(ctx, "count", &_args126, &_result128)
+  _meta127, _err = p.Client_().Call(ctx, "fold", &_args126, &_result128)
   p.SetLastResponseMeta_(_meta127)
   if _err != nil {
     return
@@ -1589,14 +1633,18 @@ func (p *IDataFrameServiceClient) Count(ctx context.Context, id *IDataFrameId) (
 
 // Parameters:
 //  - ID
+//  - Zero
+//  - Src
 //  - Tp
-func (p *IDataFrameServiceClient) Max(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args129 IDataFrameServiceMaxArgs
+func (p *IDataFrameServiceClient) TreeFold(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
+  var _args129 IDataFrameServiceTreeFoldArgs
   _args129.ID = id
+  _args129.Zero = zero
+  _args129.Src = src
   _args129.Tp = tp
-  var _result131 IDataFrameServiceMaxResult
+  var _result131 IDataFrameServiceTreeFoldResult
   var _meta130 thrift.ResponseMeta
-  _meta130, _err = p.Client_().Call(ctx, "max", &_args129, &_result131)
+  _meta130, _err = p.Client_().Call(ctx, "treeFold", &_args129, &_result131)
   p.SetLastResponseMeta_(_meta130)
   if _err != nil {
     return
@@ -1611,16 +1659,16 @@ func (p *IDataFrameServiceClient) Max(ctx context.Context, id *IDataFrameId, tp 
 
 // Parameters:
 //  - ID
-//  - Cmp
+//  - Num
 //  - Tp
-func (p *IDataFrameServiceClient) Max3(ctx context.Context, id *IDataFrameId, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args132 IDataFrameServiceMax3Args
+func (p *IDataFrameServiceClient) Take(ctx context.Context, id *IDataFrameId, num int64, tp *rpc.ISource) (_r int64, _err error) {
+  var _args132 IDataFrameServiceTakeArgs
   _args132.ID = id
-  _args132.Cmp = cmp
+  _args132.Num = num
   _args132.Tp = tp
-  var _result134 IDataFrameServiceMax3Result
+  var _result134 IDataFrameServiceTakeResult
   var _meta133 thrift.ResponseMeta
-  _meta133, _err = p.Client_().Call(ctx, "max3", &_args132, &_result134)
+  _meta133, _err = p.Client_().Call(ctx, "take", &_args132, &_result134)
   p.SetLastResponseMeta_(_meta133)
   if _err != nil {
     return
@@ -1635,84 +1683,82 @@ func (p *IDataFrameServiceClient) Max3(ctx context.Context, id *IDataFrameId, cm
 
 // Parameters:
 //  - ID
-//  - Tp
-func (p *IDataFrameServiceClient) Min(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args135 IDataFrameServiceMinArgs
+//  - Src
+func (p *IDataFrameServiceClient) Foreach_(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_err error) {
+  var _args135 IDataFrameServiceForeach_Args
   _args135.ID = id
-  _args135.Tp = tp
-  var _result137 IDataFrameServiceMinResult
+  _args135.Src = src
+  var _result137 IDataFrameServiceForeach_Result
   var _meta136 thrift.ResponseMeta
-  _meta136, _err = p.Client_().Call(ctx, "min", &_args135, &_result137)
+  _meta136, _err = p.Client_().Call(ctx, "foreach_", &_args135, &_result137)
   p.SetLastResponseMeta_(_meta136)
   if _err != nil {
     return
   }
   switch {
   case _result137.Ex!= nil:
-    return _r, _result137.Ex
+    return _result137.Ex
   }
 
-  return _result137.GetSuccess(), nil
+  return nil
 }
 
 // Parameters:
 //  - ID
-//  - Cmp
-//  - Tp
-func (p *IDataFrameServiceClient) Min3(ctx context.Context, id *IDataFrameId, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args138 IDataFrameServiceMin3Args
+//  - Src
+func (p *IDataFrameServiceClient) ForeachPartition(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_err error) {
+  var _args138 IDataFrameServiceForeachPartitionArgs
   _args138.ID = id
-  _args138.Cmp = cmp
-  _args138.Tp = tp
-  var _result140 IDataFrameServiceMin3Result
+  _args138.Src = src
+  var _result140 IDataFrameServiceForeachPartitionResult
   var _meta139 thrift.ResponseMeta
-  _meta139, _err = p.Client_().Call(ctx, "min3", &_args138, &_result140)
+  _meta139, _err = p.Client_().Call(ctx, "foreachPartition", &_args138, &_result140)
   p.SetLastResponseMeta_(_meta139)
   if _err != nil {
     return
   }
   switch {
   case _result140.Ex!= nil:
-    return _r, _result140.Ex
+    return _result140.Ex
   }
 
-  return _result140.GetSuccess(), nil
+  return nil
 }
 
-// *****************************************Key-Value******************************************
-// 
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) FlatMapValues(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args141 IDataFrameServiceFlatMapValuesArgs
+func (p *IDataFrameServiceClient) ForeachExecutor(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_err error) {
+  var _args141 IDataFrameServiceForeachExecutorArgs
   _args141.ID = id
   _args141.Src = src
-  var _result143 IDataFrameServiceFlatMapValuesResult
+  var _result143 IDataFrameServiceForeachExecutorResult
   var _meta142 thrift.ResponseMeta
-  _meta142, _err = p.Client_().Call(ctx, "flatMapValues", &_args141, &_result143)
+  _meta142, _err = p.Client_().Call(ctx, "foreachExecutor", &_args141, &_result143)
   p.SetLastResponseMeta_(_meta142)
   if _err != nil {
     return
   }
   switch {
   case _result143.Ex!= nil:
-    return _r, _result143.Ex
+    return _result143.Ex
   }
 
-  return _result143.GetSuccess(), nil
+  return nil
 }
 
 // Parameters:
 //  - ID
-//  - Src
-func (p *IDataFrameServiceClient) MapValues(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args144 IDataFrameServiceMapValuesArgs
+//  - Num
+//  - Tp
+func (p *IDataFrameServiceClient) Top(ctx context.Context, id *IDataFrameId, num int64, tp *rpc.ISource) (_r int64, _err error) {
+  var _args144 IDataFrameServiceTopArgs
   _args144.ID = id
-  _args144.Src = src
-  var _result146 IDataFrameServiceMapValuesResult
+  _args144.Num = num
+  _args144.Tp = tp
+  var _result146 IDataFrameServiceTopResult
   var _meta145 thrift.ResponseMeta
-  _meta145, _err = p.Client_().Call(ctx, "mapValues", &_args144, &_result146)
+  _meta145, _err = p.Client_().Call(ctx, "top", &_args144, &_result146)
   p.SetLastResponseMeta_(_meta145)
   if _err != nil {
     return
@@ -1727,12 +1773,18 @@ func (p *IDataFrameServiceClient) MapValues(ctx context.Context, id *IDataFrameI
 
 // Parameters:
 //  - ID
-func (p *IDataFrameServiceClient) GroupByKey(ctx context.Context, id *IDataFrameId) (_r *IDataFrameId, _err error) {
-  var _args147 IDataFrameServiceGroupByKeyArgs
+//  - Num
+//  - Cmp
+//  - Tp
+func (p *IDataFrameServiceClient) Top4(ctx context.Context, id *IDataFrameId, num int64, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
+  var _args147 IDataFrameServiceTop4Args
   _args147.ID = id
-  var _result149 IDataFrameServiceGroupByKeyResult
+  _args147.Num = num
+  _args147.Cmp = cmp
+  _args147.Tp = tp
+  var _result149 IDataFrameServiceTop4Result
   var _meta148 thrift.ResponseMeta
-  _meta148, _err = p.Client_().Call(ctx, "groupByKey", &_args147, &_result149)
+  _meta148, _err = p.Client_().Call(ctx, "top4", &_args147, &_result149)
   p.SetLastResponseMeta_(_meta148)
   if _err != nil {
     return
@@ -1747,14 +1799,16 @@ func (p *IDataFrameServiceClient) GroupByKey(ctx context.Context, id *IDataFrame
 
 // Parameters:
 //  - ID
-//  - NumPartitions
-func (p *IDataFrameServiceClient) GroupByKey2a(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args150 IDataFrameServiceGroupByKey2aArgs
+//  - Num
+//  - Tp
+func (p *IDataFrameServiceClient) TakeOrdered(ctx context.Context, id *IDataFrameId, num int64, tp *rpc.ISource) (_r int64, _err error) {
+  var _args150 IDataFrameServiceTakeOrderedArgs
   _args150.ID = id
-  _args150.NumPartitions = numPartitions
-  var _result152 IDataFrameServiceGroupByKey2aResult
+  _args150.Num = num
+  _args150.Tp = tp
+  var _result152 IDataFrameServiceTakeOrderedResult
   var _meta151 thrift.ResponseMeta
-  _meta151, _err = p.Client_().Call(ctx, "groupByKey2a", &_args150, &_result152)
+  _meta151, _err = p.Client_().Call(ctx, "takeOrdered", &_args150, &_result152)
   p.SetLastResponseMeta_(_meta151)
   if _err != nil {
     return
@@ -1769,14 +1823,18 @@ func (p *IDataFrameServiceClient) GroupByKey2a(ctx context.Context, id *IDataFra
 
 // Parameters:
 //  - ID
-//  - Src
-func (p *IDataFrameServiceClient) GroupByKey2b(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args153 IDataFrameServiceGroupByKey2bArgs
+//  - Num
+//  - Cmp
+//  - Tp
+func (p *IDataFrameServiceClient) TakeOrdered4(ctx context.Context, id *IDataFrameId, num int64, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
+  var _args153 IDataFrameServiceTakeOrdered4Args
   _args153.ID = id
-  _args153.Src = src
-  var _result155 IDataFrameServiceGroupByKey2bResult
+  _args153.Num = num
+  _args153.Cmp = cmp
+  _args153.Tp = tp
+  var _result155 IDataFrameServiceTakeOrdered4Result
   var _meta154 thrift.ResponseMeta
-  _meta154, _err = p.Client_().Call(ctx, "groupByKey2b", &_args153, &_result155)
+  _meta154, _err = p.Client_().Call(ctx, "takeOrdered4", &_args153, &_result155)
   p.SetLastResponseMeta_(_meta154)
   if _err != nil {
     return
@@ -1791,16 +1849,18 @@ func (p *IDataFrameServiceClient) GroupByKey2b(ctx context.Context, id *IDataFra
 
 // Parameters:
 //  - ID
-//  - NumPartitions
-//  - Src
-func (p *IDataFrameServiceClient) GroupByKey3(ctx context.Context, id *IDataFrameId, numPartitions int64, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args156 IDataFrameServiceGroupByKey3Args
+//  - WithReplacement
+//  - Fraction
+//  - Seed
+func (p *IDataFrameServiceClient) Sample(ctx context.Context, id *IDataFrameId, withReplacement bool, fraction float64, seed int32) (_r *IDataFrameId, _err error) {
+  var _args156 IDataFrameServiceSampleArgs
   _args156.ID = id
-  _args156.NumPartitions = numPartitions
-  _args156.Src = src
-  var _result158 IDataFrameServiceGroupByKey3Result
+  _args156.WithReplacement = withReplacement
+  _args156.Fraction = fraction
+  _args156.Seed = seed
+  var _result158 IDataFrameServiceSampleResult
   var _meta157 thrift.ResponseMeta
-  _meta157, _err = p.Client_().Call(ctx, "groupByKey3", &_args156, &_result158)
+  _meta157, _err = p.Client_().Call(ctx, "sample", &_args156, &_result158)
   p.SetLastResponseMeta_(_meta157)
   if _err != nil {
     return
@@ -1815,16 +1875,20 @@ func (p *IDataFrameServiceClient) GroupByKey3(ctx context.Context, id *IDataFram
 
 // Parameters:
 //  - ID
-//  - Src
-//  - LocalReduce
-func (p *IDataFrameServiceClient) ReduceByKey(ctx context.Context, id *IDataFrameId, src *rpc.ISource, localReduce bool) (_r *IDataFrameId, _err error) {
-  var _args159 IDataFrameServiceReduceByKeyArgs
+//  - WithReplacement
+//  - Num
+//  - Seed
+//  - Tp
+func (p *IDataFrameServiceClient) TakeSample(ctx context.Context, id *IDataFrameId, withReplacement bool, num int64, seed int32, tp *rpc.ISource) (_r int64, _err error) {
+  var _args159 IDataFrameServiceTakeSampleArgs
   _args159.ID = id
-  _args159.Src = src
-  _args159.LocalReduce = localReduce
-  var _result161 IDataFrameServiceReduceByKeyResult
+  _args159.WithReplacement = withReplacement
+  _args159.Num = num
+  _args159.Seed = seed
+  _args159.Tp = tp
+  var _result161 IDataFrameServiceTakeSampleResult
   var _meta160 thrift.ResponseMeta
-  _meta160, _err = p.Client_().Call(ctx, "reduceByKey", &_args159, &_result161)
+  _meta160, _err = p.Client_().Call(ctx, "takeSample", &_args159, &_result161)
   p.SetLastResponseMeta_(_meta160)
   if _err != nil {
     return
@@ -1839,18 +1903,12 @@ func (p *IDataFrameServiceClient) ReduceByKey(ctx context.Context, id *IDataFram
 
 // Parameters:
 //  - ID
-//  - Src
-//  - NumPartitions
-//  - LocalReduce
-func (p *IDataFrameServiceClient) ReduceByKey4(ctx context.Context, id *IDataFrameId, src *rpc.ISource, numPartitions int64, localReduce bool) (_r *IDataFrameId, _err error) {
-  var _args162 IDataFrameServiceReduceByKey4Args
+func (p *IDataFrameServiceClient) Count(ctx context.Context, id *IDataFrameId) (_r int64, _err error) {
+  var _args162 IDataFrameServiceCountArgs
   _args162.ID = id
-  _args162.Src = src
-  _args162.NumPartitions = numPartitions
-  _args162.LocalReduce = localReduce
-  var _result164 IDataFrameServiceReduceByKey4Result
+  var _result164 IDataFrameServiceCountResult
   var _meta163 thrift.ResponseMeta
-  _meta163, _err = p.Client_().Call(ctx, "reduceByKey4", &_args162, &_result164)
+  _meta163, _err = p.Client_().Call(ctx, "count", &_args162, &_result164)
   p.SetLastResponseMeta_(_meta163)
   if _err != nil {
     return
@@ -1865,16 +1923,14 @@ func (p *IDataFrameServiceClient) ReduceByKey4(ctx context.Context, id *IDataFra
 
 // Parameters:
 //  - ID
-//  - Zero
-//  - SeqOp
-func (p *IDataFrameServiceClient) AggregateByKey(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args165 IDataFrameServiceAggregateByKeyArgs
+//  - Tp
+func (p *IDataFrameServiceClient) Max(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
+  var _args165 IDataFrameServiceMaxArgs
   _args165.ID = id
-  _args165.Zero = zero
-  _args165.SeqOp = seqOp
-  var _result167 IDataFrameServiceAggregateByKeyResult
+  _args165.Tp = tp
+  var _result167 IDataFrameServiceMaxResult
   var _meta166 thrift.ResponseMeta
-  _meta166, _err = p.Client_().Call(ctx, "aggregateByKey", &_args165, &_result167)
+  _meta166, _err = p.Client_().Call(ctx, "max", &_args165, &_result167)
   p.SetLastResponseMeta_(_meta166)
   if _err != nil {
     return
@@ -1889,18 +1945,16 @@ func (p *IDataFrameServiceClient) AggregateByKey(ctx context.Context, id *IDataF
 
 // Parameters:
 //  - ID
-//  - Zero
-//  - SeqOp
-//  - NumPartitions
-func (p *IDataFrameServiceClient) AggregateByKey4a(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args168 IDataFrameServiceAggregateByKey4aArgs
+//  - Cmp
+//  - Tp
+func (p *IDataFrameServiceClient) Max3(ctx context.Context, id *IDataFrameId, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
+  var _args168 IDataFrameServiceMax3Args
   _args168.ID = id
-  _args168.Zero = zero
-  _args168.SeqOp = seqOp
-  _args168.NumPartitions = numPartitions
-  var _result170 IDataFrameServiceAggregateByKey4aResult
+  _args168.Cmp = cmp
+  _args168.Tp = tp
+  var _result170 IDataFrameServiceMax3Result
   var _meta169 thrift.ResponseMeta
-  _meta169, _err = p.Client_().Call(ctx, "aggregateByKey4a", &_args168, &_result170)
+  _meta169, _err = p.Client_().Call(ctx, "max3", &_args168, &_result170)
   p.SetLastResponseMeta_(_meta169)
   if _err != nil {
     return
@@ -1915,18 +1969,14 @@ func (p *IDataFrameServiceClient) AggregateByKey4a(ctx context.Context, id *IDat
 
 // Parameters:
 //  - ID
-//  - Zero
-//  - SeqOp
-//  - CombOp
-func (p *IDataFrameServiceClient) AggregateByKey4b(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args171 IDataFrameServiceAggregateByKey4bArgs
+//  - Tp
+func (p *IDataFrameServiceClient) Min(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
+  var _args171 IDataFrameServiceMinArgs
   _args171.ID = id
-  _args171.Zero = zero
-  _args171.SeqOp = seqOp
-  _args171.CombOp = combOp
-  var _result173 IDataFrameServiceAggregateByKey4bResult
+  _args171.Tp = tp
+  var _result173 IDataFrameServiceMinResult
   var _meta172 thrift.ResponseMeta
-  _meta172, _err = p.Client_().Call(ctx, "aggregateByKey4b", &_args171, &_result173)
+  _meta172, _err = p.Client_().Call(ctx, "min", &_args171, &_result173)
   p.SetLastResponseMeta_(_meta172)
   if _err != nil {
     return
@@ -1941,20 +1991,16 @@ func (p *IDataFrameServiceClient) AggregateByKey4b(ctx context.Context, id *IDat
 
 // Parameters:
 //  - ID
-//  - Zero
-//  - SeqOp
-//  - CombOp
-//  - NumPartitions
-func (p *IDataFrameServiceClient) AggregateByKey5(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args174 IDataFrameServiceAggregateByKey5Args
+//  - Cmp
+//  - Tp
+func (p *IDataFrameServiceClient) Min3(ctx context.Context, id *IDataFrameId, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
+  var _args174 IDataFrameServiceMin3Args
   _args174.ID = id
-  _args174.Zero = zero
-  _args174.SeqOp = seqOp
-  _args174.CombOp = combOp
-  _args174.NumPartitions = numPartitions
-  var _result176 IDataFrameServiceAggregateByKey5Result
+  _args174.Cmp = cmp
+  _args174.Tp = tp
+  var _result176 IDataFrameServiceMin3Result
   var _meta175 thrift.ResponseMeta
-  _meta175, _err = p.Client_().Call(ctx, "aggregateByKey5", &_args174, &_result176)
+  _meta175, _err = p.Client_().Call(ctx, "min3", &_args174, &_result176)
   p.SetLastResponseMeta_(_meta175)
   if _err != nil {
     return
@@ -1967,20 +2013,18 @@ func (p *IDataFrameServiceClient) AggregateByKey5(ctx context.Context, id *IData
   return _result176.GetSuccess(), nil
 }
 
+// *****************************************Key-Value******************************************
+// 
 // Parameters:
 //  - ID
-//  - Zero
 //  - Src
-//  - LocalFold
-func (p *IDataFrameServiceClient) FoldByKey(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, localFold bool) (_r *IDataFrameId, _err error) {
-  var _args177 IDataFrameServiceFoldByKeyArgs
+func (p *IDataFrameServiceClient) FlatMapValues(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args177 IDataFrameServiceFlatMapValuesArgs
   _args177.ID = id
-  _args177.Zero = zero
   _args177.Src = src
-  _args177.LocalFold = localFold
-  var _result179 IDataFrameServiceFoldByKeyResult
+  var _result179 IDataFrameServiceFlatMapValuesResult
   var _meta178 thrift.ResponseMeta
-  _meta178, _err = p.Client_().Call(ctx, "foldByKey", &_args177, &_result179)
+  _meta178, _err = p.Client_().Call(ctx, "flatMapValues", &_args177, &_result179)
   p.SetLastResponseMeta_(_meta178)
   if _err != nil {
     return
@@ -1995,20 +2039,14 @@ func (p *IDataFrameServiceClient) FoldByKey(ctx context.Context, id *IDataFrameI
 
 // Parameters:
 //  - ID
-//  - Zero
 //  - Src
-//  - NumPartitions
-//  - LocalFold
-func (p *IDataFrameServiceClient) FoldByKey5(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, numPartitions int64, localFold bool) (_r *IDataFrameId, _err error) {
-  var _args180 IDataFrameServiceFoldByKey5Args
+func (p *IDataFrameServiceClient) MapValues(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args180 IDataFrameServiceMapValuesArgs
   _args180.ID = id
-  _args180.Zero = zero
   _args180.Src = src
-  _args180.NumPartitions = numPartitions
-  _args180.LocalFold = localFold
-  var _result182 IDataFrameServiceFoldByKey5Result
+  var _result182 IDataFrameServiceMapValuesResult
   var _meta181 thrift.ResponseMeta
-  _meta181, _err = p.Client_().Call(ctx, "foldByKey5", &_args180, &_result182)
+  _meta181, _err = p.Client_().Call(ctx, "mapValues", &_args180, &_result182)
   p.SetLastResponseMeta_(_meta181)
   if _err != nil {
     return
@@ -2023,14 +2061,12 @@ func (p *IDataFrameServiceClient) FoldByKey5(ctx context.Context, id *IDataFrame
 
 // Parameters:
 //  - ID
-//  - Ascending
-func (p *IDataFrameServiceClient) SortByKey(ctx context.Context, id *IDataFrameId, ascending bool) (_r *IDataFrameId, _err error) {
-  var _args183 IDataFrameServiceSortByKeyArgs
+func (p *IDataFrameServiceClient) GroupByKey(ctx context.Context, id *IDataFrameId) (_r *IDataFrameId, _err error) {
+  var _args183 IDataFrameServiceGroupByKeyArgs
   _args183.ID = id
-  _args183.Ascending = ascending
-  var _result185 IDataFrameServiceSortByKeyResult
+  var _result185 IDataFrameServiceGroupByKeyResult
   var _meta184 thrift.ResponseMeta
-  _meta184, _err = p.Client_().Call(ctx, "sortByKey", &_args183, &_result185)
+  _meta184, _err = p.Client_().Call(ctx, "groupByKey", &_args183, &_result185)
   p.SetLastResponseMeta_(_meta184)
   if _err != nil {
     return
@@ -2045,16 +2081,14 @@ func (p *IDataFrameServiceClient) SortByKey(ctx context.Context, id *IDataFrameI
 
 // Parameters:
 //  - ID
-//  - Ascending
 //  - NumPartitions
-func (p *IDataFrameServiceClient) SortByKey3a(ctx context.Context, id *IDataFrameId, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args186 IDataFrameServiceSortByKey3aArgs
+func (p *IDataFrameServiceClient) GroupByKey2a(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args186 IDataFrameServiceGroupByKey2aArgs
   _args186.ID = id
-  _args186.Ascending = ascending
   _args186.NumPartitions = numPartitions
-  var _result188 IDataFrameServiceSortByKey3aResult
+  var _result188 IDataFrameServiceGroupByKey2aResult
   var _meta187 thrift.ResponseMeta
-  _meta187, _err = p.Client_().Call(ctx, "sortByKey3a", &_args186, &_result188)
+  _meta187, _err = p.Client_().Call(ctx, "groupByKey2a", &_args186, &_result188)
   p.SetLastResponseMeta_(_meta187)
   if _err != nil {
     return
@@ -2070,15 +2104,13 @@ func (p *IDataFrameServiceClient) SortByKey3a(ctx context.Context, id *IDataFram
 // Parameters:
 //  - ID
 //  - Src
-//  - Ascending
-func (p *IDataFrameServiceClient) SortByKey3b(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool) (_r *IDataFrameId, _err error) {
-  var _args189 IDataFrameServiceSortByKey3bArgs
+func (p *IDataFrameServiceClient) GroupByKey2b(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args189 IDataFrameServiceGroupByKey2bArgs
   _args189.ID = id
   _args189.Src = src
-  _args189.Ascending = ascending
-  var _result191 IDataFrameServiceSortByKey3bResult
+  var _result191 IDataFrameServiceGroupByKey2bResult
   var _meta190 thrift.ResponseMeta
-  _meta190, _err = p.Client_().Call(ctx, "sortByKey3b", &_args189, &_result191)
+  _meta190, _err = p.Client_().Call(ctx, "groupByKey2b", &_args189, &_result191)
   p.SetLastResponseMeta_(_meta190)
   if _err != nil {
     return
@@ -2093,18 +2125,16 @@ func (p *IDataFrameServiceClient) SortByKey3b(ctx context.Context, id *IDataFram
 
 // Parameters:
 //  - ID
-//  - Src
-//  - Ascending
 //  - NumPartitions
-func (p *IDataFrameServiceClient) SortByKey4(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args192 IDataFrameServiceSortByKey4Args
+//  - Src
+func (p *IDataFrameServiceClient) GroupByKey3(ctx context.Context, id *IDataFrameId, numPartitions int64, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args192 IDataFrameServiceGroupByKey3Args
   _args192.ID = id
-  _args192.Src = src
-  _args192.Ascending = ascending
   _args192.NumPartitions = numPartitions
-  var _result194 IDataFrameServiceSortByKey4Result
+  _args192.Src = src
+  var _result194 IDataFrameServiceGroupByKey3Result
   var _meta193 thrift.ResponseMeta
-  _meta193, _err = p.Client_().Call(ctx, "sortByKey4", &_args192, &_result194)
+  _meta193, _err = p.Client_().Call(ctx, "groupByKey3", &_args192, &_result194)
   p.SetLastResponseMeta_(_meta193)
   if _err != nil {
     return
@@ -2119,14 +2149,16 @@ func (p *IDataFrameServiceClient) SortByKey4(ctx context.Context, id *IDataFrame
 
 // Parameters:
 //  - ID
-//  - Tp
-func (p *IDataFrameServiceClient) Keys(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args195 IDataFrameServiceKeysArgs
+//  - Src
+//  - LocalReduce
+func (p *IDataFrameServiceClient) ReduceByKey(ctx context.Context, id *IDataFrameId, src *rpc.ISource, localReduce bool) (_r *IDataFrameId, _err error) {
+  var _args195 IDataFrameServiceReduceByKeyArgs
   _args195.ID = id
-  _args195.Tp = tp
-  var _result197 IDataFrameServiceKeysResult
+  _args195.Src = src
+  _args195.LocalReduce = localReduce
+  var _result197 IDataFrameServiceReduceByKeyResult
   var _meta196 thrift.ResponseMeta
-  _meta196, _err = p.Client_().Call(ctx, "keys", &_args195, &_result197)
+  _meta196, _err = p.Client_().Call(ctx, "reduceByKey", &_args195, &_result197)
   p.SetLastResponseMeta_(_meta196)
   if _err != nil {
     return
@@ -2141,14 +2173,18 @@ func (p *IDataFrameServiceClient) Keys(ctx context.Context, id *IDataFrameId, tp
 
 // Parameters:
 //  - ID
-//  - Tp
-func (p *IDataFrameServiceClient) Values(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args198 IDataFrameServiceValuesArgs
+//  - Src
+//  - NumPartitions
+//  - LocalReduce
+func (p *IDataFrameServiceClient) ReduceByKey4(ctx context.Context, id *IDataFrameId, src *rpc.ISource, numPartitions int64, localReduce bool) (_r *IDataFrameId, _err error) {
+  var _args198 IDataFrameServiceReduceByKey4Args
   _args198.ID = id
-  _args198.Tp = tp
-  var _result200 IDataFrameServiceValuesResult
+  _args198.Src = src
+  _args198.NumPartitions = numPartitions
+  _args198.LocalReduce = localReduce
+  var _result200 IDataFrameServiceReduceByKey4Result
   var _meta199 thrift.ResponseMeta
-  _meta199, _err = p.Client_().Call(ctx, "values", &_args198, &_result200)
+  _meta199, _err = p.Client_().Call(ctx, "reduceByKey4", &_args198, &_result200)
   p.SetLastResponseMeta_(_meta199)
   if _err != nil {
     return
@@ -2163,18 +2199,16 @@ func (p *IDataFrameServiceClient) Values(ctx context.Context, id *IDataFrameId, 
 
 // Parameters:
 //  - ID
-//  - WithReplacement
-//  - Fractions
-//  - Seed
-func (p *IDataFrameServiceClient) SampleByKey(ctx context.Context, id *IDataFrameId, withReplacement bool, fractions *rpc.ISource, seed int32) (_r *IDataFrameId, _err error) {
-  var _args201 IDataFrameServiceSampleByKeyArgs
+//  - Zero
+//  - SeqOp
+func (p *IDataFrameServiceClient) AggregateByKey(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args201 IDataFrameServiceAggregateByKeyArgs
   _args201.ID = id
-  _args201.WithReplacement = withReplacement
-  _args201.Fractions = fractions
-  _args201.Seed = seed
-  var _result203 IDataFrameServiceSampleByKeyResult
+  _args201.Zero = zero
+  _args201.SeqOp = seqOp
+  var _result203 IDataFrameServiceAggregateByKeyResult
   var _meta202 thrift.ResponseMeta
-  _meta202, _err = p.Client_().Call(ctx, "sampleByKey", &_args201, &_result203)
+  _meta202, _err = p.Client_().Call(ctx, "aggregateByKey", &_args201, &_result203)
   p.SetLastResponseMeta_(_meta202)
   if _err != nil {
     return
@@ -2189,14 +2223,18 @@ func (p *IDataFrameServiceClient) SampleByKey(ctx context.Context, id *IDataFram
 
 // Parameters:
 //  - ID
-//  - Tp
-func (p *IDataFrameServiceClient) CountByKey(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args204 IDataFrameServiceCountByKeyArgs
+//  - Zero
+//  - SeqOp
+//  - NumPartitions
+func (p *IDataFrameServiceClient) AggregateByKey4a(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args204 IDataFrameServiceAggregateByKey4aArgs
   _args204.ID = id
-  _args204.Tp = tp
-  var _result206 IDataFrameServiceCountByKeyResult
+  _args204.Zero = zero
+  _args204.SeqOp = seqOp
+  _args204.NumPartitions = numPartitions
+  var _result206 IDataFrameServiceAggregateByKey4aResult
   var _meta205 thrift.ResponseMeta
-  _meta205, _err = p.Client_().Call(ctx, "countByKey", &_args204, &_result206)
+  _meta205, _err = p.Client_().Call(ctx, "aggregateByKey4a", &_args204, &_result206)
   p.SetLastResponseMeta_(_meta205)
   if _err != nil {
     return
@@ -2211,14 +2249,18 @@ func (p *IDataFrameServiceClient) CountByKey(ctx context.Context, id *IDataFrame
 
 // Parameters:
 //  - ID
-//  - Tp
-func (p *IDataFrameServiceClient) CountByValue(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args207 IDataFrameServiceCountByValueArgs
+//  - Zero
+//  - SeqOp
+//  - CombOp
+func (p *IDataFrameServiceClient) AggregateByKey4b(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args207 IDataFrameServiceAggregateByKey4bArgs
   _args207.ID = id
-  _args207.Tp = tp
-  var _result209 IDataFrameServiceCountByValueResult
+  _args207.Zero = zero
+  _args207.SeqOp = seqOp
+  _args207.CombOp = combOp
+  var _result209 IDataFrameServiceAggregateByKey4bResult
   var _meta208 thrift.ResponseMeta
-  _meta208, _err = p.Client_().Call(ctx, "countByValue", &_args207, &_result209)
+  _meta208, _err = p.Client_().Call(ctx, "aggregateByKey4b", &_args207, &_result209)
   p.SetLastResponseMeta_(_meta208)
   if _err != nil {
     return
@@ -2229,6 +2271,298 @@ func (p *IDataFrameServiceClient) CountByValue(ctx context.Context, id *IDataFra
   }
 
   return _result209.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - Zero
+//  - SeqOp
+//  - CombOp
+//  - NumPartitions
+func (p *IDataFrameServiceClient) AggregateByKey5(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args210 IDataFrameServiceAggregateByKey5Args
+  _args210.ID = id
+  _args210.Zero = zero
+  _args210.SeqOp = seqOp
+  _args210.CombOp = combOp
+  _args210.NumPartitions = numPartitions
+  var _result212 IDataFrameServiceAggregateByKey5Result
+  var _meta211 thrift.ResponseMeta
+  _meta211, _err = p.Client_().Call(ctx, "aggregateByKey5", &_args210, &_result212)
+  p.SetLastResponseMeta_(_meta211)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result212.Ex!= nil:
+    return _r, _result212.Ex
+  }
+
+  return _result212.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - Zero
+//  - Src
+//  - LocalFold
+func (p *IDataFrameServiceClient) FoldByKey(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, localFold bool) (_r *IDataFrameId, _err error) {
+  var _args213 IDataFrameServiceFoldByKeyArgs
+  _args213.ID = id
+  _args213.Zero = zero
+  _args213.Src = src
+  _args213.LocalFold = localFold
+  var _result215 IDataFrameServiceFoldByKeyResult
+  var _meta214 thrift.ResponseMeta
+  _meta214, _err = p.Client_().Call(ctx, "foldByKey", &_args213, &_result215)
+  p.SetLastResponseMeta_(_meta214)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result215.Ex!= nil:
+    return _r, _result215.Ex
+  }
+
+  return _result215.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - Zero
+//  - Src
+//  - NumPartitions
+//  - LocalFold
+func (p *IDataFrameServiceClient) FoldByKey5(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, numPartitions int64, localFold bool) (_r *IDataFrameId, _err error) {
+  var _args216 IDataFrameServiceFoldByKey5Args
+  _args216.ID = id
+  _args216.Zero = zero
+  _args216.Src = src
+  _args216.NumPartitions = numPartitions
+  _args216.LocalFold = localFold
+  var _result218 IDataFrameServiceFoldByKey5Result
+  var _meta217 thrift.ResponseMeta
+  _meta217, _err = p.Client_().Call(ctx, "foldByKey5", &_args216, &_result218)
+  p.SetLastResponseMeta_(_meta217)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result218.Ex!= nil:
+    return _r, _result218.Ex
+  }
+
+  return _result218.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - Ascending
+func (p *IDataFrameServiceClient) SortByKey(ctx context.Context, id *IDataFrameId, ascending bool) (_r *IDataFrameId, _err error) {
+  var _args219 IDataFrameServiceSortByKeyArgs
+  _args219.ID = id
+  _args219.Ascending = ascending
+  var _result221 IDataFrameServiceSortByKeyResult
+  var _meta220 thrift.ResponseMeta
+  _meta220, _err = p.Client_().Call(ctx, "sortByKey", &_args219, &_result221)
+  p.SetLastResponseMeta_(_meta220)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result221.Ex!= nil:
+    return _r, _result221.Ex
+  }
+
+  return _result221.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - Ascending
+//  - NumPartitions
+func (p *IDataFrameServiceClient) SortByKey3a(ctx context.Context, id *IDataFrameId, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args222 IDataFrameServiceSortByKey3aArgs
+  _args222.ID = id
+  _args222.Ascending = ascending
+  _args222.NumPartitions = numPartitions
+  var _result224 IDataFrameServiceSortByKey3aResult
+  var _meta223 thrift.ResponseMeta
+  _meta223, _err = p.Client_().Call(ctx, "sortByKey3a", &_args222, &_result224)
+  p.SetLastResponseMeta_(_meta223)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result224.Ex!= nil:
+    return _r, _result224.Ex
+  }
+
+  return _result224.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - Src
+//  - Ascending
+func (p *IDataFrameServiceClient) SortByKey3b(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool) (_r *IDataFrameId, _err error) {
+  var _args225 IDataFrameServiceSortByKey3bArgs
+  _args225.ID = id
+  _args225.Src = src
+  _args225.Ascending = ascending
+  var _result227 IDataFrameServiceSortByKey3bResult
+  var _meta226 thrift.ResponseMeta
+  _meta226, _err = p.Client_().Call(ctx, "sortByKey3b", &_args225, &_result227)
+  p.SetLastResponseMeta_(_meta226)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result227.Ex!= nil:
+    return _r, _result227.Ex
+  }
+
+  return _result227.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - Src
+//  - Ascending
+//  - NumPartitions
+func (p *IDataFrameServiceClient) SortByKey4(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args228 IDataFrameServiceSortByKey4Args
+  _args228.ID = id
+  _args228.Src = src
+  _args228.Ascending = ascending
+  _args228.NumPartitions = numPartitions
+  var _result230 IDataFrameServiceSortByKey4Result
+  var _meta229 thrift.ResponseMeta
+  _meta229, _err = p.Client_().Call(ctx, "sortByKey4", &_args228, &_result230)
+  p.SetLastResponseMeta_(_meta229)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result230.Ex!= nil:
+    return _r, _result230.Ex
+  }
+
+  return _result230.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - Tp
+func (p *IDataFrameServiceClient) Keys(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
+  var _args231 IDataFrameServiceKeysArgs
+  _args231.ID = id
+  _args231.Tp = tp
+  var _result233 IDataFrameServiceKeysResult
+  var _meta232 thrift.ResponseMeta
+  _meta232, _err = p.Client_().Call(ctx, "keys", &_args231, &_result233)
+  p.SetLastResponseMeta_(_meta232)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result233.Ex!= nil:
+    return _r, _result233.Ex
+  }
+
+  return _result233.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - Tp
+func (p *IDataFrameServiceClient) Values(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
+  var _args234 IDataFrameServiceValuesArgs
+  _args234.ID = id
+  _args234.Tp = tp
+  var _result236 IDataFrameServiceValuesResult
+  var _meta235 thrift.ResponseMeta
+  _meta235, _err = p.Client_().Call(ctx, "values", &_args234, &_result236)
+  p.SetLastResponseMeta_(_meta235)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result236.Ex!= nil:
+    return _r, _result236.Ex
+  }
+
+  return _result236.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - WithReplacement
+//  - Fractions
+//  - Seed
+func (p *IDataFrameServiceClient) SampleByKey(ctx context.Context, id *IDataFrameId, withReplacement bool, fractions *rpc.ISource, seed int32) (_r *IDataFrameId, _err error) {
+  var _args237 IDataFrameServiceSampleByKeyArgs
+  _args237.ID = id
+  _args237.WithReplacement = withReplacement
+  _args237.Fractions = fractions
+  _args237.Seed = seed
+  var _result239 IDataFrameServiceSampleByKeyResult
+  var _meta238 thrift.ResponseMeta
+  _meta238, _err = p.Client_().Call(ctx, "sampleByKey", &_args237, &_result239)
+  p.SetLastResponseMeta_(_meta238)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result239.Ex!= nil:
+    return _r, _result239.Ex
+  }
+
+  return _result239.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - Tp
+func (p *IDataFrameServiceClient) CountByKey(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
+  var _args240 IDataFrameServiceCountByKeyArgs
+  _args240.ID = id
+  _args240.Tp = tp
+  var _result242 IDataFrameServiceCountByKeyResult
+  var _meta241 thrift.ResponseMeta
+  _meta241, _err = p.Client_().Call(ctx, "countByKey", &_args240, &_result242)
+  p.SetLastResponseMeta_(_meta241)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result242.Ex!= nil:
+    return _r, _result242.Ex
+  }
+
+  return _result242.GetSuccess(), nil
+}
+
+// Parameters:
+//  - ID
+//  - Tp
+func (p *IDataFrameServiceClient) CountByValue(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
+  var _args243 IDataFrameServiceCountByValueArgs
+  _args243.ID = id
+  _args243.Tp = tp
+  var _result245 IDataFrameServiceCountByValueResult
+  var _meta244 thrift.ResponseMeta
+  _meta244, _err = p.Client_().Call(ctx, "countByValue", &_args243, &_result245)
+  p.SetLastResponseMeta_(_meta244)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result245.Ex!= nil:
+    return _r, _result245.Ex
+  }
+
+  return _result245.GetSuccess(), nil
 }
 
 type IDataFrameServiceProcessor struct {
@@ -2251,78 +2585,90 @@ func (p *IDataFrameServiceProcessor) ProcessorMap() map[string]thrift.TProcessor
 
 func NewIDataFrameServiceProcessor(handler IDataFrameService) *IDataFrameServiceProcessor {
 
-  self210 := &IDataFrameServiceProcessor{handler:handler, processorMap:make(map[string]thrift.TProcessorFunction)}
-  self210.processorMap["setName"] = &iDataFrameServiceProcessorSetName{handler:handler}
-  self210.processorMap["persist"] = &iDataFrameServiceProcessorPersist{handler:handler}
-  self210.processorMap["cache"] = &iDataFrameServiceProcessorCache{handler:handler}
-  self210.processorMap["unpersist"] = &iDataFrameServiceProcessorUnpersist{handler:handler}
-  self210.processorMap["uncache"] = &iDataFrameServiceProcessorUncache{handler:handler}
-  self210.processorMap["repartition"] = &iDataFrameServiceProcessorRepartition{handler:handler}
-  self210.processorMap["coalesce"] = &iDataFrameServiceProcessorCoalesce{handler:handler}
-  self210.processorMap["partitions"] = &iDataFrameServiceProcessorPartitions{handler:handler}
-  self210.processorMap["saveAsObjectFile"] = &iDataFrameServiceProcessorSaveAsObjectFile{handler:handler}
-  self210.processorMap["saveAsTextFile"] = &iDataFrameServiceProcessorSaveAsTextFile{handler:handler}
-  self210.processorMap["saveAsJsonFile"] = &iDataFrameServiceProcessorSaveAsJsonFile{handler:handler}
-  self210.processorMap["map_"] = &iDataFrameServiceProcessorMap_{handler:handler}
-  self210.processorMap["filter"] = &iDataFrameServiceProcessorFilter{handler:handler}
-  self210.processorMap["flatmap"] = &iDataFrameServiceProcessorFlatmap{handler:handler}
-  self210.processorMap["keyBy"] = &iDataFrameServiceProcessorKeyBy{handler:handler}
-  self210.processorMap["mapPartitions"] = &iDataFrameServiceProcessorMapPartitions{handler:handler}
-  self210.processorMap["mapPartitionsWithIndex"] = &iDataFrameServiceProcessorMapPartitionsWithIndex{handler:handler}
-  self210.processorMap["mapExecutor"] = &iDataFrameServiceProcessorMapExecutor{handler:handler}
-  self210.processorMap["mapExecutorTo"] = &iDataFrameServiceProcessorMapExecutorTo{handler:handler}
-  self210.processorMap["groupBy"] = &iDataFrameServiceProcessorGroupBy{handler:handler}
-  self210.processorMap["groupBy2"] = &iDataFrameServiceProcessorGroupBy2{handler:handler}
-  self210.processorMap["sort"] = &iDataFrameServiceProcessorSort{handler:handler}
-  self210.processorMap["sort2"] = &iDataFrameServiceProcessorSort2{handler:handler}
-  self210.processorMap["sortBy"] = &iDataFrameServiceProcessorSortBy{handler:handler}
-  self210.processorMap["sortBy3"] = &iDataFrameServiceProcessorSortBy3{handler:handler}
-  self210.processorMap["reduce"] = &iDataFrameServiceProcessorReduce{handler:handler}
-  self210.processorMap["treeReduce"] = &iDataFrameServiceProcessorTreeReduce{handler:handler}
-  self210.processorMap["collect"] = &iDataFrameServiceProcessorCollect{handler:handler}
-  self210.processorMap["aggregate"] = &iDataFrameServiceProcessorAggregate{handler:handler}
-  self210.processorMap["treeAggregate"] = &iDataFrameServiceProcessorTreeAggregate{handler:handler}
-  self210.processorMap["fold"] = &iDataFrameServiceProcessorFold{handler:handler}
-  self210.processorMap["treeFold"] = &iDataFrameServiceProcessorTreeFold{handler:handler}
-  self210.processorMap["take"] = &iDataFrameServiceProcessorTake{handler:handler}
-  self210.processorMap["foreach_"] = &iDataFrameServiceProcessorForeach_{handler:handler}
-  self210.processorMap["foreachPartition"] = &iDataFrameServiceProcessorForeachPartition{handler:handler}
-  self210.processorMap["foreachExecutor"] = &iDataFrameServiceProcessorForeachExecutor{handler:handler}
-  self210.processorMap["top"] = &iDataFrameServiceProcessorTop{handler:handler}
-  self210.processorMap["top4"] = &iDataFrameServiceProcessorTop4{handler:handler}
-  self210.processorMap["takeOrdered"] = &iDataFrameServiceProcessorTakeOrdered{handler:handler}
-  self210.processorMap["takeOrdered4"] = &iDataFrameServiceProcessorTakeOrdered4{handler:handler}
-  self210.processorMap["sample"] = &iDataFrameServiceProcessorSample{handler:handler}
-  self210.processorMap["takeSample"] = &iDataFrameServiceProcessorTakeSample{handler:handler}
-  self210.processorMap["count"] = &iDataFrameServiceProcessorCount{handler:handler}
-  self210.processorMap["max"] = &iDataFrameServiceProcessorMax{handler:handler}
-  self210.processorMap["max3"] = &iDataFrameServiceProcessorMax3{handler:handler}
-  self210.processorMap["min"] = &iDataFrameServiceProcessorMin{handler:handler}
-  self210.processorMap["min3"] = &iDataFrameServiceProcessorMin3{handler:handler}
-  self210.processorMap["flatMapValues"] = &iDataFrameServiceProcessorFlatMapValues{handler:handler}
-  self210.processorMap["mapValues"] = &iDataFrameServiceProcessorMapValues{handler:handler}
-  self210.processorMap["groupByKey"] = &iDataFrameServiceProcessorGroupByKey{handler:handler}
-  self210.processorMap["groupByKey2a"] = &iDataFrameServiceProcessorGroupByKey2a{handler:handler}
-  self210.processorMap["groupByKey2b"] = &iDataFrameServiceProcessorGroupByKey2b{handler:handler}
-  self210.processorMap["groupByKey3"] = &iDataFrameServiceProcessorGroupByKey3{handler:handler}
-  self210.processorMap["reduceByKey"] = &iDataFrameServiceProcessorReduceByKey{handler:handler}
-  self210.processorMap["reduceByKey4"] = &iDataFrameServiceProcessorReduceByKey4{handler:handler}
-  self210.processorMap["aggregateByKey"] = &iDataFrameServiceProcessorAggregateByKey{handler:handler}
-  self210.processorMap["aggregateByKey4a"] = &iDataFrameServiceProcessorAggregateByKey4a{handler:handler}
-  self210.processorMap["aggregateByKey4b"] = &iDataFrameServiceProcessorAggregateByKey4b{handler:handler}
-  self210.processorMap["aggregateByKey5"] = &iDataFrameServiceProcessorAggregateByKey5{handler:handler}
-  self210.processorMap["foldByKey"] = &iDataFrameServiceProcessorFoldByKey{handler:handler}
-  self210.processorMap["foldByKey5"] = &iDataFrameServiceProcessorFoldByKey5{handler:handler}
-  self210.processorMap["sortByKey"] = &iDataFrameServiceProcessorSortByKey{handler:handler}
-  self210.processorMap["sortByKey3a"] = &iDataFrameServiceProcessorSortByKey3a{handler:handler}
-  self210.processorMap["sortByKey3b"] = &iDataFrameServiceProcessorSortByKey3b{handler:handler}
-  self210.processorMap["sortByKey4"] = &iDataFrameServiceProcessorSortByKey4{handler:handler}
-  self210.processorMap["keys"] = &iDataFrameServiceProcessorKeys{handler:handler}
-  self210.processorMap["values"] = &iDataFrameServiceProcessorValues{handler:handler}
-  self210.processorMap["sampleByKey"] = &iDataFrameServiceProcessorSampleByKey{handler:handler}
-  self210.processorMap["countByKey"] = &iDataFrameServiceProcessorCountByKey{handler:handler}
-  self210.processorMap["countByValue"] = &iDataFrameServiceProcessorCountByValue{handler:handler}
-return self210
+  self246 := &IDataFrameServiceProcessor{handler:handler, processorMap:make(map[string]thrift.TProcessorFunction)}
+  self246.processorMap["setName"] = &iDataFrameServiceProcessorSetName{handler:handler}
+  self246.processorMap["persist"] = &iDataFrameServiceProcessorPersist{handler:handler}
+  self246.processorMap["cache"] = &iDataFrameServiceProcessorCache{handler:handler}
+  self246.processorMap["unpersist"] = &iDataFrameServiceProcessorUnpersist{handler:handler}
+  self246.processorMap["uncache"] = &iDataFrameServiceProcessorUncache{handler:handler}
+  self246.processorMap["partitions"] = &iDataFrameServiceProcessorPartitions{handler:handler}
+  self246.processorMap["saveAsObjectFile"] = &iDataFrameServiceProcessorSaveAsObjectFile{handler:handler}
+  self246.processorMap["saveAsTextFile"] = &iDataFrameServiceProcessorSaveAsTextFile{handler:handler}
+  self246.processorMap["saveAsJsonFile"] = &iDataFrameServiceProcessorSaveAsJsonFile{handler:handler}
+  self246.processorMap["repartition"] = &iDataFrameServiceProcessorRepartition{handler:handler}
+  self246.processorMap["partitionByRandom"] = &iDataFrameServiceProcessorPartitionByRandom{handler:handler}
+  self246.processorMap["partitionByHash"] = &iDataFrameServiceProcessorPartitionByHash{handler:handler}
+  self246.processorMap["partitionBy"] = &iDataFrameServiceProcessorPartitionBy{handler:handler}
+  self246.processorMap["map_"] = &iDataFrameServiceProcessorMap_{handler:handler}
+  self246.processorMap["filter"] = &iDataFrameServiceProcessorFilter{handler:handler}
+  self246.processorMap["flatmap"] = &iDataFrameServiceProcessorFlatmap{handler:handler}
+  self246.processorMap["keyBy"] = &iDataFrameServiceProcessorKeyBy{handler:handler}
+  self246.processorMap["mapPartitions"] = &iDataFrameServiceProcessorMapPartitions{handler:handler}
+  self246.processorMap["mapPartitionsWithIndex"] = &iDataFrameServiceProcessorMapPartitionsWithIndex{handler:handler}
+  self246.processorMap["mapExecutor"] = &iDataFrameServiceProcessorMapExecutor{handler:handler}
+  self246.processorMap["mapExecutorTo"] = &iDataFrameServiceProcessorMapExecutorTo{handler:handler}
+  self246.processorMap["groupBy"] = &iDataFrameServiceProcessorGroupBy{handler:handler}
+  self246.processorMap["groupBy2"] = &iDataFrameServiceProcessorGroupBy2{handler:handler}
+  self246.processorMap["sort"] = &iDataFrameServiceProcessorSort{handler:handler}
+  self246.processorMap["sort2"] = &iDataFrameServiceProcessorSort2{handler:handler}
+  self246.processorMap["sortBy"] = &iDataFrameServiceProcessorSortBy{handler:handler}
+  self246.processorMap["sortBy3"] = &iDataFrameServiceProcessorSortBy3{handler:handler}
+  self246.processorMap["union_"] = &iDataFrameServiceProcessorUnion_{handler:handler}
+  self246.processorMap["union4"] = &iDataFrameServiceProcessorUnion4{handler:handler}
+  self246.processorMap["join"] = &iDataFrameServiceProcessorJoin{handler:handler}
+  self246.processorMap["join3a"] = &iDataFrameServiceProcessorJoin3a{handler:handler}
+  self246.processorMap["join3b"] = &iDataFrameServiceProcessorJoin3b{handler:handler}
+  self246.processorMap["join4"] = &iDataFrameServiceProcessorJoin4{handler:handler}
+  self246.processorMap["distinct"] = &iDataFrameServiceProcessorDistinct{handler:handler}
+  self246.processorMap["distinct2a"] = &iDataFrameServiceProcessorDistinct2a{handler:handler}
+  self246.processorMap["distinct2b"] = &iDataFrameServiceProcessorDistinct2b{handler:handler}
+  self246.processorMap["distinct3"] = &iDataFrameServiceProcessorDistinct3{handler:handler}
+  self246.processorMap["reduce"] = &iDataFrameServiceProcessorReduce{handler:handler}
+  self246.processorMap["treeReduce"] = &iDataFrameServiceProcessorTreeReduce{handler:handler}
+  self246.processorMap["collect"] = &iDataFrameServiceProcessorCollect{handler:handler}
+  self246.processorMap["aggregate"] = &iDataFrameServiceProcessorAggregate{handler:handler}
+  self246.processorMap["treeAggregate"] = &iDataFrameServiceProcessorTreeAggregate{handler:handler}
+  self246.processorMap["fold"] = &iDataFrameServiceProcessorFold{handler:handler}
+  self246.processorMap["treeFold"] = &iDataFrameServiceProcessorTreeFold{handler:handler}
+  self246.processorMap["take"] = &iDataFrameServiceProcessorTake{handler:handler}
+  self246.processorMap["foreach_"] = &iDataFrameServiceProcessorForeach_{handler:handler}
+  self246.processorMap["foreachPartition"] = &iDataFrameServiceProcessorForeachPartition{handler:handler}
+  self246.processorMap["foreachExecutor"] = &iDataFrameServiceProcessorForeachExecutor{handler:handler}
+  self246.processorMap["top"] = &iDataFrameServiceProcessorTop{handler:handler}
+  self246.processorMap["top4"] = &iDataFrameServiceProcessorTop4{handler:handler}
+  self246.processorMap["takeOrdered"] = &iDataFrameServiceProcessorTakeOrdered{handler:handler}
+  self246.processorMap["takeOrdered4"] = &iDataFrameServiceProcessorTakeOrdered4{handler:handler}
+  self246.processorMap["sample"] = &iDataFrameServiceProcessorSample{handler:handler}
+  self246.processorMap["takeSample"] = &iDataFrameServiceProcessorTakeSample{handler:handler}
+  self246.processorMap["count"] = &iDataFrameServiceProcessorCount{handler:handler}
+  self246.processorMap["max"] = &iDataFrameServiceProcessorMax{handler:handler}
+  self246.processorMap["max3"] = &iDataFrameServiceProcessorMax3{handler:handler}
+  self246.processorMap["min"] = &iDataFrameServiceProcessorMin{handler:handler}
+  self246.processorMap["min3"] = &iDataFrameServiceProcessorMin3{handler:handler}
+  self246.processorMap["flatMapValues"] = &iDataFrameServiceProcessorFlatMapValues{handler:handler}
+  self246.processorMap["mapValues"] = &iDataFrameServiceProcessorMapValues{handler:handler}
+  self246.processorMap["groupByKey"] = &iDataFrameServiceProcessorGroupByKey{handler:handler}
+  self246.processorMap["groupByKey2a"] = &iDataFrameServiceProcessorGroupByKey2a{handler:handler}
+  self246.processorMap["groupByKey2b"] = &iDataFrameServiceProcessorGroupByKey2b{handler:handler}
+  self246.processorMap["groupByKey3"] = &iDataFrameServiceProcessorGroupByKey3{handler:handler}
+  self246.processorMap["reduceByKey"] = &iDataFrameServiceProcessorReduceByKey{handler:handler}
+  self246.processorMap["reduceByKey4"] = &iDataFrameServiceProcessorReduceByKey4{handler:handler}
+  self246.processorMap["aggregateByKey"] = &iDataFrameServiceProcessorAggregateByKey{handler:handler}
+  self246.processorMap["aggregateByKey4a"] = &iDataFrameServiceProcessorAggregateByKey4a{handler:handler}
+  self246.processorMap["aggregateByKey4b"] = &iDataFrameServiceProcessorAggregateByKey4b{handler:handler}
+  self246.processorMap["aggregateByKey5"] = &iDataFrameServiceProcessorAggregateByKey5{handler:handler}
+  self246.processorMap["foldByKey"] = &iDataFrameServiceProcessorFoldByKey{handler:handler}
+  self246.processorMap["foldByKey5"] = &iDataFrameServiceProcessorFoldByKey5{handler:handler}
+  self246.processorMap["sortByKey"] = &iDataFrameServiceProcessorSortByKey{handler:handler}
+  self246.processorMap["sortByKey3a"] = &iDataFrameServiceProcessorSortByKey3a{handler:handler}
+  self246.processorMap["sortByKey3b"] = &iDataFrameServiceProcessorSortByKey3b{handler:handler}
+  self246.processorMap["sortByKey4"] = &iDataFrameServiceProcessorSortByKey4{handler:handler}
+  self246.processorMap["keys"] = &iDataFrameServiceProcessorKeys{handler:handler}
+  self246.processorMap["values"] = &iDataFrameServiceProcessorValues{handler:handler}
+  self246.processorMap["sampleByKey"] = &iDataFrameServiceProcessorSampleByKey{handler:handler}
+  self246.processorMap["countByKey"] = &iDataFrameServiceProcessorCountByKey{handler:handler}
+  self246.processorMap["countByValue"] = &iDataFrameServiceProcessorCountByValue{handler:handler}
+return self246
 }
 
 func (p *IDataFrameServiceProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -2333,12 +2679,12 @@ func (p *IDataFrameServiceProcessor) Process(ctx context.Context, iprot, oprot t
   }
   iprot.Skip(ctx, thrift.STRUCT)
   iprot.ReadMessageEnd(ctx)
-  x211 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function " + name)
+  x247 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function " + name)
   oprot.WriteMessageBegin(ctx, name, thrift.EXCEPTION, seqId)
-  x211.Write(ctx, oprot)
+  x247.Write(ctx, oprot)
   oprot.WriteMessageEnd(ctx)
   oprot.Flush(ctx)
-  return false, x211
+  return false, x247
 
 }
 
@@ -2747,174 +3093,6 @@ func (p *iDataFrameServiceProcessorUncache) Process(ctx context.Context, seqId i
   return true, err
 }
 
-type iDataFrameServiceProcessorRepartition struct {
-  handler IDataFrameService
-}
-
-func (p *iDataFrameServiceProcessorRepartition) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
-  args := IDataFrameServiceRepartitionArgs{}
-  var err2 error
-  if err2 = args.Read(ctx, iprot); err2 != nil {
-    iprot.ReadMessageEnd(ctx)
-    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
-    oprot.WriteMessageBegin(ctx, "repartition", thrift.EXCEPTION, seqId)
-    x.Write(ctx, oprot)
-    oprot.WriteMessageEnd(ctx)
-    oprot.Flush(ctx)
-    return false, thrift.WrapTException(err2)
-  }
-  iprot.ReadMessageEnd(ctx)
-
-  tickerCancel := func() {}
-  // Start a goroutine to do server side connectivity check.
-  if thrift.ServerConnectivityCheckInterval > 0 {
-    var cancel context.CancelFunc
-    ctx, cancel = context.WithCancel(ctx)
-    defer cancel()
-    var tickerCtx context.Context
-    tickerCtx, tickerCancel = context.WithCancel(context.Background())
-    defer tickerCancel()
-    go func(ctx context.Context, cancel context.CancelFunc) {
-      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
-      defer ticker.Stop()
-      for {
-        select {
-        case <-ctx.Done():
-          return
-        case <-ticker.C:
-          if !iprot.Transport().IsOpen() {
-            cancel()
-            return
-          }
-        }
-      }
-    }(tickerCtx, cancel)
-  }
-
-  result := IDataFrameServiceRepartitionResult{}
-  var retval *IDataFrameId
-  if retval, err2 = p.handler.Repartition(ctx, args.ID, args.NumPartitions); err2 != nil {
-    tickerCancel()
-  switch v := err2.(type) {
-    case *IDriverException:
-  result.Ex = v
-    default:
-    if err2 == thrift.ErrAbandonRequest {
-      return false, thrift.WrapTException(err2)
-    }
-    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing repartition: " + err2.Error())
-    oprot.WriteMessageBegin(ctx, "repartition", thrift.EXCEPTION, seqId)
-    x.Write(ctx, oprot)
-    oprot.WriteMessageEnd(ctx)
-    oprot.Flush(ctx)
-    return true, thrift.WrapTException(err2)
-  }
-  } else {
-    result.Success = retval
-  }
-  tickerCancel()
-  if err2 = oprot.WriteMessageBegin(ctx, "repartition", thrift.REPLY, seqId); err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err != nil {
-    return
-  }
-  return true, err
-}
-
-type iDataFrameServiceProcessorCoalesce struct {
-  handler IDataFrameService
-}
-
-func (p *iDataFrameServiceProcessorCoalesce) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
-  args := IDataFrameServiceCoalesceArgs{}
-  var err2 error
-  if err2 = args.Read(ctx, iprot); err2 != nil {
-    iprot.ReadMessageEnd(ctx)
-    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
-    oprot.WriteMessageBegin(ctx, "coalesce", thrift.EXCEPTION, seqId)
-    x.Write(ctx, oprot)
-    oprot.WriteMessageEnd(ctx)
-    oprot.Flush(ctx)
-    return false, thrift.WrapTException(err2)
-  }
-  iprot.ReadMessageEnd(ctx)
-
-  tickerCancel := func() {}
-  // Start a goroutine to do server side connectivity check.
-  if thrift.ServerConnectivityCheckInterval > 0 {
-    var cancel context.CancelFunc
-    ctx, cancel = context.WithCancel(ctx)
-    defer cancel()
-    var tickerCtx context.Context
-    tickerCtx, tickerCancel = context.WithCancel(context.Background())
-    defer tickerCancel()
-    go func(ctx context.Context, cancel context.CancelFunc) {
-      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
-      defer ticker.Stop()
-      for {
-        select {
-        case <-ctx.Done():
-          return
-        case <-ticker.C:
-          if !iprot.Transport().IsOpen() {
-            cancel()
-            return
-          }
-        }
-      }
-    }(tickerCtx, cancel)
-  }
-
-  result := IDataFrameServiceCoalesceResult{}
-  var retval *IDataFrameId
-  if retval, err2 = p.handler.Coalesce(ctx, args.ID, args.NumPartitions, args.Shuffle); err2 != nil {
-    tickerCancel()
-  switch v := err2.(type) {
-    case *IDriverException:
-  result.Ex = v
-    default:
-    if err2 == thrift.ErrAbandonRequest {
-      return false, thrift.WrapTException(err2)
-    }
-    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing coalesce: " + err2.Error())
-    oprot.WriteMessageBegin(ctx, "coalesce", thrift.EXCEPTION, seqId)
-    x.Write(ctx, oprot)
-    oprot.WriteMessageEnd(ctx)
-    oprot.Flush(ctx)
-    return true, thrift.WrapTException(err2)
-  }
-  } else {
-    result.Success = retval
-  }
-  tickerCancel()
-  if err2 = oprot.WriteMessageBegin(ctx, "coalesce", thrift.REPLY, seqId); err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
-    err = thrift.WrapTException(err2)
-  }
-  if err != nil {
-    return
-  }
-  return true, err
-}
-
 type iDataFrameServiceProcessorPartitions struct {
   handler IDataFrameService
 }
@@ -3225,6 +3403,342 @@ func (p *iDataFrameServiceProcessorSaveAsJsonFile) Process(ctx context.Context, 
   }
   tickerCancel()
   if err2 = oprot.WriteMessageBegin(ctx, "saveAsJsonFile", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorRepartition struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorRepartition) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceRepartitionArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "repartition", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceRepartitionResult{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.Repartition(ctx, args.ID, args.NumPartitions, args.PreserveOrdering, args.Global_); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing repartition: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "repartition", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "repartition", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorPartitionByRandom struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorPartitionByRandom) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServicePartitionByRandomArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionByRandom", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServicePartitionByRandomResult{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.PartitionByRandom(ctx, args.ID, args.NumPartitions); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing partitionByRandom: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionByRandom", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "partitionByRandom", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorPartitionByHash struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorPartitionByHash) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServicePartitionByHashArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionByHash", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServicePartitionByHashResult{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.PartitionByHash(ctx, args.ID, args.NumPartitions); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing partitionByHash: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionByHash", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "partitionByHash", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorPartitionBy struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorPartitionBy) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServicePartitionByArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionBy", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServicePartitionByResult{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.PartitionBy(ctx, args.ID, args.Src, args.NumPartitions); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing partitionBy: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "partitionBy", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "partitionBy", thrift.REPLY, seqId); err2 != nil {
     err = thrift.WrapTException(err2)
   }
   if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
@@ -4401,6 +4915,841 @@ func (p *iDataFrameServiceProcessorSortBy3) Process(ctx context.Context, seqId i
   }
   tickerCancel()
   if err2 = oprot.WriteMessageBegin(ctx, "sortBy3", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorUnion_ struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorUnion_) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceUnion_Args{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "union_", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceUnion_Result{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.Union_(ctx, args.ID, args.Other, args.PreserveOrder); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing union_: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "union_", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "union_", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorUnion4 struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorUnion4) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceUnion4Args{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "union4", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceUnion4Result{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.Union4(ctx, args.ID, args.Other, args.PreserveOrder, args.Src); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing union4: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "union4", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "union4", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorJoin struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorJoin) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceJoinArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "join", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceJoinResult{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.Join(ctx, args.ID, args.Other); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing join: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "join", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "join", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorJoin3a struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorJoin3a) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceJoin3aArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "join3a", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceJoin3aResult{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.Join3a(ctx, args.ID, args.Other, args.NumPartitions); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing join3a: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "join3a", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "join3a", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorJoin3b struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorJoin3b) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceJoin3bArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "join3b", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceJoin3bResult{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.Join3b(ctx, args.ID, args.Other, args.Src); err2 != nil {
+    tickerCancel()
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing join3b: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "join3b", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "join3b", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorJoin4 struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorJoin4) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceJoin4Args{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "join4", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceJoin4Result{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.Join4(ctx, args.ID, args.Other, args.NumPartitions, args.Src); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing join4: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "join4", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "join4", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorDistinct struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorDistinct) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceDistinctArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceDistinctResult{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.Distinct(ctx, args.ID); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing distinct: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "distinct", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorDistinct2a struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorDistinct2a) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceDistinct2aArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct2a", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceDistinct2aResult{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.Distinct2a(ctx, args.ID, args.NumPartitions); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing distinct2a: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct2a", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "distinct2a", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorDistinct2b struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorDistinct2b) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceDistinct2bArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct2b", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceDistinct2bResult{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.Distinct2b(ctx, args.ID, args.Src); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing distinct2b: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct2b", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "distinct2b", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorDistinct3 struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorDistinct3) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceDistinct3Args{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct3", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceDistinct3Result{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.Distinct3(ctx, args.ID, args.NumPartitions, args.Src); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing distinct3: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "distinct3", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "distinct3", thrift.REPLY, seqId); err2 != nil {
     err = thrift.WrapTException(err2)
   }
   if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
@@ -9257,600 +10606,6 @@ func (p *IDataFrameServiceUncacheResult) String() string {
 
 // Attributes:
 //  - ID
-//  - NumPartitions
-type IDataFrameServiceRepartitionArgs struct {
-  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
-  NumPartitions int64 `thrift:"numPartitions,2" db:"numPartitions" json:"numPartitions"`
-}
-
-func NewIDataFrameServiceRepartitionArgs() *IDataFrameServiceRepartitionArgs {
-  return &IDataFrameServiceRepartitionArgs{}
-}
-
-var IDataFrameServiceRepartitionArgs_ID_DEFAULT *IDataFrameId
-func (p *IDataFrameServiceRepartitionArgs) GetID() *IDataFrameId {
-  if !p.IsSetID() {
-    return IDataFrameServiceRepartitionArgs_ID_DEFAULT
-  }
-return p.ID
-}
-
-func (p *IDataFrameServiceRepartitionArgs) GetNumPartitions() int64 {
-  return p.NumPartitions
-}
-func (p *IDataFrameServiceRepartitionArgs) IsSetID() bool {
-  return p.ID != nil
-}
-
-func (p *IDataFrameServiceRepartitionArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
-  if _, err := iprot.ReadStructBegin(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    switch fieldId {
-    case 1:
-      if fieldTypeId == thrift.STRUCT {
-        if err := p.ReadField1(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    case 2:
-      if fieldTypeId == thrift.I64 {
-        if err := p.ReadField2(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    default:
-      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-        return err
-      }
-    }
-    if err := iprot.ReadFieldEnd(ctx); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *IDataFrameServiceRepartitionArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
-  p.ID = &IDataFrameId{}
-  if err := p.ID.Read(ctx, iprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
-  }
-  return nil
-}
-
-func (p *IDataFrameServiceRepartitionArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
-  if v, err := iprot.ReadI64(ctx); err != nil {
-  return thrift.PrependError("error reading field 2: ", err)
-} else {
-  p.NumPartitions = v
-}
-  return nil
-}
-
-func (p *IDataFrameServiceRepartitionArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
-  if err := oprot.WriteStructBegin(ctx, "repartition_args"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if p != nil {
-    if err := p.writeField1(ctx, oprot); err != nil { return err }
-    if err := p.writeField2(ctx, oprot); err != nil { return err }
-  }
-  if err := oprot.WriteFieldStop(ctx); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(ctx); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *IDataFrameServiceRepartitionArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
-  if err := p.ID.Write(ctx, oprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
-  }
-  if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
-  return err
-}
-
-func (p *IDataFrameServiceRepartitionArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 2); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:numPartitions: ", p), err) }
-  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (2) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:numPartitions: ", p), err) }
-  return err
-}
-
-func (p *IDataFrameServiceRepartitionArgs) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-  return fmt.Sprintf("IDataFrameServiceRepartitionArgs(%+v)", *p)
-}
-
-// Attributes:
-//  - Success
-//  - Ex
-type IDataFrameServiceRepartitionResult struct {
-  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
-  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
-}
-
-func NewIDataFrameServiceRepartitionResult() *IDataFrameServiceRepartitionResult {
-  return &IDataFrameServiceRepartitionResult{}
-}
-
-var IDataFrameServiceRepartitionResult_Success_DEFAULT *IDataFrameId
-func (p *IDataFrameServiceRepartitionResult) GetSuccess() *IDataFrameId {
-  if !p.IsSetSuccess() {
-    return IDataFrameServiceRepartitionResult_Success_DEFAULT
-  }
-return p.Success
-}
-var IDataFrameServiceRepartitionResult_Ex_DEFAULT *IDriverException
-func (p *IDataFrameServiceRepartitionResult) GetEx() *IDriverException {
-  if !p.IsSetEx() {
-    return IDataFrameServiceRepartitionResult_Ex_DEFAULT
-  }
-return p.Ex
-}
-func (p *IDataFrameServiceRepartitionResult) IsSetSuccess() bool {
-  return p.Success != nil
-}
-
-func (p *IDataFrameServiceRepartitionResult) IsSetEx() bool {
-  return p.Ex != nil
-}
-
-func (p *IDataFrameServiceRepartitionResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
-  if _, err := iprot.ReadStructBegin(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    switch fieldId {
-    case 0:
-      if fieldTypeId == thrift.STRUCT {
-        if err := p.ReadField0(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    case 1:
-      if fieldTypeId == thrift.STRUCT {
-        if err := p.ReadField1(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    default:
-      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-        return err
-      }
-    }
-    if err := iprot.ReadFieldEnd(ctx); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *IDataFrameServiceRepartitionResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
-  p.Success = &IDataFrameId{}
-  if err := p.Success.Read(ctx, iprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
-  }
-  return nil
-}
-
-func (p *IDataFrameServiceRepartitionResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
-  p.Ex = &IDriverException{}
-  if err := p.Ex.Read(ctx, iprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
-  }
-  return nil
-}
-
-func (p *IDataFrameServiceRepartitionResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
-  if err := oprot.WriteStructBegin(ctx, "repartition_result"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if p != nil {
-    if err := p.writeField0(ctx, oprot); err != nil { return err }
-    if err := p.writeField1(ctx, oprot); err != nil { return err }
-  }
-  if err := oprot.WriteFieldStop(ctx); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(ctx); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *IDataFrameServiceRepartitionResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if p.IsSetSuccess() {
-    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
-    if err := p.Success.Write(ctx, oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
-    }
-    if err := oprot.WriteFieldEnd(ctx); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
-  }
-  return err
-}
-
-func (p *IDataFrameServiceRepartitionResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if p.IsSetEx() {
-    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
-    if err := p.Ex.Write(ctx, oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
-    }
-    if err := oprot.WriteFieldEnd(ctx); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
-  }
-  return err
-}
-
-func (p *IDataFrameServiceRepartitionResult) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-  return fmt.Sprintf("IDataFrameServiceRepartitionResult(%+v)", *p)
-}
-
-// Attributes:
-//  - ID
-//  - NumPartitions
-//  - Shuffle
-type IDataFrameServiceCoalesceArgs struct {
-  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
-  NumPartitions int64 `thrift:"numPartitions,2" db:"numPartitions" json:"numPartitions"`
-  Shuffle bool `thrift:"shuffle,3" db:"shuffle" json:"shuffle"`
-}
-
-func NewIDataFrameServiceCoalesceArgs() *IDataFrameServiceCoalesceArgs {
-  return &IDataFrameServiceCoalesceArgs{}
-}
-
-var IDataFrameServiceCoalesceArgs_ID_DEFAULT *IDataFrameId
-func (p *IDataFrameServiceCoalesceArgs) GetID() *IDataFrameId {
-  if !p.IsSetID() {
-    return IDataFrameServiceCoalesceArgs_ID_DEFAULT
-  }
-return p.ID
-}
-
-func (p *IDataFrameServiceCoalesceArgs) GetNumPartitions() int64 {
-  return p.NumPartitions
-}
-
-func (p *IDataFrameServiceCoalesceArgs) GetShuffle() bool {
-  return p.Shuffle
-}
-func (p *IDataFrameServiceCoalesceArgs) IsSetID() bool {
-  return p.ID != nil
-}
-
-func (p *IDataFrameServiceCoalesceArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
-  if _, err := iprot.ReadStructBegin(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    switch fieldId {
-    case 1:
-      if fieldTypeId == thrift.STRUCT {
-        if err := p.ReadField1(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    case 2:
-      if fieldTypeId == thrift.I64 {
-        if err := p.ReadField2(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    case 3:
-      if fieldTypeId == thrift.BOOL {
-        if err := p.ReadField3(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    default:
-      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-        return err
-      }
-    }
-    if err := iprot.ReadFieldEnd(ctx); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *IDataFrameServiceCoalesceArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
-  p.ID = &IDataFrameId{}
-  if err := p.ID.Read(ctx, iprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
-  }
-  return nil
-}
-
-func (p *IDataFrameServiceCoalesceArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
-  if v, err := iprot.ReadI64(ctx); err != nil {
-  return thrift.PrependError("error reading field 2: ", err)
-} else {
-  p.NumPartitions = v
-}
-  return nil
-}
-
-func (p *IDataFrameServiceCoalesceArgs)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
-  if v, err := iprot.ReadBool(ctx); err != nil {
-  return thrift.PrependError("error reading field 3: ", err)
-} else {
-  p.Shuffle = v
-}
-  return nil
-}
-
-func (p *IDataFrameServiceCoalesceArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
-  if err := oprot.WriteStructBegin(ctx, "coalesce_args"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if p != nil {
-    if err := p.writeField1(ctx, oprot); err != nil { return err }
-    if err := p.writeField2(ctx, oprot); err != nil { return err }
-    if err := p.writeField3(ctx, oprot); err != nil { return err }
-  }
-  if err := oprot.WriteFieldStop(ctx); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(ctx); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *IDataFrameServiceCoalesceArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
-  if err := p.ID.Write(ctx, oprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
-  }
-  if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
-  return err
-}
-
-func (p *IDataFrameServiceCoalesceArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 2); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:numPartitions: ", p), err) }
-  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (2) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:numPartitions: ", p), err) }
-  return err
-}
-
-func (p *IDataFrameServiceCoalesceArgs) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "shuffle", thrift.BOOL, 3); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:shuffle: ", p), err) }
-  if err := oprot.WriteBool(ctx, bool(p.Shuffle)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.shuffle (3) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:shuffle: ", p), err) }
-  return err
-}
-
-func (p *IDataFrameServiceCoalesceArgs) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-  return fmt.Sprintf("IDataFrameServiceCoalesceArgs(%+v)", *p)
-}
-
-// Attributes:
-//  - Success
-//  - Ex
-type IDataFrameServiceCoalesceResult struct {
-  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
-  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
-}
-
-func NewIDataFrameServiceCoalesceResult() *IDataFrameServiceCoalesceResult {
-  return &IDataFrameServiceCoalesceResult{}
-}
-
-var IDataFrameServiceCoalesceResult_Success_DEFAULT *IDataFrameId
-func (p *IDataFrameServiceCoalesceResult) GetSuccess() *IDataFrameId {
-  if !p.IsSetSuccess() {
-    return IDataFrameServiceCoalesceResult_Success_DEFAULT
-  }
-return p.Success
-}
-var IDataFrameServiceCoalesceResult_Ex_DEFAULT *IDriverException
-func (p *IDataFrameServiceCoalesceResult) GetEx() *IDriverException {
-  if !p.IsSetEx() {
-    return IDataFrameServiceCoalesceResult_Ex_DEFAULT
-  }
-return p.Ex
-}
-func (p *IDataFrameServiceCoalesceResult) IsSetSuccess() bool {
-  return p.Success != nil
-}
-
-func (p *IDataFrameServiceCoalesceResult) IsSetEx() bool {
-  return p.Ex != nil
-}
-
-func (p *IDataFrameServiceCoalesceResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
-  if _, err := iprot.ReadStructBegin(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    switch fieldId {
-    case 0:
-      if fieldTypeId == thrift.STRUCT {
-        if err := p.ReadField0(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    case 1:
-      if fieldTypeId == thrift.STRUCT {
-        if err := p.ReadField1(ctx, iprot); err != nil {
-          return err
-        }
-      } else {
-        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-          return err
-        }
-      }
-    default:
-      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
-        return err
-      }
-    }
-    if err := iprot.ReadFieldEnd(ctx); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(ctx); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *IDataFrameServiceCoalesceResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
-  p.Success = &IDataFrameId{}
-  if err := p.Success.Read(ctx, iprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
-  }
-  return nil
-}
-
-func (p *IDataFrameServiceCoalesceResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
-  p.Ex = &IDriverException{}
-  if err := p.Ex.Read(ctx, iprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
-  }
-  return nil
-}
-
-func (p *IDataFrameServiceCoalesceResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
-  if err := oprot.WriteStructBegin(ctx, "coalesce_result"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if p != nil {
-    if err := p.writeField0(ctx, oprot); err != nil { return err }
-    if err := p.writeField1(ctx, oprot); err != nil { return err }
-  }
-  if err := oprot.WriteFieldStop(ctx); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(ctx); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *IDataFrameServiceCoalesceResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if p.IsSetSuccess() {
-    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
-    if err := p.Success.Write(ctx, oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
-    }
-    if err := oprot.WriteFieldEnd(ctx); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
-  }
-  return err
-}
-
-func (p *IDataFrameServiceCoalesceResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if p.IsSetEx() {
-    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
-    if err := p.Ex.Write(ctx, oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
-    }
-    if err := oprot.WriteFieldEnd(ctx); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
-  }
-  return err
-}
-
-func (p *IDataFrameServiceCoalesceResult) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-  return fmt.Sprintf("IDataFrameServiceCoalesceResult(%+v)", *p)
-}
-
-// Attributes:
-//  - ID
 type IDataFrameServicePartitionsArgs struct {
   ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
 }
@@ -10865,6 +11620,1240 @@ func (p *IDataFrameServiceSaveAsJsonFileResult) String() string {
     return "<nil>"
   }
   return fmt.Sprintf("IDataFrameServiceSaveAsJsonFileResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - NumPartitions
+//  - PreserveOrdering
+//  - Global_
+type IDataFrameServiceRepartitionArgs struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  NumPartitions int64 `thrift:"numPartitions,2" db:"numPartitions" json:"numPartitions"`
+  PreserveOrdering bool `thrift:"preserveOrdering,3" db:"preserveOrdering" json:"preserveOrdering"`
+  Global_ bool `thrift:"global_,4" db:"global_" json:"global_"`
+}
+
+func NewIDataFrameServiceRepartitionArgs() *IDataFrameServiceRepartitionArgs {
+  return &IDataFrameServiceRepartitionArgs{}
+}
+
+var IDataFrameServiceRepartitionArgs_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceRepartitionArgs) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceRepartitionArgs_ID_DEFAULT
+  }
+return p.ID
+}
+
+func (p *IDataFrameServiceRepartitionArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+
+func (p *IDataFrameServiceRepartitionArgs) GetPreserveOrdering() bool {
+  return p.PreserveOrdering
+}
+
+func (p *IDataFrameServiceRepartitionArgs) GetGlobal_() bool {
+  return p.Global_
+}
+func (p *IDataFrameServiceRepartitionArgs) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceRepartitionArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.BOOL {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 4:
+      if fieldTypeId == thrift.BOOL {
+        if err := p.ReadField4(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceRepartitionArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceRepartitionArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IDataFrameServiceRepartitionArgs)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadBool(ctx); err != nil {
+  return thrift.PrependError("error reading field 3: ", err)
+} else {
+  p.PreserveOrdering = v
+}
+  return nil
+}
+
+func (p *IDataFrameServiceRepartitionArgs)  ReadField4(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadBool(ctx); err != nil {
+  return thrift.PrependError("error reading field 4: ", err)
+} else {
+  p.Global_ = v
+}
+  return nil
+}
+
+func (p *IDataFrameServiceRepartitionArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "repartition_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+    if err := p.writeField4(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceRepartitionArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceRepartitionArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceRepartitionArgs) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "preserveOrdering", thrift.BOOL, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:preserveOrdering: ", p), err) }
+  if err := oprot.WriteBool(ctx, bool(p.PreserveOrdering)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.preserveOrdering (3) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:preserveOrdering: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceRepartitionArgs) writeField4(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "global_", thrift.BOOL, 4); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:global_: ", p), err) }
+  if err := oprot.WriteBool(ctx, bool(p.Global_)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.global_ (4) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 4:global_: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceRepartitionArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceRepartitionArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServiceRepartitionResult struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServiceRepartitionResult() *IDataFrameServiceRepartitionResult {
+  return &IDataFrameServiceRepartitionResult{}
+}
+
+var IDataFrameServiceRepartitionResult_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceRepartitionResult) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceRepartitionResult_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServiceRepartitionResult_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServiceRepartitionResult) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServiceRepartitionResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServiceRepartitionResult) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceRepartitionResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServiceRepartitionResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceRepartitionResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceRepartitionResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceRepartitionResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "repartition_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceRepartitionResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceRepartitionResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceRepartitionResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceRepartitionResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - NumPartitions
+type IDataFrameServicePartitionByRandomArgs struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  NumPartitions int64 `thrift:"numPartitions,2" db:"numPartitions" json:"numPartitions"`
+}
+
+func NewIDataFrameServicePartitionByRandomArgs() *IDataFrameServicePartitionByRandomArgs {
+  return &IDataFrameServicePartitionByRandomArgs{}
+}
+
+var IDataFrameServicePartitionByRandomArgs_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServicePartitionByRandomArgs) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServicePartitionByRandomArgs_ID_DEFAULT
+  }
+return p.ID
+}
+
+func (p *IDataFrameServicePartitionByRandomArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+func (p *IDataFrameServicePartitionByRandomArgs) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServicePartitionByRandomArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByRandomArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByRandomArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByRandomArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionByRandom_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByRandomArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByRandomArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByRandomArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServicePartitionByRandomArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServicePartitionByRandomResult struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServicePartitionByRandomResult() *IDataFrameServicePartitionByRandomResult {
+  return &IDataFrameServicePartitionByRandomResult{}
+}
+
+var IDataFrameServicePartitionByRandomResult_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServicePartitionByRandomResult) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServicePartitionByRandomResult_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServicePartitionByRandomResult_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServicePartitionByRandomResult) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServicePartitionByRandomResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServicePartitionByRandomResult) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServicePartitionByRandomResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServicePartitionByRandomResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByRandomResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByRandomResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByRandomResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionByRandom_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByRandomResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByRandomResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByRandomResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServicePartitionByRandomResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - NumPartitions
+type IDataFrameServicePartitionByHashArgs struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  NumPartitions int64 `thrift:"numPartitions,2" db:"numPartitions" json:"numPartitions"`
+}
+
+func NewIDataFrameServicePartitionByHashArgs() *IDataFrameServicePartitionByHashArgs {
+  return &IDataFrameServicePartitionByHashArgs{}
+}
+
+var IDataFrameServicePartitionByHashArgs_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServicePartitionByHashArgs) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServicePartitionByHashArgs_ID_DEFAULT
+  }
+return p.ID
+}
+
+func (p *IDataFrameServicePartitionByHashArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+func (p *IDataFrameServicePartitionByHashArgs) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServicePartitionByHashArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByHashArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByHashArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByHashArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionByHash_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByHashArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByHashArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByHashArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServicePartitionByHashArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServicePartitionByHashResult struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServicePartitionByHashResult() *IDataFrameServicePartitionByHashResult {
+  return &IDataFrameServicePartitionByHashResult{}
+}
+
+var IDataFrameServicePartitionByHashResult_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServicePartitionByHashResult) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServicePartitionByHashResult_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServicePartitionByHashResult_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServicePartitionByHashResult) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServicePartitionByHashResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServicePartitionByHashResult) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServicePartitionByHashResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServicePartitionByHashResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByHashResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByHashResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByHashResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionByHash_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByHashResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByHashResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByHashResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServicePartitionByHashResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - Src
+//  - NumPartitions
+type IDataFrameServicePartitionByArgs struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  Src *rpc.ISource `thrift:"src,2" db:"src" json:"src"`
+  NumPartitions int64 `thrift:"numPartitions,3" db:"numPartitions" json:"numPartitions"`
+}
+
+func NewIDataFrameServicePartitionByArgs() *IDataFrameServicePartitionByArgs {
+  return &IDataFrameServicePartitionByArgs{}
+}
+
+var IDataFrameServicePartitionByArgs_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServicePartitionByArgs) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServicePartitionByArgs_ID_DEFAULT
+  }
+return p.ID
+}
+var IDataFrameServicePartitionByArgs_Src_DEFAULT *rpc.ISource
+func (p *IDataFrameServicePartitionByArgs) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IDataFrameServicePartitionByArgs_Src_DEFAULT
+  }
+return p.Src
+}
+
+func (p *IDataFrameServicePartitionByArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+func (p *IDataFrameServicePartitionByArgs) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServicePartitionByArgs) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IDataFrameServicePartitionByArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByArgs)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 3: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionBy_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:src: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByArgs) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (3) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServicePartitionByArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServicePartitionByResult struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServicePartitionByResult() *IDataFrameServicePartitionByResult {
+  return &IDataFrameServicePartitionByResult{}
+}
+
+var IDataFrameServicePartitionByResult_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServicePartitionByResult) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServicePartitionByResult_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServicePartitionByResult_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServicePartitionByResult) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServicePartitionByResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServicePartitionByResult) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServicePartitionByResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServicePartitionByResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "partitionBy_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServicePartitionByResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServicePartitionByResult(%+v)", *p)
 }
 
 // Attributes:
@@ -15143,6 +17132,3095 @@ func (p *IDataFrameServiceSortBy3Result) String() string {
     return "<nil>"
   }
   return fmt.Sprintf("IDataFrameServiceSortBy3Result(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - Other
+//  - PreserveOrder
+type IDataFrameServiceUnion_Args struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  Other *IDataFrameId `thrift:"other,2" db:"other" json:"other"`
+  PreserveOrder bool `thrift:"preserveOrder,3" db:"preserveOrder" json:"preserveOrder"`
+}
+
+func NewIDataFrameServiceUnion_Args() *IDataFrameServiceUnion_Args {
+  return &IDataFrameServiceUnion_Args{}
+}
+
+var IDataFrameServiceUnion_Args_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceUnion_Args) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceUnion_Args_ID_DEFAULT
+  }
+return p.ID
+}
+var IDataFrameServiceUnion_Args_Other_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceUnion_Args) GetOther() *IDataFrameId {
+  if !p.IsSetOther() {
+    return IDataFrameServiceUnion_Args_Other_DEFAULT
+  }
+return p.Other
+}
+
+func (p *IDataFrameServiceUnion_Args) GetPreserveOrder() bool {
+  return p.PreserveOrder
+}
+func (p *IDataFrameServiceUnion_Args) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceUnion_Args) IsSetOther() bool {
+  return p.Other != nil
+}
+
+func (p *IDataFrameServiceUnion_Args) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.BOOL {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion_Args)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion_Args)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Other = &IDataFrameId{}
+  if err := p.Other.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Other), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion_Args)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadBool(ctx); err != nil {
+  return thrift.PrependError("error reading field 3: ", err)
+} else {
+  p.PreserveOrder = v
+}
+  return nil
+}
+
+func (p *IDataFrameServiceUnion_Args) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "union__args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion_Args) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceUnion_Args) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "other", thrift.STRUCT, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:other: ", p), err) }
+  if err := p.Other.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Other), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:other: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceUnion_Args) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "preserveOrder", thrift.BOOL, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:preserveOrder: ", p), err) }
+  if err := oprot.WriteBool(ctx, bool(p.PreserveOrder)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.preserveOrder (3) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:preserveOrder: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceUnion_Args) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceUnion_Args(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServiceUnion_Result struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServiceUnion_Result() *IDataFrameServiceUnion_Result {
+  return &IDataFrameServiceUnion_Result{}
+}
+
+var IDataFrameServiceUnion_Result_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceUnion_Result) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceUnion_Result_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServiceUnion_Result_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServiceUnion_Result) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServiceUnion_Result_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServiceUnion_Result) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceUnion_Result) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServiceUnion_Result) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion_Result)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion_Result)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion_Result) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "union__result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion_Result) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceUnion_Result) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceUnion_Result) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceUnion_Result(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - Other
+//  - PreserveOrder
+//  - Src
+type IDataFrameServiceUnion4Args struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  Other *IDataFrameId `thrift:"other,2" db:"other" json:"other"`
+  PreserveOrder bool `thrift:"preserveOrder,3" db:"preserveOrder" json:"preserveOrder"`
+  Src *rpc.ISource `thrift:"src,4" db:"src" json:"src"`
+}
+
+func NewIDataFrameServiceUnion4Args() *IDataFrameServiceUnion4Args {
+  return &IDataFrameServiceUnion4Args{}
+}
+
+var IDataFrameServiceUnion4Args_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceUnion4Args) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceUnion4Args_ID_DEFAULT
+  }
+return p.ID
+}
+var IDataFrameServiceUnion4Args_Other_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceUnion4Args) GetOther() *IDataFrameId {
+  if !p.IsSetOther() {
+    return IDataFrameServiceUnion4Args_Other_DEFAULT
+  }
+return p.Other
+}
+
+func (p *IDataFrameServiceUnion4Args) GetPreserveOrder() bool {
+  return p.PreserveOrder
+}
+var IDataFrameServiceUnion4Args_Src_DEFAULT *rpc.ISource
+func (p *IDataFrameServiceUnion4Args) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IDataFrameServiceUnion4Args_Src_DEFAULT
+  }
+return p.Src
+}
+func (p *IDataFrameServiceUnion4Args) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceUnion4Args) IsSetOther() bool {
+  return p.Other != nil
+}
+
+func (p *IDataFrameServiceUnion4Args) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IDataFrameServiceUnion4Args) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.BOOL {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 4:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField4(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion4Args)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion4Args)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Other = &IDataFrameId{}
+  if err := p.Other.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Other), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion4Args)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadBool(ctx); err != nil {
+  return thrift.PrependError("error reading field 3: ", err)
+} else {
+  p.PreserveOrder = v
+}
+  return nil
+}
+
+func (p *IDataFrameServiceUnion4Args)  ReadField4(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion4Args) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "union4_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+    if err := p.writeField4(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion4Args) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceUnion4Args) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "other", thrift.STRUCT, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:other: ", p), err) }
+  if err := p.Other.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Other), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:other: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceUnion4Args) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "preserveOrder", thrift.BOOL, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:preserveOrder: ", p), err) }
+  if err := oprot.WriteBool(ctx, bool(p.PreserveOrder)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.preserveOrder (3) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:preserveOrder: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceUnion4Args) writeField4(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 4); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 4:src: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceUnion4Args) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceUnion4Args(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServiceUnion4Result struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServiceUnion4Result() *IDataFrameServiceUnion4Result {
+  return &IDataFrameServiceUnion4Result{}
+}
+
+var IDataFrameServiceUnion4Result_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceUnion4Result) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceUnion4Result_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServiceUnion4Result_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServiceUnion4Result) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServiceUnion4Result_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServiceUnion4Result) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceUnion4Result) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServiceUnion4Result) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion4Result)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion4Result)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion4Result) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "union4_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceUnion4Result) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceUnion4Result) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceUnion4Result) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceUnion4Result(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - Other
+type IDataFrameServiceJoinArgs struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  Other *IDataFrameId `thrift:"other,2" db:"other" json:"other"`
+}
+
+func NewIDataFrameServiceJoinArgs() *IDataFrameServiceJoinArgs {
+  return &IDataFrameServiceJoinArgs{}
+}
+
+var IDataFrameServiceJoinArgs_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoinArgs) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceJoinArgs_ID_DEFAULT
+  }
+return p.ID
+}
+var IDataFrameServiceJoinArgs_Other_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoinArgs) GetOther() *IDataFrameId {
+  if !p.IsSetOther() {
+    return IDataFrameServiceJoinArgs_Other_DEFAULT
+  }
+return p.Other
+}
+func (p *IDataFrameServiceJoinArgs) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceJoinArgs) IsSetOther() bool {
+  return p.Other != nil
+}
+
+func (p *IDataFrameServiceJoinArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoinArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoinArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Other = &IDataFrameId{}
+  if err := p.Other.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Other), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoinArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceJoinArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoinArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "other", thrift.STRUCT, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:other: ", p), err) }
+  if err := p.Other.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Other), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:other: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoinArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceJoinArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServiceJoinResult struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServiceJoinResult() *IDataFrameServiceJoinResult {
+  return &IDataFrameServiceJoinResult{}
+}
+
+var IDataFrameServiceJoinResult_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoinResult) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceJoinResult_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServiceJoinResult_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServiceJoinResult) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServiceJoinResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServiceJoinResult) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceJoinResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServiceJoinResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoinResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoinResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoinResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceJoinResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceJoinResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceJoinResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceJoinResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - Other
+//  - NumPartitions
+type IDataFrameServiceJoin3aArgs struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  Other *IDataFrameId `thrift:"other,2" db:"other" json:"other"`
+  NumPartitions int64 `thrift:"numPartitions,3" db:"numPartitions" json:"numPartitions"`
+}
+
+func NewIDataFrameServiceJoin3aArgs() *IDataFrameServiceJoin3aArgs {
+  return &IDataFrameServiceJoin3aArgs{}
+}
+
+var IDataFrameServiceJoin3aArgs_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoin3aArgs) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceJoin3aArgs_ID_DEFAULT
+  }
+return p.ID
+}
+var IDataFrameServiceJoin3aArgs_Other_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoin3aArgs) GetOther() *IDataFrameId {
+  if !p.IsSetOther() {
+    return IDataFrameServiceJoin3aArgs_Other_DEFAULT
+  }
+return p.Other
+}
+
+func (p *IDataFrameServiceJoin3aArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+func (p *IDataFrameServiceJoin3aArgs) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceJoin3aArgs) IsSetOther() bool {
+  return p.Other != nil
+}
+
+func (p *IDataFrameServiceJoin3aArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3aArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3aArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Other = &IDataFrameId{}
+  if err := p.Other.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Other), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3aArgs)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 3: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3aArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join3a_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3aArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoin3aArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "other", thrift.STRUCT, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:other: ", p), err) }
+  if err := p.Other.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Other), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:other: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoin3aArgs) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (3) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoin3aArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceJoin3aArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServiceJoin3aResult struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServiceJoin3aResult() *IDataFrameServiceJoin3aResult {
+  return &IDataFrameServiceJoin3aResult{}
+}
+
+var IDataFrameServiceJoin3aResult_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoin3aResult) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceJoin3aResult_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServiceJoin3aResult_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServiceJoin3aResult) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServiceJoin3aResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServiceJoin3aResult) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceJoin3aResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServiceJoin3aResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3aResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3aResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3aResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join3a_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3aResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceJoin3aResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceJoin3aResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceJoin3aResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - Other
+//  - Src
+type IDataFrameServiceJoin3bArgs struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  Other *IDataFrameId `thrift:"other,2" db:"other" json:"other"`
+  Src *rpc.ISource `thrift:"src,3" db:"src" json:"src"`
+}
+
+func NewIDataFrameServiceJoin3bArgs() *IDataFrameServiceJoin3bArgs {
+  return &IDataFrameServiceJoin3bArgs{}
+}
+
+var IDataFrameServiceJoin3bArgs_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoin3bArgs) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceJoin3bArgs_ID_DEFAULT
+  }
+return p.ID
+}
+var IDataFrameServiceJoin3bArgs_Other_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoin3bArgs) GetOther() *IDataFrameId {
+  if !p.IsSetOther() {
+    return IDataFrameServiceJoin3bArgs_Other_DEFAULT
+  }
+return p.Other
+}
+var IDataFrameServiceJoin3bArgs_Src_DEFAULT *rpc.ISource
+func (p *IDataFrameServiceJoin3bArgs) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IDataFrameServiceJoin3bArgs_Src_DEFAULT
+  }
+return p.Src
+}
+func (p *IDataFrameServiceJoin3bArgs) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceJoin3bArgs) IsSetOther() bool {
+  return p.Other != nil
+}
+
+func (p *IDataFrameServiceJoin3bArgs) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IDataFrameServiceJoin3bArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3bArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3bArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Other = &IDataFrameId{}
+  if err := p.Other.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Other), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3bArgs)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3bArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join3b_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3bArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoin3bArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "other", thrift.STRUCT, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:other: ", p), err) }
+  if err := p.Other.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Other), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:other: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoin3bArgs) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:src: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoin3bArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceJoin3bArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+type IDataFrameServiceJoin3bResult struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+}
+
+func NewIDataFrameServiceJoin3bResult() *IDataFrameServiceJoin3bResult {
+  return &IDataFrameServiceJoin3bResult{}
+}
+
+var IDataFrameServiceJoin3bResult_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoin3bResult) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceJoin3bResult_Success_DEFAULT
+  }
+return p.Success
+}
+func (p *IDataFrameServiceJoin3bResult) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceJoin3bResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3bResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3bResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join3b_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin3bResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceJoin3bResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceJoin3bResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - Other
+//  - NumPartitions
+//  - Src
+type IDataFrameServiceJoin4Args struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  Other *IDataFrameId `thrift:"other,2" db:"other" json:"other"`
+  NumPartitions int64 `thrift:"numPartitions,3" db:"numPartitions" json:"numPartitions"`
+  Src *rpc.ISource `thrift:"src,4" db:"src" json:"src"`
+}
+
+func NewIDataFrameServiceJoin4Args() *IDataFrameServiceJoin4Args {
+  return &IDataFrameServiceJoin4Args{}
+}
+
+var IDataFrameServiceJoin4Args_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoin4Args) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceJoin4Args_ID_DEFAULT
+  }
+return p.ID
+}
+var IDataFrameServiceJoin4Args_Other_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoin4Args) GetOther() *IDataFrameId {
+  if !p.IsSetOther() {
+    return IDataFrameServiceJoin4Args_Other_DEFAULT
+  }
+return p.Other
+}
+
+func (p *IDataFrameServiceJoin4Args) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+var IDataFrameServiceJoin4Args_Src_DEFAULT *rpc.ISource
+func (p *IDataFrameServiceJoin4Args) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IDataFrameServiceJoin4Args_Src_DEFAULT
+  }
+return p.Src
+}
+func (p *IDataFrameServiceJoin4Args) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceJoin4Args) IsSetOther() bool {
+  return p.Other != nil
+}
+
+func (p *IDataFrameServiceJoin4Args) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IDataFrameServiceJoin4Args) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 4:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField4(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin4Args)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin4Args)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Other = &IDataFrameId{}
+  if err := p.Other.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Other), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin4Args)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 3: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IDataFrameServiceJoin4Args)  ReadField4(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin4Args) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join4_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+    if err := p.writeField4(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin4Args) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoin4Args) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "other", thrift.STRUCT, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:other: ", p), err) }
+  if err := p.Other.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Other), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:other: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoin4Args) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (3) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoin4Args) writeField4(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 4); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 4:src: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceJoin4Args) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceJoin4Args(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServiceJoin4Result struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServiceJoin4Result() *IDataFrameServiceJoin4Result {
+  return &IDataFrameServiceJoin4Result{}
+}
+
+var IDataFrameServiceJoin4Result_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceJoin4Result) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceJoin4Result_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServiceJoin4Result_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServiceJoin4Result) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServiceJoin4Result_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServiceJoin4Result) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceJoin4Result) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServiceJoin4Result) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin4Result)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin4Result)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin4Result) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "join4_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceJoin4Result) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceJoin4Result) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceJoin4Result) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceJoin4Result(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+type IDataFrameServiceDistinctArgs struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+}
+
+func NewIDataFrameServiceDistinctArgs() *IDataFrameServiceDistinctArgs {
+  return &IDataFrameServiceDistinctArgs{}
+}
+
+var IDataFrameServiceDistinctArgs_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceDistinctArgs) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceDistinctArgs_ID_DEFAULT
+  }
+return p.ID
+}
+func (p *IDataFrameServiceDistinctArgs) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceDistinctArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinctArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinctArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinctArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceDistinctArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceDistinctArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServiceDistinctResult struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServiceDistinctResult() *IDataFrameServiceDistinctResult {
+  return &IDataFrameServiceDistinctResult{}
+}
+
+var IDataFrameServiceDistinctResult_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceDistinctResult) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceDistinctResult_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServiceDistinctResult_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServiceDistinctResult) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServiceDistinctResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServiceDistinctResult) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceDistinctResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServiceDistinctResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinctResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinctResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinctResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinctResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceDistinctResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceDistinctResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceDistinctResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - NumPartitions
+type IDataFrameServiceDistinct2aArgs struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  NumPartitions int64 `thrift:"numPartitions,2" db:"numPartitions" json:"numPartitions"`
+}
+
+func NewIDataFrameServiceDistinct2aArgs() *IDataFrameServiceDistinct2aArgs {
+  return &IDataFrameServiceDistinct2aArgs{}
+}
+
+var IDataFrameServiceDistinct2aArgs_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceDistinct2aArgs) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceDistinct2aArgs_ID_DEFAULT
+  }
+return p.ID
+}
+
+func (p *IDataFrameServiceDistinct2aArgs) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+func (p *IDataFrameServiceDistinct2aArgs) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceDistinct2aArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2aArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2aArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2aArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct2a_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2aArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct2aArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct2aArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceDistinct2aArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServiceDistinct2aResult struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServiceDistinct2aResult() *IDataFrameServiceDistinct2aResult {
+  return &IDataFrameServiceDistinct2aResult{}
+}
+
+var IDataFrameServiceDistinct2aResult_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceDistinct2aResult) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceDistinct2aResult_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServiceDistinct2aResult_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServiceDistinct2aResult) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServiceDistinct2aResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServiceDistinct2aResult) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceDistinct2aResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServiceDistinct2aResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2aResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2aResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2aResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct2a_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2aResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct2aResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct2aResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceDistinct2aResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - Src
+type IDataFrameServiceDistinct2bArgs struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  Src *rpc.ISource `thrift:"src,2" db:"src" json:"src"`
+}
+
+func NewIDataFrameServiceDistinct2bArgs() *IDataFrameServiceDistinct2bArgs {
+  return &IDataFrameServiceDistinct2bArgs{}
+}
+
+var IDataFrameServiceDistinct2bArgs_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceDistinct2bArgs) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceDistinct2bArgs_ID_DEFAULT
+  }
+return p.ID
+}
+var IDataFrameServiceDistinct2bArgs_Src_DEFAULT *rpc.ISource
+func (p *IDataFrameServiceDistinct2bArgs) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IDataFrameServiceDistinct2bArgs_Src_DEFAULT
+  }
+return p.Src
+}
+func (p *IDataFrameServiceDistinct2bArgs) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceDistinct2bArgs) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IDataFrameServiceDistinct2bArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2bArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2bArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2bArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct2b_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2bArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct2bArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:src: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct2bArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceDistinct2bArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServiceDistinct2bResult struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServiceDistinct2bResult() *IDataFrameServiceDistinct2bResult {
+  return &IDataFrameServiceDistinct2bResult{}
+}
+
+var IDataFrameServiceDistinct2bResult_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceDistinct2bResult) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceDistinct2bResult_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServiceDistinct2bResult_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServiceDistinct2bResult) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServiceDistinct2bResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServiceDistinct2bResult) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceDistinct2bResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServiceDistinct2bResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2bResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2bResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2bResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct2b_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct2bResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct2bResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct2bResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceDistinct2bResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - NumPartitions
+//  - Src
+type IDataFrameServiceDistinct3Args struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  NumPartitions int64 `thrift:"numPartitions,2" db:"numPartitions" json:"numPartitions"`
+  Src *rpc.ISource `thrift:"src,3" db:"src" json:"src"`
+}
+
+func NewIDataFrameServiceDistinct3Args() *IDataFrameServiceDistinct3Args {
+  return &IDataFrameServiceDistinct3Args{}
+}
+
+var IDataFrameServiceDistinct3Args_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceDistinct3Args) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceDistinct3Args_ID_DEFAULT
+  }
+return p.ID
+}
+
+func (p *IDataFrameServiceDistinct3Args) GetNumPartitions() int64 {
+  return p.NumPartitions
+}
+var IDataFrameServiceDistinct3Args_Src_DEFAULT *rpc.ISource
+func (p *IDataFrameServiceDistinct3Args) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IDataFrameServiceDistinct3Args_Src_DEFAULT
+  }
+return p.Src
+}
+func (p *IDataFrameServiceDistinct3Args) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceDistinct3Args) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IDataFrameServiceDistinct3Args) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.I64 {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField3(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct3Args)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct3Args)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI64(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.NumPartitions = v
+}
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct3Args)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct3Args) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct3_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct3Args) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct3Args) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "numPartitions", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:numPartitions: ", p), err) }
+  if err := oprot.WriteI64(ctx, int64(p.NumPartitions)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numPartitions (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct3Args) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:src: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct3Args) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceDistinct3Args(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServiceDistinct3Result struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServiceDistinct3Result() *IDataFrameServiceDistinct3Result {
+  return &IDataFrameServiceDistinct3Result{}
+}
+
+var IDataFrameServiceDistinct3Result_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceDistinct3Result) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceDistinct3Result_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServiceDistinct3Result_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServiceDistinct3Result) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServiceDistinct3Result_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServiceDistinct3Result) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceDistinct3Result) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServiceDistinct3Result) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct3Result)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct3Result)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct3Result) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "distinct3_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceDistinct3Result) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct3Result) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceDistinct3Result) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceDistinct3Result(%+v)", *p)
 }
 
 // Attributes:

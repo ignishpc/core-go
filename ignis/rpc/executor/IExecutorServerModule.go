@@ -23,7 +23,8 @@ var _ = rpc.GoUnusedProtection__
 type IExecutorServerModule interface {
   // Parameters:
   //  - Properties
-  Start(ctx context.Context, properties map[string]string) (_err error)
+  //  - Env
+  Start(ctx context.Context, properties map[string]string, env map[string]string) (_err error)
   Stop(ctx context.Context) (_err error)
   Test(ctx context.Context) (_r bool, _err error)
 }
@@ -65,9 +66,11 @@ func (p *IExecutorServerModuleClient) SetLastResponseMeta_(meta thrift.ResponseM
 
 // Parameters:
 //  - Properties
-func (p *IExecutorServerModuleClient) Start(ctx context.Context, properties map[string]string) (_err error) {
+//  - Env
+func (p *IExecutorServerModuleClient) Start(ctx context.Context, properties map[string]string, env map[string]string) (_err error) {
   var _args0 IExecutorServerModuleStartArgs
   _args0.Properties = properties
+  _args0.Env = env
   var _result2 IExecutorServerModuleStartResult
   var _meta1 thrift.ResponseMeta
   _meta1, _err = p.Client_().Call(ctx, "start", &_args0, &_result2)
@@ -206,7 +209,7 @@ func (p *iExecutorServerModuleProcessorStart) Process(ctx context.Context, seqId
   }
 
   result := IExecutorServerModuleStartResult{}
-  if err2 = p.handler.Start(ctx, args.Properties); err2 != nil {
+  if err2 = p.handler.Start(ctx, args.Properties, args.Env); err2 != nil {
     tickerCancel()
   switch v := err2.(type) {
     case *rpc.IExecutorException:
@@ -412,8 +415,10 @@ func (p *iExecutorServerModuleProcessorTest) Process(ctx context.Context, seqId 
 
 // Attributes:
 //  - Properties
+//  - Env
 type IExecutorServerModuleStartArgs struct {
   Properties map[string]string `thrift:"properties,1" db:"properties" json:"properties"`
+  Env map[string]string `thrift:"env,2" db:"env" json:"env"`
 }
 
 func NewIExecutorServerModuleStartArgs() *IExecutorServerModuleStartArgs {
@@ -423,6 +428,10 @@ func NewIExecutorServerModuleStartArgs() *IExecutorServerModuleStartArgs {
 
 func (p *IExecutorServerModuleStartArgs) GetProperties() map[string]string {
   return p.Properties
+}
+
+func (p *IExecutorServerModuleStartArgs) GetEnv() map[string]string {
+  return p.Env
 }
 func (p *IExecutorServerModuleStartArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
   if _, err := iprot.ReadStructBegin(ctx); err != nil {
@@ -440,6 +449,16 @@ func (p *IExecutorServerModuleStartArgs) Read(ctx context.Context, iprot thrift.
     case 1:
       if fieldTypeId == thrift.MAP {
         if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.MAP {
+        if err := p.ReadField2(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -490,11 +509,40 @@ var _val12 string
   return nil
 }
 
+func (p *IExecutorServerModuleStartArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  _, _, size, err := iprot.ReadMapBegin(ctx)
+  if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+  }
+  tMap := make(map[string]string, size)
+  p.Env =  tMap
+  for i := 0; i < size; i ++ {
+var _key13 string
+    if v, err := iprot.ReadString(ctx); err != nil {
+    return thrift.PrependError("error reading field 0: ", err)
+} else {
+    _key13 = v
+}
+var _val14 string
+    if v, err := iprot.ReadString(ctx); err != nil {
+    return thrift.PrependError("error reading field 0: ", err)
+} else {
+    _val14 = v
+}
+    p.Env[_key13] = _val14
+  }
+  if err := iprot.ReadMapEnd(ctx); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+  }
+  return nil
+}
+
 func (p *IExecutorServerModuleStartArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "start_args"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if p != nil {
     if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -520,6 +568,26 @@ func (p *IExecutorServerModuleStartArgs) writeField1(ctx context.Context, oprot 
   }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 1:properties: ", p), err) }
+  return err
+}
+
+func (p *IExecutorServerModuleStartArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "env", thrift.MAP, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:env: ", p), err) }
+  if err := oprot.WriteMapBegin(ctx, thrift.STRING, thrift.STRING, len(p.Env)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+  }
+  for k, v := range p.Env {
+    if err := oprot.WriteString(ctx, string(k)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
+    if err := oprot.WriteString(ctx, string(v)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
+  }
+  if err := oprot.WriteMapEnd(ctx); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:env: ", p), err) }
   return err
 }
 

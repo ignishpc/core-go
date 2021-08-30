@@ -12,6 +12,17 @@ type IExecutorError struct {
 	cause   error
 }
 
+func Raise(err error) *IExecutorError {
+	if err2, ok := err.(*IExecutorError); ok{
+		return err2
+	}
+	return &IExecutorError{
+		err.Error(),
+		stack(),
+		nil,
+	}
+}
+
 func RaiseMsg(message string) *IExecutorError {
 	return &IExecutorError{
 		message,

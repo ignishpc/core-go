@@ -84,6 +84,7 @@ func (this *IDataFrame) Uncache(cacheLevel int8) error {
 	return nil
 }
 
+/* TODO
 func (this *IDataFrame) Repartition(numPartitions int64) (*IDataFrame, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
@@ -98,23 +99,7 @@ func (this *IDataFrame) Repartition(numPartitions int64) (*IDataFrame, error) {
 		this.worker,
 		id,
 	}, nil
-}
-
-func (this *IDataFrame) Coalesce(numPartitions int64, shuffle bool) (*IDataFrame, error) {
-	client, err := Ignis.pool.GetClient()
-	if err != nil {
-		return nil, err
-	}
-	defer client.Free()
-	id, err2 := client.Services().GetDataframeService().Coalesce(context.Background(), this.id, numPartitions, shuffle)
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
-	}
-	return &IDataFrame{
-		this.worker,
-		id,
-	}, nil
-}
+}*/
 
 func (this *IDataFrame) Partitions() (int64, error) {
 	client, err := Ignis.pool.GetClient()

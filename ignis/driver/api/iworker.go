@@ -132,7 +132,7 @@ func (this *IWorker) Parallelize(data interface{}, partitions int64, src *ISourc
 	}, nil
 }
 
-func (this *IWorker) ImportDataFrameDefault(data *IDataFrame, src *ISource) (*IDataFrame, error) {
+func (this *IWorker) ImportDataFrame(data *IDataFrame, src *ISource) (*IDataFrame, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
@@ -143,29 +143,7 @@ func (this *IWorker) ImportDataFrameDefault(data *IDataFrame, src *ISource) (*ID
 	if src == nil {
 		id, err2 = client.Services().GetWorkerService().ImportDataFrame(context.Background(), this.id, data.id)
 	} else {
-		id, err2 = client.Services().GetWorkerService().ImportDataFrame3b(context.Background(), this.id, data.id, src.rpc())
-	}
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
-	}
-	return &IDataFrame{
-		this,
-		id,
-	}, nil
-}
-
-func (this *IWorker) ImportDataFrame(data *IDataFrame, partitions int64, src *ISource) (*IDataFrame, error) {
-	client, err := Ignis.pool.GetClient()
-	if err != nil {
-		return nil, err
-	}
-	defer client.Free()
-	var err2 error
-	var id *driver.IDataFrameId
-	if src == nil {
-		id, err2 = client.Services().GetWorkerService().ImportDataFrame3a(context.Background(), this.id, data.id, partitions)
-	} else {
-		id, err2 = client.Services().GetWorkerService().ImportDataFrame4(context.Background(), this.id, data.id, partitions, src.rpc())
+		id, err2 = client.Services().GetWorkerService().ImportDataFrame3(context.Background(), this.id, data.id, src.rpc())
 	}
 	if err2 != nil {
 		return nil, derror.NewGenericIDriverError(err2)

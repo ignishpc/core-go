@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"ignis/driver/api/derror"
 	"ignis/driver/core"
-	"ignis/executor/core/mpi"
 	"os/exec"
 	"sync"
 )
@@ -24,9 +23,6 @@ func (this _Ignis) Start() error {
 	defer mu.Unlock()
 	if this.cmd == nil {
 		return nil
-	}
-	if !mpi.Is_initialized() {
-		mpi.Init()
 	}
 	ctx := context.Background()
 	this.cmd = exec.CommandContext(ctx, "ignis-backend")

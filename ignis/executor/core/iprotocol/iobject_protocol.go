@@ -3,6 +3,7 @@ package iprotocol
 import (
 	"context"
 	"github.com/apache/thrift/lib/go/thrift"
+	"ignis/executor/core/iarray"
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/io"
 )
@@ -39,6 +40,11 @@ func (this *IObjectProtocol) ReadObject() (interface{}, error) {
 		return io.IReader.Read(this)
 	}
 }
+
+func (this *IObjectProtocol) ReadObjectAsArray() (iarray.IArray, error) {
+	return nil, nil
+}
+
 
 func (this *IObjectProtocol) ReadInObject(obj interface{}) error {
 	return nil
