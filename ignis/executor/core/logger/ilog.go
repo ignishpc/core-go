@@ -6,13 +6,10 @@ import (
 	"os"
 )
 
-
-var debug = log.New(io.Discard, "[DEBUG] ", log.LstdFlags | log.Lshortfile)
-var info =  log.New(io.Discard, "[INFO]  ", log.LstdFlags | log.Lshortfile)
-var warn =  log.New(io.Discard, "[WARN]  ", log.LstdFlags | log.Lshortfile)
-var error = log.New(io.Discard, "[ERROR] ", log.LstdFlags | log.Lshortfile)
-
-
+var debug = log.New(io.Discard, "[DEBUG] ", log.LstdFlags|log.Lshortfile)
+var info = log.New(io.Discard, "[INFO]  ", log.LstdFlags|log.Lshortfile)
+var warn = log.New(io.Discard, "[WARN]  ", log.LstdFlags|log.Lshortfile)
+var error = log.New(io.Discard, "[ERROR] ", log.LstdFlags|log.Lshortfile)
 
 func Init() {
 	Enable(true)
@@ -32,18 +29,18 @@ func Enable(flag bool) {
 	}
 }
 
-func Debug(args ...interface{}) {
-	debug.Println(args...);
+func Debug(args ...any) {
+	debug.Println(args...)
 }
 
-func Info(args ...interface{}) {
-	info.Println(args...);
+func Info(args ...any) {
+	info.Println(args...)
 }
 
-func Warn(args ...interface{}) {
-	warn.Println(args...);
+func Warn(args ...any) {
+	warn.Println(args...)
 }
 
-func Error(args ...interface{}) {
-	error.Println(args...);
+func Error(args ...any) {
+	error.Println(args...)
 }

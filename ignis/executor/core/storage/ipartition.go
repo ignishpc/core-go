@@ -5,24 +5,22 @@ import (
 	"ignis/executor/api"
 )
 
-type IPartition interface {
-	ReadIterator() (api.IReadIterator, error)
-
-	WriteIterator() (api.IWriteIterator, error)
-
+type IPartitionBase interface {
 	Read(transport thrift.TTransport) error
 
-	Write(transport thrift.TTransport, compression int8, native *bool) error
+	Write(transport thrift.TTransport, compression int8) error
 
-	Clone() (IPartition, error)
+	WriteWithNative(transport thrift.TTransport, compression int8, native bool) error
 
-	CopyFrom(source IPartition) error
+	Clone() (IPartitionBase, error)
 
-	CopyTo(target IPartition) error
+	CopyFrom(source IPartitionBase) error
 
-	MoveFrom(source IPartition) error
+	CopyTo(target IPartitionBase) error
 
-	MoveTo(target IPartition) error
+	MoveFrom(source IPartitionBase) error
+
+	MoveTo(target IPartitionBase) error
 
 	Size() int64
 
@@ -37,80 +35,88 @@ type IPartition interface {
 	Type() string
 }
 
-type IPartitionGroup struct {
-	partitions []IPartition
+type IPartition[T any] interface {
+	IPartitionBase
+
+	ReadIterator() (api.IReadIterator[T], error)
+
+	WriteIterator() (api.IWriteIterator[T], error)
+}
+
+type IPartitionGroup[T any] struct {
+	partitions []IPartition[T]
 	_cache     bool
 }
 
-func NewIPartitionGroup() *IPartitionGroup {
-	return &IPartitionGroup{
-		partitions: make([]IPartition, 0, 10),
+func NewIPartitionGroup[T any]() *IPartitionGroup[T] {
+	return &IPartitionGroup[T]{
+		partitions: make([]IPartition[T], 0, 10),
 		_cache:     false,
 	}
 }
 
-func (this *IPartitionGroup) Set(index int64, value IPartition) {
+func (this *IPartitionGroup[T]) Set(index int, value IPartition[T]) {
 	this.partitions[index] = value
 }
 
-func (this *IPartitionGroup) Get(index int64) IPartition {
+func (this *IPartitionGroup[T]) Get(index int) IPartition[T] {
 	return this.partitions[index]
 }
 
-func (this *IPartitionGroup) Remove(index int64) {
+func (this *IPartitionGroup[T]) Remove(index int) {
 	this.partitions = append(this.partitions[:index], this.partitions[index+1:]...)
 }
 
-func (this *IPartitionGroup) Iter() []IPartition {
+func (this *IPartitionGroup[T]) Iter() []IPartition[T] {
 	return this.partitions
 }
 
-func (this *IPartitionGroup) Size() int64 {
-	return int64(len(this.partitions))
+func (this *IPartitionGroup[T]) Size() int {
+	return len(this.partitions)
 }
 
-func (this *IPartitionGroup) Empty() bool {
+func (this *IPartitionGroup[T]) Empty() bool {
 	return len(this.partitions) == 0
 }
 
-func (this *IPartitionGroup) Add(part IPartition) {
+func (this *IPartitionGroup[T]) Add(part IPartition[T]) {
 	this.partitions = append(this.partitions, part)
 }
 
-func (this *IPartitionGroup) Clear() {
-	this.partitions = make([]IPartition, 0, 10)
+func (this *IPartitionGroup[T]) Clear() {
+	this.partitions = make([]IPartition[T], 0, 10)
 }
 
-func (this *IPartitionGroup) Clone() (*IPartitionGroup, error) {
-	copy := NewIPartitionGroup()
+func (this *IPartitionGroup[T]) Clone() (*IPartitionGroup[T], error) {
+	group := NewIPartitionGroup[T]()
 	for _, p := range this.partitions {
 		other, err := p.Clone()
 		if err != nil {
 			return nil, err
 		}
-		copy.Add(other)
+		group.Add(other.(IPartition[T]))
 	}
-	return copy, nil
+	return group, nil
 }
 
-func (this *IPartitionGroup) ShadowCopy() (*IPartitionGroup, error) {
-	copy := NewIPartitionGroup()
+func (this *IPartitionGroup[T]) ShadowCopy() (*IPartitionGroup[T], error) {
+	group := NewIPartitionGroup[T]()
 	for _, p := range this.partitions {
-		copy.Add(p)
+		group.Add(p)
 	}
-	return copy, nil
+	return group, nil
 }
 
-func (this *IPartitionGroup) Cache() bool {
+func (this *IPartitionGroup[T]) Cache() bool {
 	return this._cache
 }
 
-func (this *IPartitionGroup) setCache(e bool) {
+func (this *IPartitionGroup[T]) setCache(e bool) {
 	this._cache = e
 }
 
-func Copy(rit api.IReadIterator, wit api.IWriteIterator) error {
-	for elem, err := rit.Next(); elem != nil; elem, err = rit.Next() {
+func Copy[T any](rit api.IReadIterator[T], wit api.IWriteIterator[T]) error {
+	for elem, err := rit.Next(); rit.HasNext(); elem, err = rit.Next() {
 		if err != nil {
 			return err
 		}

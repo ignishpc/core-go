@@ -4,9 +4,9 @@ import (
 	"github.com/apache/thrift/lib/go/thrift"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
+	"ignis/executor/core/impi"
 	"ignis/executor/core/logger"
 	"ignis/executor/core/modules"
-	"ignis/executor/core/mpi"
 	"ignis/rpc/executor"
 	"os"
 	"strconv"
@@ -37,14 +37,13 @@ func _init_(args []string) error {
 	}
 
 	if _, present := os.LookupEnv(""); present {
-		err = mpi.MPI_Init_thread(nil, nil, mpi.MPI_THREAD_MULTIPLE, nil)
+		err = impi.MPI_Init_thread(nil, nil, impi.MPI_THREAD_MULTIPLE, nil)
 	} else {
-		err = mpi.MPI_Init(nil, nil)
+		err = impi.MPI_Init(nil, nil)
 	}
 	if err != nil {
 		return err
 	}
-	defer mpi.MPI_Finalize()
 
 	server := modules.NewIExecutorServerModule(executorData)
 	return server.Serve("IExecutorServer", port, compression, services)

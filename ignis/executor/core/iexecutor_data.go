@@ -2,32 +2,38 @@ package core
 
 import (
 	"ignis/executor/api"
+	"ignis/executor/api/function"
 	"ignis/executor/core/storage"
+	"ignis/rpc"
 )
 
 type IExecutorData struct {
 	cores          int
-	partitions     *storage.IPartitionGroup
-	variables      map[string]interface{}
+	partitions     any
+	variables      map[string]any
+	library_loader ILibraryLoader
 	properties     IPropertyParser
 	partitionTools IPartitionTools
 	context        api.IContext
 }
 
 func NewIExecutorData() *IExecutorData {
-	return &IExecutorData{
-	}
+	return &IExecutorData{}
 }
 
-func (this *IExecutorData) GetPartitions() *storage.IPartitionGroup {
+func (this *IExecutorData) GetPartitions() any {
 	return nil
 }
 
-func (this *IExecutorData) GetAndDeletePartitions() *storage.IPartitionGroup {
+func (this *IExecutorData) GetAndDeletePartitions() any {
 	return nil
 }
 
-func (this *IExecutorData) SetPartitions(*storage.IPartitionGroup) {
+func CheckPartitions[T any](group any) *storage.IPartitionGroup[T] {
+	return nil
+}
+
+func (this *IExecutorData) SetPartitions(group any) {
 
 }
 
@@ -63,8 +69,8 @@ func (this *IExecutorData) InfoDirectory() string {
 	return "nil"
 }
 
-func (this *IExecutorData) GetContext() *api.IContext {
-	return &this.context
+func (this *IExecutorData) GetContext() api.IContext {
+	return this.context
 }
 
 func (this *IExecutorData) GetProperties() *IPropertyParser {
@@ -81,4 +87,12 @@ func (this *IExecutorData) SetCores(n int) {
 
 func (this *IExecutorData) GetCores() int {
 	return this.cores
+}
+
+func (this *IExecutorData) LoadLibrary(src *rpc.ISource) (function.IBaseFunction, error) {
+	return nil, nil //TODO
+}
+
+func (this *IExecutorData) LoadLibraryNoBackup(src *rpc.ISource) (function.IBaseFunction, error) {
+	return nil, nil //TODO
 }

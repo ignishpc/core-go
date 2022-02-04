@@ -13,7 +13,10 @@ type IExecutorError struct {
 }
 
 func Raise(err error) *IExecutorError {
-	if err2, ok := err.(*IExecutorError); ok{
+	if err == nil {
+		return nil
+	}
+	if err2, ok := err.(*IExecutorError); ok {
 		return err2
 	}
 	return &IExecutorError{

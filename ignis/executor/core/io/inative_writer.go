@@ -1,22 +1,25 @@
 package io
 
 import (
-	"encoding/gob"
 	"github.com/apache/thrift/lib/go/thrift"
-	"reflect"
+	"ignis/executor/core/ierror"
 )
 
-type _INativeWriter struct {
-}
-
-var INativeWriter = new(_INativeWriter)
-
-func (this _INativeWriter) Write(protocol thrift.TProtocol, obj interface{}) error {
-	enc := gob.NewEncoder(protocol.Transport())
+func WriteNative(protocol thrift.TProtocol, obj any) error {
+	/*enc := gob.NewEncoder(protocol.Transport())
 	tp := reflect.TypeOf(obj)
-	INativeReader.Register(tp)
-	if err := enc.Encode(getName(tp)); err != nil {
+	if err := enc.Encode(tp.String()); err != nil {
 		return err
 	}
-	return enc.Encode(obj)
+	return enc.Encode(obj)*/
+	return ierror.RaiseMsg("Not implemented yet")
+}
+
+func ReadNative(protocol thrift.TProtocol) (any, error) {
+	/*dec := gob.NewDecoder(protocol.Transport())
+	var tps string
+	if err := dec.Decode(tps); err != nil {
+		return nil, err
+	}*/
+	return nil, ierror.RaiseMsg("Not implemented yet")
 }

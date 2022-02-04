@@ -6,8 +6,8 @@ import (
 	"github.com/apache/thrift/lib/go/thrift"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
+	"ignis/executor/core/impi"
 	"ignis/executor/core/logger"
-	"ignis/executor/core/mpi"
 	"ignis/rpc/executor"
 	"os"
 )
@@ -63,10 +63,10 @@ func (this *IExecutorServerModule) Start(ctx context.Context, properties map[str
 	}
 	var err error
 	if _, present := os.LookupEnv("MPI_THREAD_MULTIPLE"); present {
-		err = mpi.MPI_Init_thread(nil, nil, mpi.MPI_THREAD_MULTIPLE, nil)
+		err = impi.MPI_Init_thread(nil, nil, impi.MPI_THREAD_MULTIPLE, nil)
 		logger.Info("ServerModule: Mpi started in thread mode")
 	} else {
-		err = mpi.MPI_Init(nil, nil)
+		err = impi.MPI_Init(nil, nil)
 		logger.Info("ServerModule: Mpi started")
 	}
 	if err != nil {
@@ -77,7 +77,7 @@ func (this *IExecutorServerModule) Start(ctx context.Context, properties map[str
 }
 
 func (this *IExecutorServerModule) Stop(ctx context.Context) (_err error) {
-	mpi.MPI_Finalize()
+	impi.MPI_Finalize()
 	err := this.server.Stop()
 	this.processor = nil
 	this.server = nil

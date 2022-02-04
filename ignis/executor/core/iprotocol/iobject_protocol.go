@@ -3,7 +3,6 @@ package iprotocol
 import (
 	"context"
 	"github.com/apache/thrift/lib/go/thrift"
-	"ignis/executor/core/iarray"
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/io"
 )
@@ -25,39 +24,30 @@ func NewIObjectProtocol(trans thrift.TTransport) *IObjectProtocol {
 	}
 }
 
-func (this *IObjectProtocol) WriteObject(obj interface{}) error {
-	return this.WriteObjectNative(obj, false)
+func (this *IObjectProtocol) WriteObject(obj any) error {
+	return this.WriteObjectWithNative(obj, false)
 }
 
-func (this *IObjectProtocol) ReadObject() (interface{}, error) {
+func (this *IObjectProtocol) WriteObjectWithNative(obj any, native bool) error {
+	if err := this.WriteSerialization(native); err != nil {
+		return ierror.Raise(err)
+	}
+	if native {
+		return io.WriteNative(this, obj)
+	} else {
+		return io.Write(this, obj)
+	}
+}
+
+func (this *IObjectProtocol) ReadObject() (any, error) {
 	native, err := this.ReadSerialization()
 	if err != nil {
-		return nil, err
+		return nil, ierror.Raise(err)
 	}
 	if native {
-		return io.INativeReader.Read(this)
+		return io.ReadNative(this)
 	} else {
-		return io.IReader.Read(this)
-	}
-}
-
-func (this *IObjectProtocol) ReadObjectAsArray() (iarray.IArray, error) {
-	return nil, nil
-}
-
-
-func (this *IObjectProtocol) ReadInObject(obj interface{}) error {
-	return nil
-}
-
-func (this *IObjectProtocol) WriteObjectNative(obj interface{}, native bool) error {
-	if err := this.WriteSerialization(native); err != nil {
-		return err
-	}
-	if native {
-		return io.INativeWriter.Write(this, obj)
-	} else {
-		return io.IWriter.Write(this, obj)
+		return io.Read[any](this)
 	}
 }
 
@@ -67,7 +57,7 @@ func (this *IObjectProtocol) ReadSerialization() (bool, error) {
 		return false, nil
 	}
 	if id == IGNIS_PROTOCOL {
-		return true, nil
+		return false, nil
 	} else if id == GO_PROTOCOL {
 		return true, nil
 	} else {

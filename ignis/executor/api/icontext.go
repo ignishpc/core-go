@@ -1,35 +1,15 @@
 package api
 
-type IContext struct {
-	properties map[string]string
-	variables  map[string]interface{}
-}
+import (
+	"ignis/executor/core/impi"
+)
 
-func NewIContext() *IContext {
-	return &IContext{
-	}
-}
-
-func (this *IContext) Cores() int {
-	return 0
-}
-
-func (this *IContext) Executors() int {
-	return 0
-}
-
-func (this *IContext) ExecutorId() int {
-	return 0
-}
-
-func (this *IContext) ThreadId() int {
-	return 0
-}
-
-func (this *IContext) Props() map[string]string {
-	return this.properties
-}
-
-func (this *IContext) Vars() map[string]interface{} {
-	return this.variables
+type IContext interface {
+	Cores() int
+	ThreadId() int
+	Executors() int
+	ExecutorId() int
+	MpiGroup() impi.C_MPI_Comm
+	Props() map[string]string
+	Vars() map[string]any
 }

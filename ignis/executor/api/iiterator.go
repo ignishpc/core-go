@@ -1,10 +1,10 @@
 package api
 
-type IReadIterator interface {
+type IReadIterator[T any] interface {
 	HasNext() bool
-	Next() (interface{}, error)
+	Next() (T, error)
 }
 
-type IWriteIterator interface {
-	Write(v interface{}) error
+type IWriteIterator[T any] interface {
+	Write(v T) error
 }

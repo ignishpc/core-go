@@ -1,9 +1,11 @@
 package modules
 
 import (
+	"fmt"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
 	"ignis/rpc"
+	"reflect"
 )
 
 type IModule struct {
@@ -14,7 +16,7 @@ func NewIModule(executorData *core.IExecutorData) IModule { //Only for IDriverCo
 	return IModule{executorData}
 }
 
-func (this *IModule) _pack_error(err error) error {
+func (this *IModule) Pack_error(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -31,4 +33,22 @@ func (this *IModule) _pack_error(err error) error {
 	}
 
 	return ex
+}
+
+func (this *IModule) CompatibilyError(f reflect.Type, m string) error {
+	return ierror.RaiseMsg(f.String() + " is not compatible with " + m)
+}
+
+func (this *IModule) moduleRecover(err *error) {
+	if r := recover(); r != nil {
+		if err2, ok := r.(error); ok {
+			*err = ierror.Raise(err2)
+			return
+		}
+		if msg, ok := r.(string); ok {
+			*err = ierror.RaiseMsg(msg)
+			return
+		}
+		*err = ierror.RaiseMsg(fmt.Sprint(r))
+	}
 }
