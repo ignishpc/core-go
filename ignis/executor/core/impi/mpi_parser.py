@@ -194,7 +194,7 @@ if __name__ == '__main__':
         return tp
 
     def goAlias(tp):
-        if tp.startswith("C."):
+        if "C." in tp:
             alias = tp.replace('.', '_')
             real_alias = clearType(alias)
             if real_alias not in alias_names:
@@ -231,13 +231,17 @@ func mpi_check(code C.int) *MpiError {
 	return &MpiError{int(0)}
 }
 
-	""")
+""")
 
     for f in mpi.getFunctions():
         go_source.write("func " + f.name + "(")
         i = 0
         for arg in f.args:
-            go_source.write(arg.name + " " + goAlias(mpi.getVarTypeAsGo(arg.tp)))
+            if "void *" == arg.tp:
+                go_source.write(arg.name + " " + "unsafe.Pointer /*("+arg.tp+")*/")
+                unsafe = True
+            else:
+                go_source.write(arg.name + " " + goAlias(mpi.getVarTypeAsGo(arg.tp)))
             i += 1
             if i < len(f.args):
                 go_source.write(", ")
@@ -252,11 +256,7 @@ func mpi_check(code C.int) *MpiError {
         go_source.write("C." + f.name + "(")
         i = 0
         for arg in f.args:
-            if "void *" == arg.tp:
-                go_source.write("unsafe.Pointer(" + arg.name + ")")
-                unsafe = True
-            else:
-                go_source.write(arg.name)
+            go_source.write(arg.name)
             i += 1
             if i < len(f.args):
                 go_source.write(", ")

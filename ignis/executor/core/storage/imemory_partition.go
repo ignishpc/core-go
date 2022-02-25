@@ -29,6 +29,13 @@ func NewIMemoryPartitionWithNative[T any](sz int64, native bool) *IMemoryPartiti
 	}
 }
 
+func ConvIMemoryPartition[T any](other IPartitionBase) IPartitionBase {
+	return &IMemoryPartition[T]{
+		other.Inner().(IList),
+		other.Native(),
+	}
+}
+
 func (this *IMemoryPartition[T]) Read(transport thrift.TTransport) error {
 	zlibTrans, err := itransport.NewIZlibTransport(transport)
 	if err != nil {
@@ -164,6 +171,14 @@ func (this *IMemoryPartition[T]) Fit() error {
 
 func (this *IMemoryPartition[T]) Type() string {
 	return IMemoryPartitionType
+}
+
+func (this *IMemoryPartition[T]) Inner() any {
+	return this.elems
+}
+
+func (this *IMemoryPartition[T]) Native() bool {
+	return this.native
 }
 
 func (this *IMemoryPartition[T]) ReadIterator() (api.IReadIterator[T], error) {

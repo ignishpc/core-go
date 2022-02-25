@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/apache/thrift/lib/go/thrift"
 	"ignis/executor/core/ierror"
-	"ignis/executor/core/io"
+	"ignis/executor/core/iio"
 )
 
 var ctx = context.Background()
@@ -33,9 +33,9 @@ func (this *IObjectProtocol) WriteObjectWithNative(obj any, native bool) error {
 		return ierror.Raise(err)
 	}
 	if native {
-		return io.WriteNative(this, obj)
+		return iio.WriteNative(this, obj)
 	} else {
-		return io.Write(this, obj)
+		return iio.Write(this, obj)
 	}
 }
 
@@ -45,9 +45,9 @@ func (this *IObjectProtocol) ReadObject() (any, error) {
 		return nil, ierror.Raise(err)
 	}
 	if native {
-		return io.ReadNative(this)
+		return iio.ReadNative(this)
 	} else {
-		return io.Read[any](this)
+		return iio.Read[any](this)
 	}
 }
 

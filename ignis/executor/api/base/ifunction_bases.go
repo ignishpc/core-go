@@ -30,9 +30,9 @@ type IFilter[T any] struct {
 }
 
 func (this *IFilter[T]) filter(i *impl.IPipeImpl, f function.IFunction[T, bool]) error {
-	return impl.Map(i, f)
+	return impl.Filter(i, f)
 }
 
 func (this *IFilter[T]) RunFilter(i *impl.IPipeImpl, f function.IBaseFunction) error {
-	return impl.Map(i, f.(function.IFunction[T, bool]))
+	return impl.Filter(i, f.(function.IFunction[T, bool]))
 }

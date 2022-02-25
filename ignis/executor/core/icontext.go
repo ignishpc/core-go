@@ -7,37 +7,49 @@ import (
 )
 
 type iContextImpl struct {
-	properties map[string]string
-	variables  map[string]any
-	comm       impi.C_MPI_Comm
+	properties     map[string]string
+	variables      map[string]any
+	mpiThreadGroup []impi.C_MPI_Comm
 }
 
 func NewIContext() api.IContext {
-	return &iContextImpl{}
+	return &iContextImpl{
+		mpiThreadGroup: []impi.C_MPI_Comm{impi.MPI_COMM_WORLD},
+	}
 }
 
 func (this *iContextImpl) Cores() int {
-	return ithreads.GetPoolCores()
+	return ithreads.DefaultCores()
 }
 
 func (this *iContextImpl) Executors() int {
 	var sz impi.C_int
-	impi.MPI_Comm_size(this.comm, (*impi.C_int)(&sz))
+	impi.MPI_Comm_size(this.MpiGroup(), (*impi.C_int)(&sz))
 	return int(sz)
 }
 
 func (this *iContextImpl) ExecutorId() int {
 	var rank impi.C_int
-	impi.MPI_Comm_rank(this.comm, (*impi.C_int)(&rank))
+	impi.MPI_Comm_rank(this.MpiGroup(), (*impi.C_int)(&rank))
 	return int(rank)
 }
 
 func (this *iContextImpl) ThreadId() int {
-	return ithreads.GetThreadId()
+	return ithreads.ThreadId()
 }
 
 func (this *iContextImpl) MpiGroup() impi.C_MPI_Comm {
-	return this.comm
+	if len(this.mpiThreadGroup) == 1 {
+		return this.mpiThreadGroup[0]
+	}
+
+	id := this.ThreadId()
+
+	if id < len(this.mpiThreadGroup) {
+		return this.mpiThreadGroup[id]
+	}
+
+	return impi.MPI_COMM_NULL
 }
 
 func (this *iContextImpl) Props() map[string]string {

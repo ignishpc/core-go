@@ -50,7 +50,7 @@ func (this *ILibraryLoader) LoadFunction(name string) (any, error) {
 
 	vf, ok := v.(func() any)
 	if !ok {
-		return nil, ierror.RaiseMsg("New" + class_name + " must have no arguments")
+		return nil, ierror.RaiseMsg("New" + class_name + " must have no arguments and must return any")
 	}
 	return vf(), nil
 }
@@ -75,7 +75,7 @@ func (this *ILibraryLoader) LoadLibrary(path string) ([]string, error) {
 
 	v, err := library.Lookup("IgnisLibrary")
 	if err != nil {
-		return nil, ierror.RaiseMsgCause("IgnisLibrary is required to register a python file as ignis library", err)
+		return nil, ierror.RaiseMsgCause("IgnisLibrary is required to register a go file as ignis library", err)
 	}
 
 	ignis_library, ok := v.([]string)

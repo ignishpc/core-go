@@ -2,6 +2,7 @@ package modules
 
 import (
 	"fmt"
+	"ignis/executor/api/base"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
 	"ignis/rpc"
@@ -35,8 +36,24 @@ func (this *IModule) Pack_error(err error) error {
 	return ex
 }
 
+func (this *IModule) TypeFromDefault() (base.IBasicBase, error) {
+	return nil, ierror.RaiseMsg("Not implemented error") //TODO
+}
+
+func (this *IModule) TypeFromPartition() (base.IBasicBase, error) {
+	return nil, ierror.RaiseMsg("Not implemented error") //TODO
+}
+
+func (this *IModule) TypeFromName(name string) (base.IBasicBase, error) {
+	return nil, ierror.RaiseMsg("Not implemented error") //TODO
+}
+
+func (this *IModule) TypeFromSource(src *rpc.ISource) (base.IBasicBase, error) {
+	return nil, ierror.RaiseMsg("Not implemented error") //TODO
+}
+
 func (this *IModule) CompatibilyError(f reflect.Type, m string) error {
-	return ierror.RaiseMsg(f.String() + " is not compatible with " + m)
+	return this.Pack_error(ierror.RaiseMsg(f.String() + " is not compatible with " + m))
 }
 
 func (this *IModule) moduleRecover(err *error) {

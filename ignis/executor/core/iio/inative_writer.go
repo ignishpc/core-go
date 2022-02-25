@@ -1,4 +1,4 @@
-package io
+package iio
 
 import (
 	"github.com/apache/thrift/lib/go/thrift"

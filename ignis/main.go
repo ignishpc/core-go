@@ -22,7 +22,7 @@ func _init_(args []string) error {
 	compression, err2 := strconv.Atoi(os.Args[2])
 
 	if err != nil || err2 != nil {
-		return ierror.RaiseMsg("Executor need a server port and compression as argument")
+		return ierror.RaiseMsg("Executor need a valid server port and compression as argument")
 	}
 
 	executorData := core.NewIExecutorData()
@@ -42,7 +42,7 @@ func _init_(args []string) error {
 		err = impi.MPI_Init(nil, nil)
 	}
 	if err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 
 	server := modules.NewIExecutorServerModule(executorData)
