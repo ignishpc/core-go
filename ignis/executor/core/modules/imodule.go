@@ -37,19 +37,19 @@ func (this *IModule) Pack_error(err error) error {
 }
 
 func (this *IModule) TypeFromDefault() (base.IBasicBase, error) {
-	return nil, ierror.RaiseMsg("Not implemented error") //TODO
+	return nil, ierror.RaiseMsg("Not implemented yet") //TODO
 }
 
 func (this *IModule) TypeFromPartition() (base.IBasicBase, error) {
-	return nil, ierror.RaiseMsg("Not implemented error") //TODO
+	return nil, ierror.RaiseMsg("Not implemented yet") //TODO
 }
 
 func (this *IModule) TypeFromName(name string) (base.IBasicBase, error) {
-	return nil, ierror.RaiseMsg("Not implemented error") //TODO
+	return nil, ierror.RaiseMsg("Not implemented yet") //TODO
 }
 
 func (this *IModule) TypeFromSource(src *rpc.ISource) (base.IBasicBase, error) {
-	return nil, ierror.RaiseMsg("Not implemented error") //TODO
+	return nil, ierror.RaiseMsg("Not implemented yet") //TODO
 }
 
 func (this *IModule) CompatibilyError(f reflect.Type, m string) error {

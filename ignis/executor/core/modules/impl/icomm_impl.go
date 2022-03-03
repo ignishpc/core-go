@@ -73,10 +73,7 @@ func (this *ICommImpl) HasGroup(name string) (bool, error) {
 
 func (this *ICommImpl) DestroyGroup(name string) error {
 	if len(name) == 0 {
-		comm := this.executorData.Mpi().Native()
-		if comm != impi.MPI_COMM_WORLD {
-			return ierror.Raise(impi.MPI_Comm_free(&comm))
-		}
+		this.executorData.DestroyMpiGroup()
 		return nil
 
 	} else if comm, ok := this.groups[name]; ok {
@@ -93,9 +90,7 @@ func (this *ICommImpl) DestroyGroups() (err error) {
 		}
 		delete(this.groups, name)
 	}
-	if err2 := this.DestroyGroup(""); err2 != nil {
-		err = err2
-	}
+	this.executorData.DestroyMpiGroup()
 	return
 }
 
@@ -125,7 +120,7 @@ func GetPartitions[T any](this *ICommImpl, protocol int8, minPartitions int64) (
 	buffer := itransport.NewIMemoryBuffer()
 	if int64(group.Size()) > minPartitions {
 		for _, part := range group.Iter() {
-			buffer.Reset()
+			buffer.ResetBuffer()
 			if err := part.WriteWithNative(buffer, cmp, native); err != nil {
 				return nil, ierror.Raise(err)
 			}
@@ -158,14 +153,14 @@ func GetPartitions[T any](this *ICommImpl, protocol int8, minPartitions int64) (
 				return nil, ierror.Raise(err)
 			}
 			partitions = append(partitions, buffer.Bytes())
-			buffer.Reset()
+			buffer.ResetBuffer()
 		}
 	} else if group.Size() > 0 {
 		elemens := int64(0)
 		for _, part := range group.Iter() {
 			elemens += part.Size()
 		}
-		part := storage.NewIMemoryPartition[T](1024 * 1024)
+		part := storage.NewIMemoryPartition[T](1024*1024, false)
 		partition_elems := elemens / minPartitions
 		remainder := elemens % minPartitions
 		i := 0
@@ -216,10 +211,10 @@ func GetPartitions[T any](this *ICommImpl, protocol int8, minPartitions int64) (
 				return nil, ierror.Raise(err)
 			}
 			partitions = append(partitions, buffer.Bytes())
-			buffer.Reset()
+			buffer.ResetBuffer()
 		}
 	} else {
-		part := storage.NewIMemoryPartitionWithNative[T](1024*1024, native)
+		part := storage.NewIMemoryPartition[T](1024*1024, native)
 		if err := part.WriteWithNative(buffer, cmp, native); err != nil {
 			return nil, ierror.Raise(err)
 		}
@@ -237,7 +232,9 @@ func SetPartitions[T any](this *ICommImpl, partitions [][]byte) error {
 		return ierror.Raise(err)
 	}
 	for i := 0; i < len(partitions); i++ {
-		if err := group.Get(i).Read(itransport.NewIMemoryBufferBytes(partitions[i])); err != nil {
+		if err := group.Get(i).Read(
+			itransport.NewIMemoryBufferWrapper(partitions[i], int64(len(partitions[i])), itransport.OBSERVE),
+		); err != nil {
 			return ierror.Raise(err)
 		}
 	}
@@ -311,9 +308,13 @@ func ImportData[T any](this *ICommImpl, group string, source bool, threads int64
 	var executors int64
 	{
 		var aux impi.C_int
-		impi.MPI_Comm_rank(import_comm, &aux)
+		if err = impi.MPI_Comm_rank(import_comm, &aux); err != nil {
+			return ierror.Raise(err)
+		}
 		me = int(aux)
-		impi.MPI_Comm_size(import_comm, &aux)
+		if err = impi.MPI_Comm_size(import_comm, &aux); err != nil {
+			return ierror.Raise(err)
+		}
 		executors = int64(aux)
 	}
 	ranges, queue, err := this.importDataAux(import_comm, source)
@@ -364,11 +365,11 @@ func ImportData[T any](this *ICommImpl, group string, source bool, threads int64
 			sync.Barrier()
 			for j := int64(0); j < end-init; j++ {
 				if source {
-					if err = core.SendGroup[T](this.executorData.Mpi(), comm, shared.Get(int(init-offset+j)), int(other), 0, opt); err != nil {
+					if err = core.SendGroupOpt[T](this.executorData.Mpi(), comm, shared.Get(int(init-offset+j)), int(other), 0, opt); err != nil {
 						return ierror.Raise(err)
 					}
 				} else {
-					if err = core.RecvGroup[T](this.executorData.Mpi(), comm, shared.Get(int(init-offset+j)), int(other), 0, opt); err != nil {
+					if err = core.RecvGroupOpt[T](this.executorData.Mpi(), comm, shared.Get(int(init-offset+j)), int(other), 0, opt); err != nil {
 						return ierror.Raise(err)
 					}
 				}
@@ -398,9 +399,13 @@ func (this *ICommImpl) importDataAux(group impi.C_MPI_Comm, source bool) ([]ipai
 	executors := int64(0)
 	{
 		var aux impi.C_int
-		impi.MPI_Comm_rank(group, &aux)
+		if err := impi.MPI_Comm_rank(group, &aux); err != nil {
+			return nil, nil, ierror.Raise(err)
+		}
 		rank = int64(aux)
-		impi.MPI_Comm_size(group, &aux)
+		if err := impi.MPI_Comm_size(group, &aux); err != nil {
+			return nil, nil, ierror.Raise(err)
+		}
 		executors = int64(aux)
 	}
 	localExecutors := int64(this.executorData.Mpi().Executors())

@@ -94,6 +94,7 @@ func (this *ThreadsInfo) RunN(n int, f func(int, ISync) error) error {
 }
 
 func (this *ThreadsInfo) Parallel(f func(int, ISync) error) error {
+	this.static = true
 	return this.RunRange(0, this.threads, f)
 }
 

@@ -2,6 +2,7 @@ package impi
 
 /*
 #include <stdlib.h>
+#include <string.h>
 */
 import "C"
 import (
@@ -10,6 +11,9 @@ import (
 )
 
 type C_int64 = C.int64_t
+type C_int32 = C.int16_t
+type C_int16 = C.int32_t
+type C_int8 = C.int8_t
 
 func C_ArrayToString(array []C_char) string {
 	str := C.GoString(&array[0])
@@ -27,4 +31,10 @@ func C_ArrayFromString(str string) []C_char {
 
 func P[T any](ptr *T) unsafe.Pointer {
 	return unsafe.Pointer(ptr)
+}
+
+func P_NIL() unsafe.Pointer { return unsafe.Pointer(nil) }
+
+func Memcpy(dest unsafe.Pointer, src unsafe.Pointer, size int) {
+	C.memcpy(dest, src, C.size_t(size))
 }

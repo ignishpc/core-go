@@ -81,11 +81,19 @@ func NewPartitionGroupDef[T any](this *IPartitionTools) (*storage.IPartitionGrou
 }
 
 func NewMemoryPartitionDef[T any](this *IPartitionTools) (*storage.IMemoryPartition[T], error) {
-	return storage.NewIMemoryPartition[T](1024 * 1024), nil
+	native, err := this.properties.NativeSerialization()
+	if err != nil {
+		return nil, ierror.Raise(err)
+	}
+	return storage.NewIMemoryPartition[T](1024*1024, native), nil
 }
 
 func NewMemoryPartition[T any](this *IPartitionTools, sz int64) (*storage.IMemoryPartition[T], error) {
-	return storage.NewIMemoryPartition[T](sz), nil
+	native, err := this.properties.NativeSerialization()
+	if err != nil {
+		return nil, ierror.Raise(err)
+	}
+	return storage.NewIMemoryPartition[T](sz, native), nil
 }
 
 func NewRawMemoryPartitionDef[T any](this *IPartitionTools, sz int64) (*storage.IRawMemoryPartition[T], error) {

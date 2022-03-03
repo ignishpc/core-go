@@ -146,7 +146,7 @@ func (this *IPartitionGroup[T]) NewGroup() IPartitionGroupBase {
 }
 
 func (this *IPartitionGroup[T]) AddMemoryPartition(sz int64) {
-	this.Add(NewIMemoryPartition[T](sz))
+	this.Add(NewIMemoryPartition[T](sz, false))
 }
 
 func Copy[T any](rit api.IReadIterator[T], wit api.IWriteIterator[T]) error {

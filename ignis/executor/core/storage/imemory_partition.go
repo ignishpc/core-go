@@ -18,11 +18,7 @@ type IMemoryPartition[T any] struct {
 	native bool
 }
 
-func NewIMemoryPartition[T any](sz int64) *IMemoryPartition[T] {
-	return NewIMemoryPartitionWithNative[T](sz, false)
-}
-
-func NewIMemoryPartitionWithNative[T any](sz int64, native bool) *IMemoryPartition[T] {
+func NewIMemoryPartition[T any](sz int64, native bool) *IMemoryPartition[T] {
 	return &IMemoryPartition[T]{
 		NewIList[T](int(sz)),
 		native,
@@ -77,7 +73,7 @@ func (this *IMemoryPartition[T]) WriteWithNative(transport thrift.TTransport, co
 }
 
 func (this *IMemoryPartition[T]) Clone() (IPartitionBase, error) {
-	other := NewIMemoryPartition[T](this.Size())
+	other := NewIMemoryPartition[T](this.Size(), this.native)
 	return other, this.CopyTo(other)
 }
 

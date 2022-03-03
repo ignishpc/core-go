@@ -77,6 +77,10 @@ func (this *IPropertyParser) PartitionType() (string, error) {
 	return this.GetString("ignis.partition.type")
 }
 
+func (this *IPropertyParser) ExchangeType() (string, error) {
+	return this.GetString("ignis.modules.exchange.type")
+}
+
 func (this *IPropertyParser) JobDirectory() (string, error) {
 	return this.GetString("ignis.job.directory")
 }

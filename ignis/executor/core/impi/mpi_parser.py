@@ -57,7 +57,7 @@ class MpiParser:
                 if value2[0].isalnum():
                     value += value2
                     value2 = " "
-                value2 = value2.replace(")", "")
+                value2 = value2.replace(")", "").replace("(", "")
                 if value[0].isnumeric() or value[0] == '-':
                     self._macro_list.append(CMacro(name, "int"))
                 elif value[0] == '"':

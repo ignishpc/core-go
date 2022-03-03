@@ -10,6 +10,7 @@ import (
 	"ignis/rpc"
 	"math"
 	"strconv"
+	"strings"
 )
 
 type IExecutorData struct {
@@ -17,6 +18,7 @@ type IExecutorData struct {
 	partitions      storage.IPartitionGroupBase
 	conv_partitions storage.IPartitionGroupBase
 	variables       map[string]any
+	functions       map[string]function.IBaseFunction
 	library_loader  ILibraryLoader
 	properties      IPropertyParser
 	partitionTools  IPartitionTools
@@ -115,7 +117,17 @@ func (this *IExecutorData) InfoDirectory() (string, error) {
 }
 
 func (this *IExecutorData) SetMpiGroup(comm impi.C_MPI_Comm) error {
-	return nil //TODO
+	this.context.(*iContextImpl).mpiThreadGroup = []impi.C_MPI_Comm{comm}
+	return nil
+}
+
+func (this *IExecutorData) DestroyMpiGroup() {
+	for _, comm := range this.context.(*iContextImpl).mpiThreadGroup {
+		if comm != impi.MPI_COMM_WORLD {
+			impi.MPI_Comm_free(&comm)
+		}
+	}
+	this.SetMpiGroup(impi.MPI_COMM_WORLD)
 }
 
 func (this *IExecutorData) ReloadLibraries() error {
@@ -147,7 +159,7 @@ func (this *IExecutorData) GetCores() int {
 }
 
 func (this *IExecutorData) GetMpiCores() int {
-	return 0 //TODO
+	return len(this.context.(*iContextImpl).mpiThreadGroup)
 }
 
 func (this *IExecutorData) EnableMpiCores() error {
@@ -201,9 +213,29 @@ func (this *IExecutorData) Duplicate(comm impi.C_MPI_Comm, threads int) ([]impi.
 }
 
 func (this *IExecutorData) LoadLibrary(src *rpc.ISource) (function.IBaseFunction, error) {
-	return nil, nil //TODO
+	return this.loadLibrary(src, true, false)
 }
 
-func (this *IExecutorData) LoadLibraryNoBackup(src *rpc.ISource) (function.IBaseFunction, error) {
-	return nil, nil //TODO
+func (this *IExecutorData) loadLibrary(src *rpc.ISource, backup bool, fast bool) (function.IBaseFunction, error) {
+	if src.Obj.IsSetBytes() {
+		return nil, ierror.RaiseMsg("Go not support function serialization")
+	}
+	sep := strings.IndexByte(*src.Obj.Name, ':')
+	var baseFunction function.IBaseFunction
+	if sep == -1 {
+		if f, ok := this.functions[*src.Obj.Name]; ok {
+			baseFunction = f
+		} else {
+			return nil, ierror.RaiseMsg("Function " + *src.Obj.Name + " not found")
+		}
+	} else {
+		if f, err := this.library_loader.LoadFunction(*src.Obj.Name); err == nil {
+			baseFunction = f.(function.IBaseFunction)
+		} else {
+			return nil, ierror.Raise(err)
+		}
+		//TODO
+	}
+	
+	return baseFunction, nil
 }

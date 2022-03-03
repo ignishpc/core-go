@@ -7,6 +7,7 @@ import (
 )
 
 type IRawPartition[T any] struct {
+	native bool
 }
 
 func (this *IRawPartition[T]) Read(transport thrift.TTransport) error {
@@ -82,4 +83,8 @@ func (this *IRawPartition[T]) ReadIterator() (api.IReadIterator[T], error) {
 
 func (this *IRawPartition[T]) WriteIterator() (api.IWriteIterator[T], error) {
 	return nil, ierror.RaiseMsg("Not implemented yet") //TODO
+}
+
+func DisableNative[T any](this IPartitionBase) {
+	this.(*IRawPartition[T]).native = false
 }
