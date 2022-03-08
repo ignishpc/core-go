@@ -43,30 +43,31 @@ func (this *IPrinterType) SetPrinter(id string, value IPrinter) {
 	}
 }
 
-func (this *IPrinterType) GetPrinter(id string) IPrinter {
+func (this *IPrinterType) GetPrinter(id string) (printer IPrinter) {
+	printer = this
 	switch id[0] {
 	case '*':
 		if this.ptr != nil {
-			return this.ptr
+			printer = this.ptr
 		}
 	case '[':
 		if this.array != nil {
-			return this.array
+			printer = this.array
 		}
 	}
 	if len(this.printers) > 0 {
-		if printer, present := this.printers[id]; present {
-			return printer
+		if p2, present := this.printers[id]; present {
+			return p2
 		}
 		i := strings.IndexByte(id, '[')
 		if i > 0 {
-			printer, present := this.printers[id[0:i]]
+			p2, present := this.printers[id[0:i]]
 			if present {
-				return printer
+				return p2
 			}
 		}
 	}
-	return this
+	return
 }
 
 var globalPrinter IPrinter
@@ -159,33 +160,6 @@ func (this *IMapPrinterType[K, V]) Print(stream io.Writer, obj any, level int) e
 	return nil
 }
 
-type IPairPrinterType[T1 any, T2 any] struct {
-	IPrinterType
-	firstPrinter  IPrinterType
-	secondPrinter IPrinterType
-}
-
-func (this *IPairPrinterType[T1, T2]) Print(stream io.Writer, obj any, level int) error {
-	pair := obj.(ipair.IPair[T1, T2])
-
-	if _, err := stream.Write([]byte("(")); err != nil {
-		return ierror.Raise(err)
-	}
-	if err := this.firstPrinter.print(stream, pair.First, level+1); err != nil {
-		return ierror.Raise(err)
-	}
-	if _, err := stream.Write([]byte(", ")); err != nil {
-		return ierror.Raise(err)
-	}
-	if err := this.secondPrinter.Print(stream, pair.Second, level+1); err != nil {
-		return ierror.Raise(err)
-	}
-	if _, err := stream.Write([]byte(")")); err != nil {
-		return ierror.Raise(err)
-	}
-	return nil
-}
-
 func init() {
 	globalPrinter = NewIPrinterType(func(stream io.Writer, obj any, level int) error {
 		_, err := fmt.Fprintf(stream, "%+v", obj)
@@ -275,31 +249,21 @@ func init() {
 		return nil
 	}))
 	SetPrinter(TypeGenericName[ipair.IPair[any, any]](), NewIPrinterType(func(stream io.Writer, obj any, level int) error {
-		value := reflect.ValueOf(obj)
-		rt := value.Type()
+		p := obj.(ipair.IAbstractPair)
 
-		firstRt := rt.Field(0).Type
-		secondRt := rt.Field(1).Type
-		if firstRt.Kind() == reflect.Interface {
-			firstRt = value.Field(0).Elem().Type()
-		}
-		if secondRt.Kind() == reflect.Interface {
-			secondRt = value.Field(1).Elem().Type()
-		}
-
-		firstPrinter := GetPrinter(firstRt.String())
-		secondPrinter := GetPrinter(secondRt.String())
+		firstPrinter := GetPrinter(GetName(p.GetFirst()))
+		secondPrinter := GetPrinter(GetName(p.GetSecond()))
 
 		if _, err := stream.Write([]byte("(")); err != nil {
 			return ierror.Raise(err)
 		}
-		if err := firstPrinter.Print(stream, value.Field(0).Interface(), level+1); err != nil {
+		if err := firstPrinter.Print(stream, p.GetFirst(), level+1); err != nil {
 			return ierror.Raise(err)
 		}
 		if _, err := stream.Write([]byte(", ")); err != nil {
 			return ierror.Raise(err)
 		}
-		if err := secondPrinter.Print(stream, value.Field(1).Interface(), level+1); err != nil {
+		if err := secondPrinter.Print(stream, p.GetSecond(), level+1); err != nil {
 			return ierror.Raise(err)
 		}
 		if _, err := stream.Write([]byte(")")); err != nil {

@@ -40,7 +40,18 @@ func PartitionApproxSize[T any](this *IIOImpl) (int64, error) {
 
 	size := int64(0)
 	if this.executorData.GetPartitionTools().IsMemoryGroup(group) {
-		return 0, nil //TODO
+		for _, part := range group.Iter() {
+			size += part.Size()
+		}
+		if iio.IsContiguous[T]() {
+			size *= int64(iio.TypeObj[T]().Size())
+		} else {
+			if eSize, err := this.executorData.GetProperties().TransportElemSize(); err != nil {
+				return 0, ierror.Raise(err)
+			} else {
+				size *= eSize
+			}
+		}
 	} else {
 		for _, part := range group.Iter() {
 			size += part.Bytes()
@@ -48,8 +59,6 @@ func PartitionApproxSize[T any](this *IIOImpl) (int64, error) {
 	}
 
 	return size, nil
-
-	return 0, nil //TODO
 }
 
 func (this *IIOImpl) TextFile(path string, minPartitions int64) error {

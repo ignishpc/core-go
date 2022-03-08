@@ -12,7 +12,7 @@ import (
 
 type IGeneralModule struct {
 	IModule
-	pipe_impl *impl.IPipeImpl
+	pipeImpl *impl.IPipeImpl
 }
 
 func NewIGeneralModule(executorData *core.IExecutorData) *IGeneralModule {
@@ -28,12 +28,12 @@ func (this *IGeneralModule) Map_(ctx context.Context, src *rpc.ISource) (_err er
 	defer this.moduleRecover(&_err)
 	basefun, err := this.executorData.LoadLibrary(src)
 	if err != nil {
-		return this.Pack_error(err)
+		return this.PackError(err)
 	}
 	if mapfun, ok := basefun.(base.IMapAbs); ok {
-		return this.Pack_error(mapfun.RunMap(this.pipe_impl, basefun))
+		return this.PackError(mapfun.RunMap(this.pipeImpl, basefun))
 	} else if anyfun, ok := basefun.(function.IFunction[any, any]); ok {
-		return this.Pack_error(impl.Map(this.pipe_impl, anyfun))
+		return this.PackError(impl.Map(this.pipeImpl, anyfun))
 	}
 	return this.CompatibilyError(reflect.TypeOf(basefun), "map")
 }
@@ -42,12 +42,12 @@ func (this *IGeneralModule) Filter(ctx context.Context, src *rpc.ISource) (_err 
 	defer this.moduleRecover(&_err)
 	basefun, err := this.executorData.LoadLibrary(src)
 	if err != nil {
-		return this.Pack_error(err)
+		return this.PackError(err)
 	}
 	if filterfun, ok := basefun.(base.IFilterAbs); ok {
-		return this.Pack_error(filterfun.RunFilter(this.pipe_impl, basefun))
+		return this.PackError(filterfun.RunFilter(this.pipeImpl, basefun))
 	} else if anyfun, ok := basefun.(function.IFunction[any, bool]); ok {
-		return this.Pack_error(impl.Filter(this.pipe_impl, anyfun))
+		return this.PackError(impl.Filter(this.pipeImpl, anyfun))
 	}
 	return this.CompatibilyError(reflect.TypeOf(basefun), "filter")
 }

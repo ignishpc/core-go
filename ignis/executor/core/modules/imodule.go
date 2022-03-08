@@ -5,6 +5,8 @@ import (
 	"ignis/executor/api/base"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
+	"ignis/executor/core/iio"
+	"ignis/executor/core/logger"
 	"ignis/rpc"
 	"reflect"
 )
@@ -17,7 +19,7 @@ func NewIModule(executorData *core.IExecutorData) IModule { //Only for IDriverCo
 	return IModule{executorData}
 }
 
-func (this *IModule) Pack_error(err error) error {
+func (this *IModule) PackError(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -36,24 +38,62 @@ func (this *IModule) Pack_error(err error) error {
 	return ex
 }
 
-func (this *IModule) TypeFromDefault() (base.IBasicBase, error) {
-	return nil, ierror.RaiseMsg("Not implemented yet") //TODO
+func (this *IModule) TypeFromDefault() (base.ITypeBase, error) {
+	return &base.ITypeBaseImpl[any]{}, nil
 }
 
-func (this *IModule) TypeFromPartition() (base.IBasicBase, error) {
-	return nil, ierror.RaiseMsg("Not implemented yet") //TODO
+func (this *IModule) TypeFromPartition() (base.ITypeBase, error) {
+	group, err := core.GetPartitions[any](this.executorData)
+	if err != nil {
+		return nil, ierror.Raise(err)
+	}
+
+	for _, part := range group.Iter() {
+		it, err := part.ReadIterator()
+		if err != nil {
+			return nil, ierror.Raise(err)
+		}
+		for it.HasNext() {
+			elem, err := it.Next()
+			if err != nil {
+				return nil, ierror.Raise(err)
+			}
+			return this.TypeFromName(iio.GetName(elem))
+		}
+	}
+
+	return nil, ierror.RaiseMsg("Type not found in partition")
 }
 
-func (this *IModule) TypeFromName(name string) (base.IBasicBase, error) {
-	return nil, ierror.RaiseMsg("Not implemented yet") //TODO
+func (this *IModule) TypeFromName(name string) (base.ITypeBase, error) {
+	typeBase := this.executorData.GetBaseTypes(name)
+	if typeBase == nil {
+		logger.Warn("Type '", name, "' not found, using 'any' as default")
+		return this.TypeFromDefault()
+	}
+	return typeBase.(base.ITypeBase), nil
 }
 
-func (this *IModule) TypeFromSource(src *rpc.ISource) (base.IBasicBase, error) {
-	return nil, ierror.RaiseMsg("Not implemented yet") //TODO
+func (this *IModule) TypeFromSource(src *rpc.ISource) (base.ITypeBase, error) {
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return nil, ierror.Raise(err)
+	}
+	if err = basefun.Before(this.executorData.GetContext()); err != nil {
+		return nil, ierror.Raise(err)
+	}
+	old := this.executorData.GetLastBaseType()
+	typeBase := this.executorData.GetLastBaseType()
+
+	if typeBase == old || typeBase == nil {
+		return nil, ierror.RaiseMsg("No type found in source")
+	}
+
+	return typeBase.(base.ITypeBase), nil
 }
 
 func (this *IModule) CompatibilyError(f reflect.Type, m string) error {
-	return this.Pack_error(ierror.RaiseMsg(f.String() + " is not compatible with " + m))
+	return this.PackError(ierror.RaiseMsg(f.String() + " is not compatible with " + m))
 }
 
 func (this *IModule) moduleRecover(err *error) {

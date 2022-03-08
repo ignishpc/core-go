@@ -2,7 +2,7 @@ package storage
 
 import (
 	"github.com/apache/thrift/lib/go/thrift"
-	"ignis/executor/api"
+	"ignis/executor/api/iterator"
 	"ignis/executor/core/ierror"
 )
 
@@ -77,11 +77,11 @@ func (this *IRawPartition[T]) Native() bool {
 	return false
 }
 
-func (this *IRawPartition[T]) ReadIterator() (api.IReadIterator[T], error) {
+func (this *IRawPartition[T]) ReadIterator() (iterator.IReadIterator[T], error) {
 	return nil, ierror.RaiseMsg("Not implemented yet") //TODO
 }
 
-func (this *IRawPartition[T]) WriteIterator() (api.IWriteIterator[T], error) {
+func (this *IRawPartition[T]) WriteIterator() (iterator.IWriteIterator[T], error) {
 	return nil, ierror.RaiseMsg("Not implemented yet") //TODO
 }
 

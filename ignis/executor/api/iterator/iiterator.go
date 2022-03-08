@@ -1,4 +1,4 @@
-package api
+package iterator
 
 type IReadIterator[T any] interface {
 	HasNext() bool

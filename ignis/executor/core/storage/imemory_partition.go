@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/apache/thrift/lib/go/thrift"
-	"ignis/executor/api"
+	"ignis/executor/api/iterator"
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/iprotocol"
 	"ignis/executor/core/itransport"
@@ -177,14 +177,14 @@ func (this *IMemoryPartition[T]) Native() bool {
 	return this.native
 }
 
-func (this *IMemoryPartition[T]) ReadIterator() (api.IReadIterator[T], error) {
+func (this *IMemoryPartition[T]) ReadIterator() (iterator.IReadIterator[T], error) {
 	if elemsT, ok := this.elems.(*IListImpl[T]); ok {
 		return &iMemoryReadIterator[T]{0, int(this.Size()), elemsT}, nil
 	}
 	return &iMemoryAnyReadIterator[T]{0, int(this.Size()), this.elems}, nil
 }
 
-func (this *IMemoryPartition[T]) WriteIterator() (api.IWriteIterator[T], error) {
+func (this *IMemoryPartition[T]) WriteIterator() (iterator.IWriteIterator[T], error) {
 	if elemsT, ok := this.elems.(*IListImpl[T]); ok &&
 		(this.Size() > 0 || reflect.TypeOf((*T)(nil)).Elem().Kind() != reflect.Interface) {
 		return &iMemoryWriteIterator[T]{elemsT}, nil

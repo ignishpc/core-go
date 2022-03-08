@@ -5,6 +5,7 @@ import (
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/impi"
+	"ignis/executor/core/itype"
 	"ignis/executor/core/logger"
 	"ignis/executor/core/modules"
 	"ignis/rpc/executor"
@@ -34,6 +35,9 @@ func _init_(args []string) error {
 		processor.RegisterProcessor("IIO", executor.NewIIOModuleProcessor(modules.NewIIOModule(executorData)))
 		processor.RegisterProcessor("ICacheContext", executor.NewICacheContextModuleProcessor(modules.NewICacheContextModule(executorData)))
 		processor.RegisterProcessor("IComm", executor.NewICommModuleProcessor(modules.NewICommModule(executorData)))
+
+		itype.DefaultTypes(executorData)
+		itype.DefaultFunctions(executorData)
 	}
 
 	if _, present := os.LookupEnv(""); present {

@@ -50,6 +50,14 @@ func GetGenericReader(key int8, id string) IGenericReader {
 	return reader
 }
 
+func SetGenericReader(key int8, id string, gr IGenericReader) {
+	if gr == nil {
+		delete(readers[key].(*IReaderType).readers, id)
+	} else {
+		readers[key].(*IReaderType).readers[id] = gr
+	}
+}
+
 func Read[T any](protocol thrift.TProtocol) (r T, errr error) {
 	id, err := ReadTypeAux(protocol)
 	if err != nil {
@@ -141,16 +149,21 @@ type IPairArrayReaderInfo struct {
 	second       any
 }
 
-type IPairArrayGenericReader[T1 any, T2 any] struct {
+type IPairArrayGenericReader[T any] struct {
 }
 
-func (this *IPairArrayGenericReader[T1, T2]) Read(protocol thrift.TProtocol, info any) (any, error) {
+func (this *IPairArrayGenericReader[T]) Read(protocol thrift.TProtocol, info any) (any, error) {
 	arrayInfo := info.(*IPairArrayReaderInfo)
-	array := make([]ipair.IPair[T1, T2], arrayInfo.sz)
+	array := make([]T, arrayInfo.sz)
+	var pp any
 	if arrayInfo.sz > 0 {
-		array[0] = ipair.IPair[T1, T2]{arrayInfo.first.(T1), arrayInfo.second.(T2)}
+		pp = &array[0]
+		p := pp.(ipair.IAbstractPair)
+		p.SetFirst(arrayInfo.first)
+		p.SetSecond(arrayInfo.second)
 	}
 	for i := int64(1); i < arrayInfo.sz; i++ {
+		pp = &array[i]
 		first, err := arrayInfo.firstReader.Read(protocol)
 		if err != nil {
 			return nil, ierror.Raise(err)
@@ -159,7 +172,9 @@ func (this *IPairArrayGenericReader[T1, T2]) Read(protocol thrift.TProtocol, inf
 		if err != nil {
 			return nil, ierror.Raise(err)
 		}
-		array[i] = ipair.IPair[T1, T2]{first.(T1), second.(T2)}
+		p := pp.(ipair.IAbstractPair)
+		p.SetFirst(first)
+		p.SetSecond(second)
 	}
 	return array, nil
 }
@@ -225,12 +240,17 @@ type IPairReaderInfo struct {
 	second any
 }
 
-type IPairGenericReader[T1 any, T2 any] struct {
+type IPairGenericReader[T any] struct {
 }
 
-func (this *IPairGenericReader[T1, T2]) Read(protocol thrift.TProtocol, info any) (any, error) {
+func (this *IPairGenericReader[T]) Read(protocol thrift.TProtocol, info any) (any, error) {
 	pairInfo := info.(*IPairReaderInfo)
-	return ipair.IPair[T1, T2]{pairInfo.first.(T1), pairInfo.second.(T2)}, nil
+	p := new(T)
+	var pa any = p
+	pp := pa.(ipair.IAbstractPair)
+	pp.SetFirst(pairInfo.first)
+	pp.SetSecond(pairInfo.second)
+	return *p, nil
 }
 
 func setReaderR(key int8, value IReader) *IReaderType {
@@ -410,7 +430,7 @@ func init() {
 			}
 		}
 
-		return GetGenericReader(I_MAP, GetNamePair(info.key, info.val)).Read(protocol, info)
+		return GetGenericReader(I_MAP, GetNameMap(info.key, info.val)).Read(protocol, info)
 
 	}, map[any]any{})).def = NewIGenericReaderImpl(func(protocol thrift.TProtocol, info any) (any, error) {
 		mapInfo := info.(*IMapReaderInfo)
@@ -501,86 +521,9 @@ func init() {
 		if info.second, err = secondReader.Read(protocol); err != nil {
 			return nil, ierror.Raise(err)
 		}
-		return GetGenericReader(I_SET, GetNamePair(info.first, info.second)).Read(protocol, info)
+		return GetGenericReader(I_PAIR, GetNamePair(info.first, info.second)).Read(protocol, info)
 	}, ipair.IPair[any, any]{})).def = NewIGenericReaderImpl(func(protocol thrift.TProtocol, info any) (any, error) {
 		pair := info.(*IPairReaderInfo)
 		return ipair.IPair[any, any]{pair.first, pair.second}, nil
 	})
 }
-
-/*
-func initArray() {
-	createArrayReaderHelper[bool]()
-	createArrayReaderHelper[int8]()
-	createArrayReaderHelper[int16]()
-	createArrayReaderHelper[int32]()
-	createArrayReaderHelper[int64]()
-	createArrayReaderHelper[float64]()
-	createArrayReaderHelper[string]()
-
-	createArrayReaderHelper[[]bool]()
-	createArrayReaderHelper[[]int8]()
-	createArrayReaderHelper[[]int16]()
-	createArrayReaderHelper[[]int32]()
-	createArrayReaderHelper[[]int64]()
-	createArrayReaderHelper[[]float64]()
-	createArrayReaderHelper[[]string]()
-}
-
-func initPair() {
-	createPairReaderHelper[bool, bool]()
-	createPairReaderHelper[bool, int8]()
-	createPairReaderHelper[bool, int16]()
-	createPairReaderHelper[bool, int32]()
-	createPairReaderHelper[bool, int64]()
-	createPairReaderHelper[bool, float64]()
-	createPairReaderHelper[bool, string]()
-
-	createPairReaderHelper[int8, bool]()
-	createPairReaderHelper[int8, int8]()
-	createPairReaderHelper[int8, int16]()
-	createPairReaderHelper[int8, int32]()
-	createPairReaderHelper[int8, int64]()
-	createPairReaderHelper[int8, float64]()
-	createPairReaderHelper[int8, string]()
-
-	createPairReaderHelper[int16, bool]()
-	createPairReaderHelper[int16, int8]()
-	createPairReaderHelper[int16, int16]()
-	createPairReaderHelper[int16, int32]()
-	createPairReaderHelper[int16, int64]()
-	createPairReaderHelper[int16, float64]()
-	createPairReaderHelper[int16, string]()
-
-	createPairReaderHelper[int32, bool]()
-	createPairReaderHelper[int32, int8]()
-	createPairReaderHelper[int32, int16]()
-	createPairReaderHelper[int32, int32]()
-	createPairReaderHelper[int32, int64]()
-	createPairReaderHelper[int32, float64]()
-	createPairReaderHelper[int32, string]()
-
-	createPairReaderHelper[int64, bool]()
-	createPairReaderHelper[int64, int8]()
-	createPairReaderHelper[int64, int16]()
-	createPairReaderHelper[int64, int32]()
-	createPairReaderHelper[int64, int64]()
-	createPairReaderHelper[int64, float64]()
-	createPairReaderHelper[int64, string]()
-
-	createPairReaderHelper[float64, bool]()
-	createPairReaderHelper[float64, int8]()
-	createPairReaderHelper[float64, int16]()
-	createPairReaderHelper[float64, int32]()
-	createPairReaderHelper[float64, int64]()
-	createPairReaderHelper[float64, float64]()
-	createPairReaderHelper[float64, string]()
-
-	createPairReaderHelper[string, bool]()
-	createPairReaderHelper[string, int8]()
-	createPairReaderHelper[string, int16]()
-	createPairReaderHelper[string, int32]()
-	createPairReaderHelper[string, int64]()
-	createPairReaderHelper[string, float64]()
-	createPairReaderHelper[string, string]()
-}*/

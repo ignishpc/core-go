@@ -32,31 +32,31 @@ func NewICacheContextModule(executorData *core.IExecutorData) *ICacheContextModu
 func (this *ICacheContextModule) SaveContext(ctx context.Context) (_r int64, _err error) {
 	defer this.moduleRecover(&_err)
 	_r, _err = this.impl.SaveContext()
-	_err = this.Pack_error(_err)
+	_err = this.PackError(_err)
 	return
 }
 
 func (this *ICacheContextModule) ClearContext(ctx context.Context) (_err error) {
 	defer this.moduleRecover(&_err)
-	return this.Pack_error(this.impl.ClearContext())
+	return this.PackError(this.impl.ClearContext())
 }
 
 func (this *ICacheContextModule) LoadContext(ctx context.Context, id int64) (_err error) {
 	defer this.moduleRecover(&_err)
-	return this.Pack_error(this.impl.LoadContext(id))
+	return this.PackError(this.impl.LoadContext(id))
 }
 
 func (this *ICacheContextModule) LoadContextAsVariable(ctx context.Context, id int64, name string) (_err error) {
 	defer this.moduleRecover(&_err)
-	return this.Pack_error(this.impl.LoadContextAsVariable(id, name))
+	return this.PackError(this.impl.LoadContextAsVariable(id, name))
 }
 
 func (this *ICacheContextModule) Cache(ctx context.Context, id int64, level int8) (_err error) {
 	defer this.moduleRecover(&_err)
-	return this.Pack_error(this.impl.Cache(id, level))
+	return this.PackError(this.impl.Cache(id, level))
 }
 
 func (this *ICacheContextModule) LoadCache(ctx context.Context, id int64) (_err error) {
 	defer this.moduleRecover(&_err)
-	return this.Pack_error(this.impl.LoadCache(id))
+	return this.PackError(this.impl.LoadCache(id))
 }

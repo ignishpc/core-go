@@ -1,29 +1,35 @@
 package core
 
 import (
+	"bufio"
+	"errors"
 	"ignis/executor/api"
 	"ignis/executor/api/function"
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/impi"
+	"ignis/executor/core/iprotocol"
+	"ignis/executor/core/itransport"
 	"ignis/executor/core/logger"
 	"ignis/executor/core/storage"
 	"ignis/rpc"
 	"math"
+	"os"
+	"reflect"
 	"strconv"
 	"strings"
 )
 
 type IExecutorData struct {
-	cores           int
-	partitions      storage.IPartitionGroupBase
-	conv_partitions storage.IPartitionGroupBase
-	variables       map[string]any
-	functions       map[string]function.IBaseFunction
-	library_loader  ILibraryLoader
-	properties      IPropertyParser
-	partitionTools  IPartitionTools
-	context         api.IContext
-	mpi_            IMpi
+	cores          int
+	partitions     storage.IPartitionGroupBase
+	convPartitions storage.IPartitionGroupBase
+	variables      map[string]any
+	functions      map[string]function.IBaseFunction
+	libraryLoader  ILibraryLoader
+	properties     IPropertyParser
+	partitionTools IPartitionTools
+	context        *iContextImpl
+	mpi_           IMpi
 }
 
 func NewIExecutorData() *IExecutorData {
@@ -46,14 +52,14 @@ func GetPartitions[T any](this *IExecutorData) (*storage.IPartitionGroup[T], err
 	if group, ok := this.partitions.(*storage.IPartitionGroup[T]); ok {
 		return group, nil
 	}
-	if group, ok := this.conv_partitions.(*storage.IPartitionGroup[T]); ok {
+	if group, ok := this.convPartitions.(*storage.IPartitionGroup[T]); ok {
 		return group, nil
 	}
 	conv_partitions, err := ConvertGroupPartitionTo[T](&this.partitionTools, this.partitions)
 	if err != nil {
 		return nil, err
 	}
-	this.conv_partitions = conv_partitions
+	this.convPartitions = conv_partitions
 	return conv_partitions, nil
 }
 
@@ -80,7 +86,7 @@ func (this *IExecutorData) HasPartitions() bool {
 
 func (this *IExecutorData) DeletePartitions() {
 	this.partitions = nil
-	this.conv_partitions = nil
+	this.convPartitions = nil
 }
 
 func SetVariable[T any](this *IExecutorData, key string, value T) {
@@ -117,21 +123,17 @@ func (this *IExecutorData) InfoDirectory() (string, error) {
 }
 
 func (this *IExecutorData) SetMpiGroup(comm impi.C_MPI_Comm) error {
-	this.context.(*iContextImpl).mpiThreadGroup = []impi.C_MPI_Comm{comm}
+	this.context.mpiThreadGroup = []impi.C_MPI_Comm{comm}
 	return nil
 }
 
 func (this *IExecutorData) DestroyMpiGroup() {
-	for _, comm := range this.context.(*iContextImpl).mpiThreadGroup {
+	for _, comm := range this.context.mpiThreadGroup {
 		if comm != impi.MPI_COMM_WORLD {
 			impi.MPI_Comm_free(&comm)
 		}
 	}
 	this.SetMpiGroup(impi.MPI_COMM_WORLD)
-}
-
-func (this *IExecutorData) ReloadLibraries() error {
-	return nil //TODO
 }
 
 func (this *IExecutorData) GetContext() api.IContext {
@@ -159,7 +161,7 @@ func (this *IExecutorData) GetCores() int {
 }
 
 func (this *IExecutorData) GetMpiCores() int {
-	return len(this.context.(*iContextImpl).mpiThreadGroup)
+	return len(this.context.mpiThreadGroup)
 }
 
 func (this *IExecutorData) EnableMpiCores() error {
@@ -174,10 +176,8 @@ func (this *IExecutorData) EnableMpiCores() error {
 		mpiCores = int(math.Ceil(float64(this.GetCores()) * math.Ceil(ratio)))
 	}
 
-	context := this.context.(*iContextImpl)
-
-	if mpiCores > 1 && len(context.mpiThreadGroup) == 1 && context.Executors() > 1 {
-		context.mpiThreadGroup, err = this.Duplicate(context.mpiThreadGroup[0], mpiCores)
+	if mpiCores > 1 && len(this.context.mpiThreadGroup) == 1 && this.context.Executors() > 1 {
+		this.context.mpiThreadGroup, err = this.Duplicate(this.context.mpiThreadGroup[0], mpiCores)
 		if err != nil {
 			return ierror.Raise(err)
 		}
@@ -216,7 +216,7 @@ func (this *IExecutorData) LoadLibrary(src *rpc.ISource) (function.IBaseFunction
 	return this.loadLibrary(src, true, false)
 }
 
-func (this *IExecutorData) loadLibrary(src *rpc.ISource, backup bool, fast bool) (function.IBaseFunction, error) {
+func (this *IExecutorData) loadLibrary(src *rpc.ISource, withBackup bool, fast bool) (function.IBaseFunction, error) {
 	if src.Obj.IsSetBytes() {
 		return nil, ierror.RaiseMsg("Go not support function serialization")
 	}
@@ -229,13 +229,105 @@ func (this *IExecutorData) loadLibrary(src *rpc.ISource, backup bool, fast bool)
 			return nil, ierror.RaiseMsg("Function " + *src.Obj.Name + " not found")
 		}
 	} else {
-		if f, err := this.library_loader.LoadFunction(*src.Obj.Name); err == nil {
+		if f, err := this.libraryLoader.LoadFunction(*src.Obj.Name); err == nil {
 			baseFunction = f.(function.IBaseFunction)
 		} else {
 			return nil, ierror.Raise(err)
 		}
-		//TODO
+		this.RegisterFunction(baseFunction)
+
+		if withBackup {
+			info, err := this.InfoDirectory()
+			if err != nil {
+				return nil, ierror.Raise(err)
+			}
+			backupPath := info + "/sources" + strconv.Itoa(this.context.ExecutorId()) + ".bak"
+			file, err := os.OpenFile(backupPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				return nil, ierror.Raise(err)
+			}
+			defer file.Close()
+			if _, err := file.WriteString(*src.Obj.Name + "\n"); err != nil {
+				return nil, ierror.Raise(err)
+			}
+		}
 	}
-	
+
+	if !fast {
+		if len(src.Params) > 0 {
+			logger.Info("Loading user variables")
+			if err := this.LoadParameters(src); err != nil {
+				return nil, ierror.Raise(err)
+			}
+		}
+		logger.Info("Function loaded")
+	}
+
 	return baseFunction, nil
+}
+
+func (this *IExecutorData) LoadLibraryFunctions(path string) error {
+	return ierror.RaiseMsg("Not implemented yet")
+}
+
+func (this *IExecutorData) ReloadLibraries() error {
+	info, err := this.InfoDirectory()
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	backupPath := info + "/sources" + strconv.Itoa(this.context.ExecutorId()) + ".bak"
+	if _, err = os.Stat(backupPath); errors.Is(err, os.ErrExist) {
+		logger.Info("Function backup found, loading")
+		file, err := os.Open(backupPath)
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		defer file.Close()
+		source := rpc.NewISource()
+		source.Obj = rpc.NewIEncoded()
+		loaded := map[string]bool{}
+		scanner := bufio.NewScanner(file)
+
+		for scanner.Scan() {
+			line := scanner.Text()
+			source.Obj.Name = &line
+			if _, ok := loaded[line]; !ok && len(line) > 0 {
+				_, err = this.loadLibrary(source, false, true)
+				if err != nil {
+					logger.Error(err)
+				}
+				loaded[line] = true
+			}
+		}
+	}
+	return nil
+}
+
+func (this *IExecutorData) RegisterFunction(f function.IBaseFunction) {
+	this.functions[reflect.TypeOf(f).String()] = f
+}
+
+func (this *IExecutorData) RegisterType(name string, tp any) {
+	this.context.AddType(name, tp)
+}
+
+func (this *IExecutorData) LoadParameters(src *rpc.ISource) error {
+	for key, value := range src.Params {
+		buffer := itransport.NewIMemoryBufferWrapper(value, int64(len(value)), itransport.OBSERVE)
+		proto := iprotocol.NewIObjectProtocol(buffer)
+		if v, err := proto.ReadObject(); err != nil {
+			return ierror.Raise(err)
+		} else {
+			this.context.Vars()[key] = v
+		}
+	}
+	return nil
+}
+
+func (this *IExecutorData) GetBaseTypes(name string) any {
+	return this.context.baseTypes[name]
+}
+
+func (this *IExecutorData) GetLastBaseType() any {
+	return this.context.lastBaseType
 }

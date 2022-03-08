@@ -2,7 +2,7 @@ package storage
 
 import (
 	"github.com/apache/thrift/lib/go/thrift"
-	"ignis/executor/api"
+	"ignis/executor/api/iterator"
 )
 
 type IPartitionBase interface {
@@ -27,8 +27,8 @@ type IPartitionBase interface {
 type IPartition[T any] interface {
 	IPartitionBase
 
-	ReadIterator() (api.IReadIterator[T], error)
-	WriteIterator() (api.IWriteIterator[T], error)
+	ReadIterator() (iterator.IReadIterator[T], error)
+	WriteIterator() (iterator.IWriteIterator[T], error)
 }
 
 type IPartitionGroupBase interface {
@@ -149,7 +149,7 @@ func (this *IPartitionGroup[T]) AddMemoryPartition(sz int64) {
 	this.Add(NewIMemoryPartition[T](sz, false))
 }
 
-func Copy[T any](rit api.IReadIterator[T], wit api.IWriteIterator[T]) error {
+func Copy[T any](rit iterator.IReadIterator[T], wit iterator.IWriteIterator[T]) error {
 	for elem, err := rit.Next(); rit.HasNext(); elem, err = rit.Next() {
 		if err != nil {
 			return err

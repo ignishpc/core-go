@@ -5,6 +5,7 @@ import (
 	"github.com/apache/thrift/lib/go/thrift"
 	"ignis/executor/api/ipair"
 	"ignis/executor/core/ierror"
+	"ignis/executor/core/utils"
 	"reflect"
 	"strings"
 )
@@ -62,30 +63,31 @@ func (this *IWriterType) SetWriter(id string, value IWriter) {
 	}
 }
 
-func (this *IWriterType) GetWriter(id string) IWriter {
+func (this *IWriterType) GetWriter(id string) (writer IWriter) {
+	writer = this
 	switch id[0] {
 	case '*':
 		if this.ptr != nil {
-			return this.ptr
+			writer = this.ptr
 		}
 	case '[':
 		if this.array != nil {
-			return this.array
+			writer = this.array
 		}
 	}
 	if len(this.writers) > 0 {
-		if printer, present := this.writers[id]; present {
-			return printer
+		if w2, present := this.writers[id]; present {
+			return w2
 		}
 		i := strings.IndexByte(id, '[')
 		if i > 0 {
-			printer, present := this.writers[id[0:i]]
+			w2, present := this.writers[id[0:i]]
 			if present {
-				return printer
+				return w2
 			}
 		}
 	}
-	return this
+	return
 }
 
 var globalWriter IWriter
@@ -127,9 +129,13 @@ func (this *IWriterPrinterType[T]) Write(protocol thrift.TProtocol, obj any) err
 type IArrayWriterType[T any] struct {
 	IWriterType
 	valWriter IWriterType
+	err       error
 }
 
 func (this *IArrayWriterType[T]) Write(protocol thrift.TProtocol, obj any) error {
+	if this.err != nil {
+		return this.err
+	}
 	array := obj.([]T)
 	sz := len(array)
 	if err := WriteSizeAux(protocol, int64(sz)); err != nil {
@@ -154,9 +160,13 @@ type IMapWriterType[K comparable, V any] struct {
 	IWriterType
 	keyWriter IWriterType
 	valWriter IWriterType
+	err       error
 }
 
 func (this *IMapWriterType[K, V]) Write(protocol thrift.TProtocol, obj any) error {
+	if this.err != nil {
+		return this.err
+	}
 	m := obj.(map[K]V)
 	sz := len(m)
 	if err := WriteSizeAux(protocol, int64(sz)); err != nil {
@@ -187,45 +197,18 @@ func (this *IMapWriterType[K, V]) Write(protocol thrift.TProtocol, obj any) erro
 	return nil
 }
 
-type IPairWriterType[T1 any, T2 any] struct {
+type IPairArrayWriterType[T any] struct {
 	IWriterType
 	firstWriter  IWriterType
 	secondWriter IWriterType
+	err          error
 }
 
-func (this *IPairWriterType[T1, T2]) Write(protocol thrift.TProtocol, obj any) error {
-	p := obj.(ipair.IPair[T1, T2])
-
-	err := this.firstWriter.WriteType(protocol)
-	if err != nil {
-		return ierror.Raise(err)
+func (this *IPairArrayWriterType[T]) Write(protocol thrift.TProtocol, obj any) error {
+	if this.err != nil {
+		return this.err
 	}
-
-	err = this.secondWriter.WriteType(protocol)
-	if err != nil {
-		return ierror.Raise(err)
-	}
-
-	err = this.firstWriter.Write(protocol, p.First)
-	if err != nil {
-		return ierror.Raise(err)
-	}
-	err = this.secondWriter.Write(protocol, p.Second)
-	if err != nil {
-		return ierror.Raise(err)
-	}
-
-	return nil
-}
-
-type IPairArrayWriterType[T1 any, T2 any] struct {
-	IWriterType
-	firstWriter  IWriterType
-	secondWriter IWriterType
-}
-
-func (this *IPairArrayWriterType[T1, T2]) Write(protocol thrift.TProtocol, obj any) error {
-	array := obj.([]ipair.IPair[T1, T2])
+	array := obj.([]T)
 	sz := len(array)
 	if err := WriteSizeAux(protocol, int64(sz)); err != nil {
 		return ierror.Raise(err)
@@ -242,14 +225,44 @@ func (this *IPairArrayWriterType[T1, T2]) Write(protocol thrift.TProtocol, obj a
 	}
 
 	for _, e := range array {
-		if err = this.firstWriter.Write(protocol, e.First); err != nil {
+		var pa any = &e
+		pp := pa.(ipair.IAbstractPair)
+		if err = this.firstWriter.Write(protocol, pp.GetFirst()); err != nil {
 			return ierror.Raise(err)
 		}
-		if err = this.secondWriter.Write(protocol, e.Second); err != nil {
+		if err = this.secondWriter.Write(protocol, pp.GetSecond()); err != nil {
 			return ierror.Raise(err)
 		}
 	}
 	return nil
+}
+
+type IAbsPointerWriterType struct {
+	IWriterType
+}
+
+func (this *IAbsPointerWriterType) GetWriter(id string) IWriter {
+	valWriter, err := GetWriter(id[1:])
+
+	return NewIWriteType(utils.Ternary(err != nil, valWriter.Type(), I_VOID), func(protocol thrift.TProtocol, obj any) error {
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		elem := reflect.ValueOf(obj).Elem()
+		return valWriter.Write(protocol, elem.Interface())
+	})
+}
+
+type IPointerWriterType[T any] struct {
+	IWriterType
+	err error
+}
+
+func (this *IPointerWriterType[T]) Write(protocol thrift.TProtocol, obj any) error {
+	if this.err != nil {
+		return this.err
+	}
+	return this.write(protocol, *(obj.(*T)))
 }
 
 func init() {
@@ -308,14 +321,7 @@ func init() {
 	SetWriter(TypeName[string](), NewIWriteType(I_STRING, func(protocol thrift.TProtocol, obj any) error {
 		return protocol.WriteString(ctx, obj.(string))
 	}))
-	SetWriter(TypeGenericName[*any](), NewIWriteType(I_MAP, func(protocol thrift.TProtocol, obj any) error {
-		elem := reflect.ValueOf(obj).Elem()
-		if writer, err := GetWriter(elem.Type().String()); err != nil {
-			return ierror.Raise(err)
-		} else {
-			return writer.Write(protocol, elem.Interface())
-		}
-	}))
+	SetWriter(TypeGenericName[*any](), &IAbsPointerWriterType{})
 	array := NewIWriteType(I_LIST, func(protocol thrift.TProtocol, obj any) error {
 		value := reflect.ValueOf(obj)
 		rt := value.Type()
@@ -371,11 +377,11 @@ func init() {
 		if err != nil {
 			return ierror.Raise(err)
 		}
-		firstWriter.WriteType(protocol)
+		err = firstWriter.WriteType(protocol)
 		if err != nil {
 			return ierror.Raise(err)
 		}
-		secondWriter.WriteType(protocol)
+		err = secondWriter.WriteType(protocol)
 		if err != nil {
 			return ierror.Raise(err)
 		}
@@ -437,11 +443,11 @@ func init() {
 		if err != nil {
 			return ierror.Raise(err)
 		}
-		key_writer.WriteType(protocol)
+		err = key_writer.WriteType(protocol)
 		if err != nil {
 			return ierror.Raise(err)
 		}
-		value_writer.WriteType(protocol)
+		err = value_writer.WriteType(protocol)
 		if err != nil {
 			return ierror.Raise(err)
 		}
@@ -460,39 +466,30 @@ func init() {
 		return nil
 	}))
 	SetWriter(TypeGenericName[ipair.IPair[any, any]](), NewIWriteType(I_PAIR, func(protocol thrift.TProtocol, obj any) error {
-		value := reflect.ValueOf(obj)
-		rt := value.Type()
+		p := obj.(ipair.IAbstractPair)
 
-		firstRt := rt.Field(0).Type
-		secondRt := rt.Field(1).Type
-		if firstRt.Kind() == reflect.Interface {
-			firstRt = value.Field(0).Elem().Type()
-		}
-		if secondRt.Kind() == reflect.Interface {
-			secondRt = value.Field(1).Elem().Type()
-		}
-		first_writer, err := GetWriter(firstRt.String())
+		first_writer, err := GetWriter(GetName(p.GetFirst()))
 		if err != nil {
 			return ierror.Raise(err)
 		}
-		second_writer, err := GetWriter(secondRt.String())
+		second_writer, err := GetWriter(GetName(p.GetSecond()))
 		if err != nil {
 			return ierror.Raise(err)
 		}
-		first_writer.WriteType(protocol)
+		err = first_writer.WriteType(protocol)
 		if err != nil {
 			return ierror.Raise(err)
 		}
-		second_writer.WriteType(protocol)
+		err = second_writer.WriteType(protocol)
 		if err != nil {
 			return ierror.Raise(err)
 		}
 
-		err = first_writer.Write(protocol, value.Field(0).Interface())
+		err = first_writer.Write(protocol, p.GetFirst())
 		if err != nil {
 			return ierror.Raise(err)
 		}
-		err = second_writer.Write(protocol, value.Field(1).Interface())
+		err = second_writer.Write(protocol, p.GetSecond())
 		if err != nil {
 			return ierror.Raise(err)
 		}
