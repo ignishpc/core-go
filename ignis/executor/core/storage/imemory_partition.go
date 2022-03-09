@@ -32,6 +32,13 @@ func ConvIMemoryPartition[T any](other IPartitionBase) IPartitionBase {
 	}
 }
 
+func NewIMemoryPartitionArray[T any](array []T) *IMemoryPartition[T] {
+	return &IMemoryPartition[T]{
+		NewIListArray(array),
+		false,
+	}
+}
+
 func (this *IMemoryPartition[T]) Read(transport thrift.TTransport) error {
 	zlibTrans, err := itransport.NewIZlibTransport(transport)
 	if err != nil {

@@ -341,9 +341,9 @@ func SaveAsObjectFile[T any](this *IIOImpl, path string, compression int8, first
 	return nil
 }
 
-func (this *IIOImpl) SaveAsTextFile(path string, first int64) error {
+func SaveAsTextFile[T any](this *IIOImpl, path string, first int64) error {
 	logger.Info("IO: saving as text file")
-	group, err := core.GetAndDeletePartitions[string](this.executorData)
+	group, err := core.GetAndDeletePartitions[T](this.executorData)
 	if err != nil {
 		return ierror.Raise(err)
 	}

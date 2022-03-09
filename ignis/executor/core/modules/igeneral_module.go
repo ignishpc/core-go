@@ -4,6 +4,7 @@ import (
 	"context"
 	"ignis/executor/api/base"
 	"ignis/executor/api/function"
+	"ignis/executor/api/iterator"
 	"ignis/executor/core"
 	"ignis/executor/core/modules/impl"
 	"ignis/rpc"
@@ -22,7 +23,19 @@ func NewIGeneralModule(executorData *core.IExecutorData) *IGeneralModule {
 	}
 }
 
-func (this *IGeneralModule) ExecuteTo(ctx context.Context, src *rpc.ISource) (_err error) { return nil }
+func (this *IGeneralModule) ExecuteTo(ctx context.Context, src *rpc.ISource) (_err error) {
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if mapfun, ok := basefun.(base.IExecuteToAbs); ok {
+		return this.PackError(mapfun.RunExecuteTo(this.pipeImpl, basefun))
+	} else if anyfun, ok := basefun.(function.IFunction0[[][]any]); ok {
+		return this.PackError(impl.ExecuteTo(this.pipeImpl, anyfun))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "executeTo")
+}
 
 func (this *IGeneralModule) Map_(ctx context.Context, src *rpc.ISource) (_err error) {
 	defer this.moduleRecover(&_err)
@@ -53,27 +66,87 @@ func (this *IGeneralModule) Filter(ctx context.Context, src *rpc.ISource) (_err 
 }
 
 func (this *IGeneralModule) Flatmap(ctx context.Context, src *rpc.ISource) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if filterfun, ok := basefun.(base.IFlatmapAbs); ok {
+		return this.PackError(filterfun.RunFlatmap(this.pipeImpl, basefun))
+	} else if anyfun, ok := basefun.(function.IFunction[any, []any]); ok {
+		return this.PackError(impl.Flatmap(this.pipeImpl, anyfun))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "flatmap")
 }
 
 func (this *IGeneralModule) KeyBy(ctx context.Context, src *rpc.ISource) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if filterfun, ok := basefun.(base.IKeyByAbs); ok {
+		return this.PackError(filterfun.RunKeyBy(this.pipeImpl, basefun))
+	} else if anyfun, ok := basefun.(function.IFunction[any, any]); ok {
+		return this.PackError(impl.KeyBy(this.pipeImpl, anyfun))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "keyBy")
 }
 
 func (this *IGeneralModule) MapPartitions(ctx context.Context, src *rpc.ISource) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if filterfun, ok := basefun.(base.IMapPartitionsAbs); ok {
+		return this.PackError(filterfun.RunMapPartitions(this.pipeImpl, basefun))
+	} else if anyfun, ok := basefun.(function.IFunction[iterator.IReadIterator[any], []any]); ok {
+		return this.PackError(impl.MapPartitions(this.pipeImpl, anyfun))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "mapPartitions")
 }
 
 func (this *IGeneralModule) MapPartitionsWithIndex(ctx context.Context, src *rpc.ISource, preservesPartitioning bool) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if filterfun, ok := basefun.(base.IMapPartitionsWithIndexAbs); ok {
+		return this.PackError(filterfun.RunMapPartitionsWithIndex(this.pipeImpl, basefun, preservesPartitioning))
+	} else if anyfun, ok := basefun.(function.IFunction2[int64, iterator.IReadIterator[any], []any]); ok {
+		return this.PackError(impl.MapPartitionsWithIndex(this.pipeImpl, anyfun, preservesPartitioning))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "mapPartitionsWithIndex")
 }
 
 func (this *IGeneralModule) MapExecutor(ctx context.Context, src *rpc.ISource) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if filterfun, ok := basefun.(base.IMapExecutorAbs); ok {
+		return this.PackError(filterfun.RunMapExecutor(this.pipeImpl, basefun))
+	} else if anyfun, ok := basefun.(function.IVoidFunction[[][]any]); ok {
+		return this.PackError(impl.MapExecutor(this.pipeImpl, anyfun))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "mapExecutor")
 }
 
 func (this *IGeneralModule) MapExecutorTo(ctx context.Context, src *rpc.ISource) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if filterfun, ok := basefun.(base.IMapExecutorToAbs); ok {
+		return this.PackError(filterfun.RunMapExecutorTo(this.pipeImpl, basefun))
+	} else if anyfun, ok := basefun.(function.IFunction[[][]any, [][]any]); ok {
+		return this.PackError(impl.MapExecutorTo(this.pipeImpl, anyfun))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "mapExecutorTo")
 }
 
 func (this *IGeneralModule) GroupBy(ctx context.Context, src *rpc.ISource, numPartitions int64) (_err error) {

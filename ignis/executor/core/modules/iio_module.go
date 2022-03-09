@@ -3,6 +3,7 @@ package modules
 import (
 	"context"
 	"ignis/executor/core"
+	"ignis/executor/core/ierror"
 	"ignis/executor/core/modules/impl"
 	"ignis/rpc"
 )
@@ -75,33 +76,59 @@ func (this *IIOModule) TextFile2(ctx context.Context, path string, minPartitions
 }
 
 func (this *IIOModule) PartitionObjectFile(ctx context.Context, path string, first int64, partitions int64) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	base, err := this.TypeFromPartition()
+	if err != nil {
+		return this.PackError(err)
+	}
+	return this.PackError(base.PartitionObjectFile(this.ioImpl, path, first, partitions))
 }
 
 func (this *IIOModule) PartitionObjectFile4(ctx context.Context, path string, first int64, partitions int64, src *rpc.ISource) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	base, err := this.TypeFromSource(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	return this.PackError(base.PartitionObjectFile(this.ioImpl, path, first, partitions))
 }
 
 func (this *IIOModule) PartitionTextFile(ctx context.Context, path string, first int64, partitions int64) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	return this.PackError(this.ioImpl.PartitionTextFile(path, first, partitions))
 }
 
 func (this *IIOModule) PartitionJsonFile4a(ctx context.Context, path string, first int64, partitions int64, objectMapping bool) (_err error) {
-	return nil
+	return this.PackError(ierror.RaiseMsg("Not implemented yet"))
 }
 
 func (this *IIOModule) PartitionJsonFile4b(ctx context.Context, path string, first int64, partitions int64, src *rpc.ISource) (_err error) {
-	return nil
+	return this.PackError(ierror.RaiseMsg("Not implemented yet"))
 }
 
 func (this *IIOModule) SaveAsObjectFile(ctx context.Context, path string, compression int8, first int64) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	base, err := this.TypeFromPartition()
+	if err != nil {
+		return this.PackError(err)
+	}
+	return this.PackError(base.SaveAsObjectFile(this.ioImpl, path, compression, first))
 }
 
 func (this *IIOModule) SaveAsTextFile(ctx context.Context, path string, first int64) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	base, err := this.TypeFromPartition()
+	if err != nil {
+		return this.PackError(err)
+	}
+	return this.PackError(base.SaveAsTextFile(this.ioImpl, path, first))
 }
 
 func (this *IIOModule) SaveAsJsonFile(ctx context.Context, path string, first int64, pretty bool) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	base, err := this.TypeFromPartition()
+	if err != nil {
+		return this.PackError(err)
+	}
+	return this.PackError(base.SaveAsJsonFile(this.ioImpl, path, first, pretty))
 }

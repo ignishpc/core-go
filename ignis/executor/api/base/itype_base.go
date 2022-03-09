@@ -32,6 +32,10 @@ type ITypeBase interface {
 	ImportData(commImpl *impl.ICommImpl, group string, source bool, threads int64) error
 
 	PartitionApproxSize(ioImpl *impl.IIOImpl) (int64, error)
+	PartitionObjectFile(ioImpl *impl.IIOImpl, path string, first int64, partitions int64) error
+	SaveAsObjectFile(ioImpl *impl.IIOImpl, path string, compression int8, first int64) error
+	SaveAsTextFile(ioImpl *impl.IIOImpl, path string, first int64) error
+	SaveAsJsonFile(ioImpl *impl.IIOImpl, path string, first int64, pretty bool) error
 }
 
 type ITypeBaseImpl[T any] struct {
@@ -67,4 +71,20 @@ func (this *ITypeBaseImpl[T]) ImportData(commImpl *impl.ICommImpl, group string,
 
 func (this *ITypeBaseImpl[T]) PartitionApproxSize(ioImpl *impl.IIOImpl) (int64, error) {
 	return impl.PartitionApproxSize[T](ioImpl)
+}
+
+func (this *ITypeBaseImpl[T]) PartitionObjectFile(ioImpl *impl.IIOImpl, path string, first int64, partitions int64) error {
+	return impl.PartitionObjectFile[T](ioImpl, path, first, partitions)
+}
+
+func (this *ITypeBaseImpl[T]) SaveAsObjectFile(ioImpl *impl.IIOImpl, path string, compression int8, first int64) error {
+	return impl.SaveAsObjectFile[T](ioImpl, path, compression, first)
+}
+
+func (this *ITypeBaseImpl[T]) SaveAsTextFile(ioImpl *impl.IIOImpl, path string, first int64) error {
+	return impl.SaveAsTextFile[T](ioImpl, path, first)
+}
+
+func (this *ITypeBaseImpl[T]) SaveAsJsonFile(ioImpl *impl.IIOImpl, path string, first int64, pretty bool) error {
+	return impl.SaveAsJsonFile[T](ioImpl, path, first, pretty)
 }

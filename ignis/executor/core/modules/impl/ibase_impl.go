@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"ignis/executor/api"
 	"ignis/executor/api/ipair"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
@@ -13,6 +14,10 @@ import (
 
 type IBaseImpl struct {
 	executorData *core.IExecutorData
+}
+
+func (this *IBaseImpl) Context() api.IContext {
+	return this.executorData.GetContext()
 }
 
 func Exchange[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *storage.IPartitionGroup[T]) error {
@@ -77,25 +82,25 @@ func exchangeSync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *s
 	remainder := numPartitions % executors
 	var partsTargets []ipair.IPair[int64, int64]
 
-	none := ipair.New(int64(-1), int64(-1))
+	none := *ipair.New(int64(-1), int64(-1))
 	for i := 0; i < (block+1)*executors; i++ {
 		partsTargets = append(partsTargets, none)
 	}
 	p := int64(0)
 	for i := 0; i < executors; i++ {
 		for j := 0; j < block; j++ {
-			partsTargets[j*executors+i] = ipair.New(p+int64(j), int64(i))
+			partsTargets[j*executors+i] = *ipair.New(p+int64(j), int64(i))
 		}
 		p += int64(block)
 		if i < remainder {
-			partsTargets[block*executors+i] = ipair.New(p, int64(i))
+			partsTargets[block*executors+i] = *ipair.New(p, int64(i))
 			p += 1
 		}
 	}
 	{
 		var aux []ipair.IPair[int64, int64]
 		for _, e := range partsTargets {
-			if !ipair.Compare(e, none) {
+			if !ipair.Compare(&e, &none) {
 				aux = append(aux, e)
 			}
 		}
@@ -105,20 +110,20 @@ func exchangeSync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *s
 	for i := 0; i < block; i++ {
 		for j := 0; j < executors; j++ {
 			if j < remainder {
-				partsTargets = append(partsTargets, ipair.New(int64(block*j+i+j), int64(j)))
+				partsTargets = append(partsTargets, *ipair.New(int64(block*j+i+j), int64(j)))
 			} else {
-				partsTargets = append(partsTargets, ipair.New(int64(block*j+i+remainder), int64(j)))
+				partsTargets = append(partsTargets, *ipair.New(int64(block*j+i+remainder), int64(j)))
 			}
 		}
 	}
 
 	if block > 0 {
 		for j := 0; j < remainder; j++ {
-			partsTargets = append(partsTargets, ipair.New(int64(block*j+block), int64(j)))
+			partsTargets = append(partsTargets, *ipair.New(int64(block*j+block), int64(j)))
 		}
 	} else {
 		for j := 0; j < remainder; j++ {
-			partsTargets = append(partsTargets, ipair.New(int64(j), int64(j)))
+			partsTargets = append(partsTargets, *ipair.New(int64(j), int64(j)))
 		}
 	}
 
@@ -174,7 +179,7 @@ func exchangeAsync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *
 			init = int64((block+1)*remainder + block*(i-remainder))
 			end = init + int64(block)
 		}
-		ranges = append(ranges, ipair.New(init, end))
+		ranges = append(ranges, *ipair.New(init, end))
 	}
 
 	m := utils.Ternary(executors%2 == 0, executors, executors+1)
