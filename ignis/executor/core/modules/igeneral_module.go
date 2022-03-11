@@ -14,12 +14,14 @@ import (
 type IGeneralModule struct {
 	IModule
 	pipeImpl *impl.IPipeImpl
+	sortImpl *impl.ISortImpl
 }
 
 func NewIGeneralModule(executorData *core.IExecutorData) *IGeneralModule {
 	return &IGeneralModule{
 		IModule{executorData},
 		impl.NewIPipeImpl(executorData),
+		impl.NewISortImpl(executorData),
 	}
 }
 
@@ -153,18 +155,50 @@ func (this *IGeneralModule) GroupBy(ctx context.Context, src *rpc.ISource, numPa
 	return nil
 }
 
-func (this *IGeneralModule) Sort(ctx context.Context, ascending bool) (_err error) { return nil }
+func (this *IGeneralModule) Sort(ctx context.Context, ascending bool) (_err error) {
+	defer this.moduleRecover(&_err)
+	base, err := this.TypeFromPartition()
+	if err != nil {
+		return this.PackError(err)
+	}
+	return this.PackError(base.Sort(this.sortImpl, ascending))
+}
 
 func (this *IGeneralModule) Sort2(ctx context.Context, ascending bool, numPartitions int64) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	base, err := this.TypeFromPartition()
+	if err != nil {
+		return this.PackError(err)
+	}
+	return this.PackError(base.SortWithPartitions(this.sortImpl, ascending, numPartitions))
 }
 
 func (this *IGeneralModule) SortBy(ctx context.Context, src *rpc.ISource, ascending bool) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if filterfun, ok := basefun.(base.ISortByAbs); ok {
+		return this.PackError(filterfun.RunSortBy(this.sortImpl, basefun, ascending))
+	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
+		return this.PackError(impl.SortBy(this.sortImpl, anyfun, ascending))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "sortBy")
 }
 
 func (this *IGeneralModule) SortBy3(ctx context.Context, src *rpc.ISource, ascending bool, numPartitions int64) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if filterfun, ok := basefun.(base.ISortByAbs); ok {
+		return this.PackError(filterfun.RunSortByWithPartitions(this.sortImpl, basefun, ascending, numPartitions))
+	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
+		return this.PackError(impl.SortByWithPartitions(this.sortImpl, anyfun, ascending, numPartitions))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "sortBy")
 }
 
 func (this *IGeneralModule) Union_(ctx context.Context, other string, preserveOrder bool) (_err error) {

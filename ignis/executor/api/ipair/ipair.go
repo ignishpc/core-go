@@ -5,6 +5,8 @@ type IAbstractPair interface {
 	GetFirst() any
 	SetSecond(f any)
 	GetSecond() any
+	Copy(first any, second any) IAbstractPair
+	New(first any, second any) IAbstractPair
 }
 
 type IPair[T1 any, T2 any] struct {
@@ -26,6 +28,14 @@ func (this *IPair[T1, T2]) SetSecond(f any) {
 
 func (this *IPair[T1, T2]) GetSecond() any {
 	return this.Second
+}
+
+func (this *IPair[T1, T2]) Copy(first any, second any) IAbstractPair {
+	return &IPair[T1, T2]{this.First, this.Second}
+}
+
+func (this *IPair[T1, T2]) New(first any, second any) IAbstractPair {
+	return &IPair[T1, T2]{first.(T1), second.(T2)}
 }
 
 func New[T1 any, T2 any](first T1, second T2) *IPair[T1, T2] {

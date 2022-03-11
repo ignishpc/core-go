@@ -118,3 +118,21 @@ func (this *IMapExecutorTo[T, R]) RunMapExecutorTo(i *impl.IPipeImpl, f function
 	RegisterType[R](i.Context())
 	return impl.MapExecutorTo[T, R](i, f.(function.IFunction[[][]T, [][]R]))
 }
+
+type ISortByAbs interface {
+	RunSortBy(i *impl.ISortImpl, f function.IBaseFunction, ascending bool) error
+	RunSortByWithPartitions(i *impl.ISortImpl, f function.IBaseFunction, ascending bool, partitions int64) error
+}
+
+type ISortBy[T any] struct {
+}
+
+func (this *IExecuteTo[T]) RunSortBy(i *impl.ISortImpl, f function.IBaseFunction, ascending bool) error {
+	RegisterType[T](i.Context())
+	return impl.SortBy(i, f.(function.IFunction2[T, T, bool]), ascending)
+}
+
+func (this *IExecuteTo[T]) RunSortByWithPartitions(i *impl.ISortImpl, f function.IBaseFunction, ascending bool, partitions int64) error {
+	RegisterType[T](i.Context())
+	return impl.SortByWithPartitions(i, f.(function.IFunction2[T, T, bool]), ascending, partitions)
+}

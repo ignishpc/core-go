@@ -36,6 +36,9 @@ type ITypeBase interface {
 	SaveAsObjectFile(ioImpl *impl.IIOImpl, path string, compression int8, first int64) error
 	SaveAsTextFile(ioImpl *impl.IIOImpl, path string, first int64) error
 	SaveAsJsonFile(ioImpl *impl.IIOImpl, path string, first int64, pretty bool) error
+
+	Sort(sortImpl *impl.ISortImpl, ascending bool) error
+	SortWithPartitions(sortImpl *impl.ISortImpl, ascending bool, partitions int64) error
 }
 
 type ITypeBaseImpl[T any] struct {
@@ -87,4 +90,12 @@ func (this *ITypeBaseImpl[T]) SaveAsTextFile(ioImpl *impl.IIOImpl, path string, 
 
 func (this *ITypeBaseImpl[T]) SaveAsJsonFile(ioImpl *impl.IIOImpl, path string, first int64, pretty bool) error {
 	return impl.SaveAsJsonFile[T](ioImpl, path, first, pretty)
+}
+
+func (this *ITypeBaseImpl[T]) Sort(sortImpl *impl.ISortImpl, ascending bool) error {
+	return impl.Sort[T](sortImpl, ascending)
+}
+
+func (this *ITypeBaseImpl[T]) SortWithPartitions(sortImpl *impl.ISortImpl, ascending bool, partitions int64) error {
+	return impl.SortWithPartitions[T](sortImpl, ascending, partitions)
 }

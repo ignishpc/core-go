@@ -36,8 +36,8 @@ type ThreadsInfo struct {
 	static  bool
 	threads int
 	chunk   int
-	before  func() error
-	after   func() error
+	before  func(ISync) error
+	after   func(ISync) error
 }
 
 func New() *ThreadsInfo {
@@ -68,12 +68,12 @@ func (this *ThreadsInfo) Chunk(n int) *ThreadsInfo {
 	return this
 }
 
-func (this *ThreadsInfo) Before(f func() error) *ThreadsInfo {
+func (this *ThreadsInfo) Before(f func(ISync) error) *ThreadsInfo {
 	this.before = f
 	return this
 }
 
-func (this *ThreadsInfo) After(f func() error) *ThreadsInfo {
+func (this *ThreadsInfo) After(f func(ISync) error) *ThreadsInfo {
 	this.after = f
 	return this
 }
@@ -153,7 +153,7 @@ func staticWorker(info *ThreadsInfo, id int, input [][2]int, sync ISync, f func(
 	}()
 
 	if info.before != nil {
-		if err := info.before(); err != nil {
+		if err := info.before(sync); err != nil {
 			results <- err
 			sync.(*iSyncImpl).fail()
 			return
@@ -171,7 +171,7 @@ func staticWorker(info *ThreadsInfo, id int, input [][2]int, sync ISync, f func(
 	}
 
 	if info.after != nil {
-		if err := info.after(); err != nil {
+		if err := info.after(sync); err != nil {
 			results <- err
 			sync.(*iSyncImpl).fail()
 			return
@@ -191,7 +191,7 @@ func dinamicWorker(info *ThreadsInfo, id int, input <-chan [2]int, sync ISync, f
 	}()
 
 	if info.before != nil {
-		if err := info.before(); err != nil {
+		if err := info.before(sync); err != nil {
 			results <- err
 			sync.(*iSyncImpl).fail()
 			return
@@ -209,7 +209,7 @@ func dinamicWorker(info *ThreadsInfo, id int, input <-chan [2]int, sync ISync, f
 	}
 
 	if info.after != nil {
-		if err := info.after(); err != nil {
+		if err := info.after(sync); err != nil {
 			results <- err
 			sync.(*iSyncImpl).fail()
 			return
@@ -224,7 +224,7 @@ func staticRun(info *ThreadsInfo, start int, end int, f func(int, ISync) error) 
 	input := make([][][2]int, threads)
 	results := make(chan error, threads)
 
-	i := 0
+	i := start
 	id := 0
 	for {
 		next := i + info.chunk
@@ -262,7 +262,7 @@ func dinamicRun(info *ThreadsInfo, start int, end int, f func(int, ISync) error)
 		go dinamicWorker(info, i, input, sync, f, results)
 	}
 
-	i := 0
+	i := start
 	id := 0
 	for {
 		next := i + info.chunk

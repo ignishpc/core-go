@@ -76,12 +76,7 @@ func (this *IIOModule) TextFile2(ctx context.Context, path string, minPartitions
 }
 
 func (this *IIOModule) PartitionObjectFile(ctx context.Context, path string, first int64, partitions int64) (_err error) {
-	defer this.moduleRecover(&_err)
-	base, err := this.TypeFromPartition()
-	if err != nil {
-		return this.PackError(err)
-	}
-	return this.PackError(base.PartitionObjectFile(this.ioImpl, path, first, partitions))
+	return this.PackError(ierror.RaiseMsg("Not implemented yet"))
 }
 
 func (this *IIOModule) PartitionObjectFile4(ctx context.Context, path string, first int64, partitions int64, src *rpc.ISource) (_err error) {
