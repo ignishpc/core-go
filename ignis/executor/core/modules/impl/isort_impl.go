@@ -64,50 +64,174 @@ func SortByWithPartitions[T any](this *ISortImpl, f function.IFunction2[T, T, bo
 }
 
 func Top[T any](this *ISortImpl, n int64) error {
-	return nil
+	f, err := defaultCmp[T]()
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	return takeOrderedImpl(this, f, false, n)
 }
 
-func TopBy[T any](this *ISortImpl, n int64, f function.IFunction2[T, T, bool]) error {
+func TopBy[T any](this *ISortImpl, f function.IFunction2[T, T, bool], n int64) error {
+	context := this.Context()
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := takeOrderedImpl[T](this, func(a T, b T) bool {
+		less, err := f.Call(a, b, context)
+		if err != nil {
+			panic(err)
+		}
+		return less
+	}, false, n); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
 	return nil
 }
 
 func TakeOrdered[T any](this *ISortImpl, n int64) error {
+	f, err := defaultCmp[T]()
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	return takeOrderedImpl(this, f, true, n)
+}
+
+func TakeOrderedBy[T any](this *ISortImpl, f function.IFunction2[T, T, bool], n int64) error {
+	context := this.Context()
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := takeOrderedImpl[T](this, func(a T, b T) bool {
+		less, err := f.Call(a, b, context)
+		if err != nil {
+			panic(err)
+		}
+		return less
+	}, true, n); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
 	return nil
 }
 
-func TakeOrderedBy[T any](this *ISortImpl, n int64, f function.IFunction2[T, T, bool]) error {
+func Max[T any](this *ISortImpl) error {
+	f, err := defaultCmp[T]()
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	return maxImpl(this, f, false)
+}
+
+func Min[T any](this *ISortImpl) error {
+	f, err := defaultCmp[T]()
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	return maxImpl(this, f, true)
+}
+
+func MaxBy[T any](this *ISortImpl, f function.IFunction2[T, T, bool]) error {
+	context := this.Context()
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := maxImpl[T](this, func(a T, b T) bool {
+		less, err := f.Call(a, b, context)
+		if err != nil {
+			panic(err)
+		}
+		return less
+	}, false); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
 	return nil
 }
 
-func Max[T any](this *ISortImpl, n int64) error {
-	return nil
-}
-
-func Min[T any](this *ISortImpl, n int64) error {
-	return nil
-}
-
-func MaxBy[T any](this *ISortImpl, n int64, f function.IFunction2[T, T, bool]) error {
-	return nil
-}
-
-func MinBy[T any](this *ISortImpl, n int64, f function.IFunction2[T, T, bool]) error {
+func MinBy[T any](this *ISortImpl, f function.IFunction2[T, T, bool]) error {
+	context := this.Context()
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := maxImpl[T](this, func(a T, b T) bool {
+		less, err := f.Call(a, b, context)
+		if err != nil {
+			panic(err)
+		}
+		return less
+	}, true); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
 	return nil
 }
 
 func SortByKey[T any, K any](this *ISortImpl, ascending bool) error {
-	return nil
+	return SortByKeyWithPartitions[T, K](this, ascending, -1)
 }
 
 func SortByKeyWithPartitions[T any, K any](this *ISortImpl, ascending bool, partitions int64) error {
-	return nil
+	f, err := defaultCmp[K]()
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	if _, ok := this.executorData.GetPartitionFirst().(*ipair.IPair[K, T]); ok {
+		pf := func(a, b ipair.IPair[K, T]) bool {
+			return f(a.First, b.First)
+		}
+		return sortImpl[ipair.IPair[K, T]](this, pf, ascending, partitions, true)
+	} else {
+		pf := func(a, b any) bool {
+			return f(a.(ipair.IAbstractPair).GetFirst().(K), b.(ipair.IAbstractPair).GetFirst().(K))
+		}
+		return sortImpl[any](this, pf, ascending, partitions, true)
+	}
 }
 
-func SortByKeyBy[T any, K any](this *ISortImpl, ascending bool, f function.IFunction2[T, T, bool]) error {
-	return nil
+func SortByKeyBy[T any, K any](this *ISortImpl, f function.IFunction2[K, K, bool], ascending bool) error {
+	return SortByKeyByWithPartitions[T, K](this, f, ascending, -1)
 }
 
-func SortByKeyByWithPartitions[T any, K any](this *ISortImpl, ascending bool, partitions int64, f function.IFunction2[T, T, bool]) error {
+func SortByKeyByWithPartitions[T any, K any](this *ISortImpl, f function.IFunction2[K, K, bool], ascending bool, partitions int64) error {
+	context := this.Context()
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	if _, ok := this.executorData.GetPartitionFirst().(*ipair.IPair[K, T]); ok {
+		pf := func(a, b ipair.IPair[K, T]) bool {
+			less, err := f.Call(a.First, b.First, context)
+			if err != nil {
+				panic(err)
+			}
+			return less
+		}
+		if err := sortImpl[ipair.IPair[K, T]](this, pf, ascending, partitions, true); err != nil {
+			return ierror.Raise(err)
+		}
+	} else {
+		pf := func(a, b any) bool {
+			less, err := f.Call(a.(ipair.IAbstractPair).GetFirst().(K), b.(ipair.IAbstractPair).GetFirst().(K), context)
+			if err != nil {
+				panic(err)
+			}
+			return less
+		}
+		if err := sortImpl[any](this, pf, ascending, partitions, true); err != nil {
+			return ierror.Raise(err)
+		}
+	}
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
 	return nil
 }
 
@@ -706,6 +830,170 @@ func searchRange[T any](this *ISortImpl, f func(T, T) bool, elem T, ascending bo
 			return start + 1
 		}
 	}
+}
+
+func takeOrderedImpl[T any](this *ISortImpl, f func(T, T) bool, ascending bool, n int64) error {
+	input, err := core.GetAndDeletePartitions[T](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	ouput, err := core.NewPartitionGroupDef[T](this.executorData.GetPartitionTools())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	logger.Info("Sort: top/takeOrdered ", n, " elements")
+	top, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), n*int64(input.Size()))
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	localTopv := make([]*storage.IMemoryPartition[T], this.executorData.GetCores())
+
+	logger.Info("Sort: local partition top/takeOrdered")
+	if err := ithreads.New().Dynamic().Before(func(sync ithreads.ISync) error {
+		aux, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), n)
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		localTopv[ithreads.ThreadId()] = aux
+		return nil
+	}).After(func(sync ithreads.ISync) error {
+		return sync.Critical(func() error {
+			return ierror.Raise(localTopv[ithreads.ThreadId()].MoveTo(top))
+		})
+	}).RunN(input.Size(), func(p int, sync ithreads.ISync) error {
+		reader, err := input.Get(p).ReadIterator()
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		ltop := localTopv[ithreads.ThreadId()].Inner().(*storage.IListImpl[T])
+		for reader.HasNext() {
+			elem, err := reader.Next()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			err = takeOrderedAdd(this, f, ascending, ltop, elem, n)
+			if err != nil {
+				return ierror.Raise(err)
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	logger.Info("Sort: local executor top/takeOrdered")
+	sortPartition[T](this, f, top, ascending)
+	top.Inner().(storage.IList).Resize(int(n), false)
+	logger.Info("Sort: global top/takeOrdered")
+	if err := core.Gather[T](this.executorData.Mpi(), top, 0); err != nil {
+		return ierror.Raise(err)
+	}
+
+	if this.executorData.Mpi().IsRoot(0) {
+		sortPartition[T](this, f, top, ascending)
+		top.Inner().(storage.IList).Resize(int(n), false)
+		ouput.Add(top)
+	}
+	core.SetPartitions(this.executorData, ouput)
+	return nil
+}
+
+func takeOrderedAdd[T any](this *ISortImpl, f func(T, T) bool, ascending bool, top *storage.IListImpl[T], elem T, n int64) error {
+	if top.Size() == 0 {
+		top.Add(elem)
+		return nil
+	}
+
+	if top.Size() == int(n) {
+		back := top.Get(int(n - 1))
+		if f(back, elem) != ascending || f(elem, back) != ascending {
+			return nil
+		}
+		top.Resize(int(n-1), false)
+	}
+	i := int(searchRange[T](this, f, elem, ascending, top))
+	top.Insert(i)
+	top.Set(i, elem)
+	return nil
+}
+
+func maxImpl[T any](this *ISortImpl, f func(T, T) bool, ascending bool) error {
+	input, err := core.GetAndDeletePartitions[T](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	ouput, err := core.NewPartitionGroupDef[T](this.executorData.GetPartitionTools())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	logger.Info("Sort: max/min")
+	first := this.executorData.GetPartitionFirst()
+	if first == nil {
+		core.SetPartitions(this.executorData, ouput)
+		return nil
+	}
+
+	logger.Info("Sort: local max/min")
+
+	elem := first.(T)
+	localElems := make([]T, this.executorData.GetCores())
+
+	if err := ithreads.New().Dynamic().Before(func(sync ithreads.ISync) error {
+		localElems[ithreads.ThreadId()] = elem
+		return nil
+	}).After(func(sync ithreads.ISync) error {
+		return sync.Critical(func() error {
+			if f(elem, localElems[ithreads.ThreadId()]) != ascending {
+				elem = localElems[ithreads.ThreadId()]
+			}
+			return nil
+		})
+	}).RunN(input.Size(), func(p int, sync ithreads.ISync) error {
+		reader, err := input.Get(p).ReadIterator()
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		myElem := localElems[ithreads.ThreadId()]
+		for reader.HasNext() {
+			elem, err := reader.Next()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			if f(myElem, elem) != ascending {
+				myElem = elem
+			}
+		}
+		localElems[ithreads.ThreadId()] = myElem
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	logger.Info("Sort: global max/min")
+	result, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), int64(this.executorData.Mpi().Executors()))
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	list := result.Inner().(*storage.IListImpl[T])
+	list.Add(elem)
+	if err := core.Gather[T](this.executorData.Mpi(), result, 0); err != nil {
+		return ierror.Raise(err)
+	}
+
+	if this.executorData.Mpi().IsRoot(0) {
+		for i := 0; i < list.Size(); i++ {
+			if f(elem, list.Get(i)) != ascending {
+				elem = list.Get(i)
+			}
+		}
+		list.Resize(1, false)
+		list.Set(0, elem)
+		ouput.Add(result)
+	}
+	core.SetPartitions(this.executorData, ouput)
+	return nil
 }
 
 func defaultCmp[T any]() (func(T, T) bool, error) {

@@ -331,3 +331,12 @@ func (this *IExecutorData) GetBaseTypes(name string) any {
 func (this *IExecutorData) GetLastBaseType() any {
 	return this.context.lastBaseType
 }
+
+func (this *IExecutorData) GetPartitionFirst() any {
+	for i := 0; i < this.partitions.Size(); i++ {
+		if this.partitions.GetBase(i).Size() > 0 {
+			return this.partitions.GetBase(i).First()
+		}
+	}
+	return nil
+}

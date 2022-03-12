@@ -73,6 +73,10 @@ func (this *IRawPartition[T]) Inner() any {
 	return nil
 }
 
+func (this *IRawPartition[T]) First() any {
+	return nil
+}
+
 func (this *IRawPartition[T]) Native() bool {
 	return false
 }

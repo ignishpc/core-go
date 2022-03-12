@@ -2,6 +2,7 @@ package base
 
 import (
 	"ignis/executor/api/function"
+	"ignis/executor/api/ipair"
 	"ignis/executor/api/iterator"
 	"ignis/executor/core/modules/impl"
 )
@@ -127,12 +128,82 @@ type ISortByAbs interface {
 type ISortBy[T any] struct {
 }
 
-func (this *IExecuteTo[T]) RunSortBy(i *impl.ISortImpl, f function.IBaseFunction, ascending bool) error {
+func (this *ISortBy[T]) RunSortBy(i *impl.ISortImpl, f function.IBaseFunction, ascending bool) error {
 	RegisterType[T](i.Context())
 	return impl.SortBy(i, f.(function.IFunction2[T, T, bool]), ascending)
 }
 
-func (this *IExecuteTo[T]) RunSortByWithPartitions(i *impl.ISortImpl, f function.IBaseFunction, ascending bool, partitions int64) error {
+func (this *ISortBy[T]) RunSortByWithPartitions(i *impl.ISortImpl, f function.IBaseFunction, ascending bool, partitions int64) error {
 	RegisterType[T](i.Context())
 	return impl.SortByWithPartitions(i, f.(function.IFunction2[T, T, bool]), ascending, partitions)
+}
+
+type ITopByAbs interface {
+	RunTopBy(i *impl.ISortImpl, f function.IBaseFunction, n int64) error
+}
+
+type ITopBy[T any] struct {
+}
+
+func (this *ITopBy[T]) RunTopBy(i *impl.ISortImpl, f function.IBaseFunction, n int64) error {
+	RegisterType[T](i.Context())
+	return impl.TopBy(i, f.(function.IFunction2[T, T, bool]), n)
+}
+
+type ITakeOrderedByAbs interface {
+	RunTakeOrderedBy(i *impl.ISortImpl, f function.IBaseFunction, n int64) error
+}
+
+type ITakeOrderedBy[T any] struct {
+}
+
+func (this *ITakeOrderedBy[T]) RunTakeOrderedBy(i *impl.ISortImpl, f function.IBaseFunction, n int64) error {
+	RegisterType[T](i.Context())
+	return impl.TakeOrderedBy(i, f.(function.IFunction2[T, T, bool]), n)
+}
+
+type IMaxByAbs interface {
+	RunMaxBy(i *impl.ISortImpl, f function.IBaseFunction) error
+}
+
+type IMaxBy[T any] struct {
+}
+
+func (this *IMaxBy[T]) RunMaxBy(i *impl.ISortImpl, f function.IBaseFunction) error {
+	RegisterType[T](i.Context())
+	return impl.MaxBy(i, f.(function.IFunction2[T, T, bool]))
+}
+
+type IMinByAbs interface {
+	RunMinBy(i *impl.ISortImpl, f function.IBaseFunction) error
+}
+
+type IMinBy[T any] struct {
+}
+
+func (this *IMinBy[T]) RunMinBy(i *impl.ISortImpl, f function.IBaseFunction) error {
+	RegisterType[T](i.Context())
+	return impl.MinBy(i, f.(function.IFunction2[T, T, bool]))
+}
+
+type ISortByKeyAbs interface {
+	RunSortByKey(i *impl.ISortImpl, f function.IBaseFunction, ascending bool) error
+	RunSortByKeyWithPartitions(i *impl.ISortImpl, f function.IBaseFunction, ascending bool, partitions int64) error
+}
+
+type ISortByKey[K any, V any] struct {
+}
+
+func (this *ISortByKey[K, V]) RunSortByKey(i *impl.ISortImpl, f function.IBaseFunction, ascending bool) error {
+	RegisterType[K](i.Context())
+	RegisterType[V](i.Context())
+	RegisterType[ipair.IPair[K, V]](i.Context())
+	return impl.SortByKeyBy[V, K](i, f.(function.IFunction2[K, K, bool]), ascending)
+}
+
+func (this *ISortByKey[K, V]) RunSortByKeyWithPartitions(i *impl.ISortImpl, f function.IBaseFunction, ascending bool, partitions int64) error {
+	RegisterType[K](i.Context())
+	RegisterType[V](i.Context())
+	RegisterType[ipair.IPair[K, V]](i.Context())
+	return impl.SortByKeyByWithPartitions[V, K](i, f.(function.IFunction2[K, K, bool]), ascending, partitions)
 }

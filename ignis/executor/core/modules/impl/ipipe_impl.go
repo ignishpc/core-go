@@ -21,6 +21,24 @@ func NewIPipeImpl(executorData *core.IExecutorData) *IPipeImpl {
 	}
 }
 
+func Execute(this *IPipeImpl, f function.IVoidFunction0) error {
+	context := this.executorData.GetContext()
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	logger.Info("General: Execute")
+
+	err := f.Call(context)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
+}
+
 func ExecuteTo[R any](this *IPipeImpl, f function.IFunction0[[][]R]) error {
 	context := this.executorData.GetContext()
 	if err := f.Before(context); err != nil {

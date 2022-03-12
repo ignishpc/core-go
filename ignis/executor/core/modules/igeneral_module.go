@@ -266,17 +266,47 @@ func (this *IGeneralModule) FoldByKey(ctx context.Context, zero *rpc.ISource, sr
 }
 
 func (this *IGeneralModule) SortByKey(ctx context.Context, ascending bool) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	base, err := this.TypeFromPartition()
+	if err != nil {
+		return this.PackError(err)
+	}
+	return this.PackError(base.SortByKey(this.sortImpl, ascending))
 }
 
 func (this *IGeneralModule) SortByKey2a(ctx context.Context, ascending bool, numPartitions int64) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	base, err := this.TypeFromPartition()
+	if err != nil {
+		return this.PackError(err)
+	}
+	return this.PackError(base.SortByKeyWithPartitions(this.sortImpl, ascending, numPartitions))
 }
 
 func (this *IGeneralModule) SortByKey2b(ctx context.Context, src *rpc.ISource, ascending bool) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if filterfun, ok := basefun.(base.ISortByKeyAbs); ok {
+		return this.PackError(filterfun.RunSortByKey(this.sortImpl, basefun, ascending))
+	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
+		return this.PackError(impl.SortByKeyBy[any, any](this.sortImpl, anyfun, ascending))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "sortByKey")
 }
 
 func (this *IGeneralModule) SortByKey3(ctx context.Context, src *rpc.ISource, ascending bool, numPartitions int64) (_err error) {
-	return nil
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if filterfun, ok := basefun.(base.ISortByKeyAbs); ok {
+		return this.PackError(filterfun.RunSortByKeyWithPartitions(this.sortImpl, basefun, ascending, numPartitions))
+	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
+		return this.PackError(impl.SortByKeyByWithPartitions[any, any](this.sortImpl, anyfun, ascending, numPartitions))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "sortByKey")
 }

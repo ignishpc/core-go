@@ -180,6 +180,10 @@ func (this *IMemoryPartition[T]) Inner() any {
 	return this.elems
 }
 
+func (this *IMemoryPartition[T]) First() any {
+	return this.elems.GetAny(0)
+}
+
 func (this *IMemoryPartition[T]) Native() bool {
 	return this.native
 }
@@ -273,6 +277,7 @@ type IList interface {
 	Copy() IList
 	Resize(sz int, shrink bool)
 	Reserve(sz int)
+	Insert(i int)
 	GetAny(i int) any
 	SetAny(i int, value any)
 	AddAny(value any)
@@ -332,6 +337,11 @@ func (this *IListImpl[T]) Reserve(sz int) {
 		copy(other, this.array)
 		this.array = other
 	}
+}
+
+func (this *IListImpl[T]) Insert(i int) {
+	this.Add(this.array[0])
+	copy(this.array[i+1:this.pos], this.array[i:this.pos-1])
 }
 
 func (this *IListImpl[T]) GetAny(i int) any {

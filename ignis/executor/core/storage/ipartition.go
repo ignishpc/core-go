@@ -22,6 +22,7 @@ type IPartitionBase interface {
 	Type() string
 	Inner() any
 	Native() bool
+	First() any
 }
 
 type IPartition[T any] interface {
