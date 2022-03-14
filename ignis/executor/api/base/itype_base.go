@@ -53,9 +53,12 @@ type ITypeBase interface {
 	Min(sortImpl *impl.ISortImpl) error
 
 	Sample(mathImpl *impl.IMathImpl, withReplacement bool, num []int64, seed int32) error
+	SampleByKeyFilter(mathImpl *impl.IMathImpl) (int64, error)
 	SampleByKey(mathImpl *impl.IMathImpl, withReplacement bool, seed int32) error
 	CountByKey(mathImpl *impl.IMathImpl) error
 	CountByValue(mathImpl *impl.IMathImpl) error
+
+	GroupByKey(reduceImpl *impl.IReduceImpl, numPartitions int64) error
 }
 
 type ITypeBaseImpl[T any] struct {
@@ -145,6 +148,10 @@ func (this *ITypeBaseImpl[T]) Sample(mathImpl *impl.IMathImpl, withReplacement b
 	return impl.Sample[T](mathImpl, withReplacement, num, seed)
 }
 
+func (this *ITypeBaseImpl[T]) SampleByKeyFilter(mathImpl *impl.IMathImpl) (int64, error) {
+	return 0, typeError[T]()
+}
+
 func (this *ITypeBaseImpl[T]) SampleByKey(mathImpl *impl.IMathImpl, withReplacement bool, seed int32) error {
 	return typeError[T]()
 }
@@ -154,6 +161,10 @@ func (this *ITypeBaseImpl[T]) CountByKey(mathImpl *impl.IMathImpl) error {
 }
 
 func (this *ITypeBaseImpl[T]) CountByValue(mathImpl *impl.IMathImpl) error {
+	return typeError[T]()
+}
+
+func (this *ITypeBaseImpl[T]) GroupByKey(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
 	return typeError[T]()
 }
 
@@ -176,6 +187,10 @@ func (this *IPairTypeBaseImpl[T, K]) SortByKeyWithPartitions(sortImpl *impl.ISor
 	return impl.SortByKeyWithPartitions[T, K](sortImpl, ascending, partitions)
 }
 
+func (this *IPairTypeBaseImpl[T, K]) SampleByKeyFilter(mathImpl *impl.IMathImpl) (int64, error) {
+	return impl.SampleByKeyFilter[T, K](mathImpl)
+}
+
 func (this *IPairTypeBaseImpl[T, K]) SampleByKey(mathImpl *impl.IMathImpl, withReplacement bool, seed int32) error {
 	return impl.SampleByKey[T, K](mathImpl, withReplacement, seed)
 }
@@ -185,5 +200,9 @@ func (this *IPairTypeBaseImpl[T, K]) CountByKey(mathImpl *impl.IMathImpl) error 
 }
 
 func (this *IPairTypeBaseImpl[T, K]) CountByValue(mathImpl *impl.IMathImpl) error {
-	return impl.CountByValue[T, K](mathImpl)
+	return impl.CountByValue[K, T](mathImpl)
+}
+
+func (this *IPairTypeBaseImpl[T, K]) GroupByKey(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
+	return impl.GroupByKey[T, K](reduceImpl, numPartitions)
 }

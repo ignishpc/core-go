@@ -15,6 +15,7 @@ type IGeneralModule struct {
 	IModule
 	pipeImpl *impl.IPipeImpl
 	sortImpl *impl.ISortImpl
+	reduceImpl *impl.IReduceImpl
 }
 
 func NewIGeneralModule(executorData *core.IExecutorData) *IGeneralModule {
@@ -22,6 +23,7 @@ func NewIGeneralModule(executorData *core.IExecutorData) *IGeneralModule {
 		IModule{executorData},
 		impl.NewIPipeImpl(executorData),
 		impl.NewISortImpl(executorData),
+		impl.NewIReduceImpl(executorData),
 	}
 }
 

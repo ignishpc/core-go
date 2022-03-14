@@ -1,6 +1,8 @@
 package utils
 
-import "constraints"
+import (
+	"constraints"
+)
 
 func Min[T constraints.Ordered](a, b T) T {
 	if a > b {

@@ -12,8 +12,9 @@ import (
 
 type IMathModule struct {
 	IModule
-	mathImpl *impl.IMathImpl
-	sortImpl *impl.ISortImpl
+	mathImpl   *impl.IMathImpl
+	sortImpl   *impl.ISortImpl
+	reduceImpl *impl.IReduceImpl
 }
 
 func NewIMathModule(executorData *core.IExecutorData) *IMathModule {
@@ -21,6 +22,7 @@ func NewIMathModule(executorData *core.IExecutorData) *IMathModule {
 		IModule{executorData},
 		impl.NewIMathImpl(executorData),
 		impl.NewISortImpl(executorData),
+		impl.NewIReduceImpl(executorData),
 	}
 }
 
@@ -89,6 +91,13 @@ func (this *IMathModule) SampleByKey(ctx context.Context, withReplacement bool, 
 	defer this.moduleRecover(&_err)
 	base, err := this.TypeFromPartition()
 	if err != nil {
+		return this.PackError(err)
+	}
+	numPartitions, err := base.SampleByKeyFilter(this.mathImpl)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if err = base.GroupByKey(this.reduceImpl, numPartitions); err != nil {
 		return this.PackError(err)
 	}
 	return this.PackError(base.SampleByKey(this.mathImpl, withReplacement, seed))

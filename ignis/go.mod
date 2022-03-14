@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/apache/thrift v0.14.1
+	github.com/pierrec/xxHash v0.1.5
 	github.com/stretchr/testify v1.7.0
 )
 
