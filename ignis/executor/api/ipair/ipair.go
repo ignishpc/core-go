@@ -1,5 +1,7 @@
 package ipair
 
+import "reflect"
+
 type IAbstractPair interface {
 	SetFirst(f any)
 	GetFirst() any
@@ -12,6 +14,10 @@ type IAbstractPair interface {
 type IPair[T1 any, T2 any] struct {
 	First  T1
 	Second T2
+}
+
+func IsPairType(p reflect.Type) bool {
+	return p.Implements(reflect.TypeOf((*IAbstractPair)(nil)).Elem())
 }
 
 func (this *IPair[T1, T2]) SetFirst(f any) {

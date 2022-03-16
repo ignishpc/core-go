@@ -107,7 +107,7 @@ func (this *ICommModule) SetPartitions2(ctx context.Context, partitions [][]byte
 
 func (this *ICommModule) DriverGather(ctx context.Context, group string, src *rpc.ISource) (_err error) {
 	defer this.moduleRecover(&_err)
-	var base base.ITypeBase
+	var base base.ITypeFunctions
 	if this.executorData.HasPartitions() {
 		base, _err = this.TypeFromPartition()
 	} else {
@@ -121,7 +121,7 @@ func (this *ICommModule) DriverGather(ctx context.Context, group string, src *rp
 
 func (this *ICommModule) DriverGather0(ctx context.Context, group string, src *rpc.ISource) (_err error) {
 	defer this.moduleRecover(&_err)
-	var base base.ITypeBase
+	var base base.ITypeFunctions
 	if this.executorData.HasPartitions() {
 		base, _err = this.TypeFromPartition()
 	} else {
@@ -135,7 +135,7 @@ func (this *ICommModule) DriverGather0(ctx context.Context, group string, src *r
 
 func (this *ICommModule) DriverScatter(ctx context.Context, group string, partitions int64) (_err error) {
 	defer this.moduleRecover(&_err)
-	var base base.ITypeBase
+	var base base.ITypeFunctions
 	if this.executorData.HasPartitions() {
 		base, _err = this.TypeFromPartition()
 	} else {
@@ -149,7 +149,7 @@ func (this *ICommModule) DriverScatter(ctx context.Context, group string, partit
 
 func (this *ICommModule) DriverScatter3(ctx context.Context, group string, partitions int64, src *rpc.ISource) (_err error) {
 	defer this.moduleRecover(&_err)
-	var base base.ITypeBase
+	var base base.ITypeFunctions
 	if this.executorData.HasPartitions() {
 		base, _err = this.TypeFromPartition()
 	} else {
@@ -163,7 +163,7 @@ func (this *ICommModule) DriverScatter3(ctx context.Context, group string, parti
 
 func (this *ICommModule) ImportData(ctx context.Context, group string, source bool, threads int64) (_err error) {
 	defer this.moduleRecover(&_err)
-	var base base.ITypeBase
+	var base base.ITypeFunctions
 	if this.executorData.HasPartitions() {
 		base, _err = this.TypeFromPartition()
 	} else {
@@ -177,7 +177,7 @@ func (this *ICommModule) ImportData(ctx context.Context, group string, source bo
 
 func (this *ICommModule) ImportData4(ctx context.Context, group string, source bool, threads int64, src *rpc.ISource) (_err error) {
 	defer this.moduleRecover(&_err)
-	var base base.ITypeBase
+	var base base.ITypeFunctions
 	if this.executorData.HasPartitions() {
 		base, _err = this.TypeFromPartition()
 	} else {

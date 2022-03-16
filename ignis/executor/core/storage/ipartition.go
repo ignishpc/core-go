@@ -3,6 +3,7 @@ package storage
 import (
 	"github.com/apache/thrift/lib/go/thrift"
 	"ignis/executor/api/iterator"
+	"reflect"
 )
 
 type IPartitionBase interface {
@@ -44,6 +45,7 @@ type IPartitionGroupBase interface {
 	ShadowCopyBase() IPartitionGroupBase
 	Cache() bool
 	SetCache(e bool)
+	Type() reflect.Type
 	NewGroup() IPartitionGroupBase
 	AddMemoryPartition(sz int64)
 	//AddRawMemoryPartition() error TODO
@@ -140,6 +142,10 @@ func (this *IPartitionGroup[T]) Cache() bool {
 
 func (this *IPartitionGroup[T]) SetCache(e bool) {
 	this._cache = e
+}
+
+func (this *IPartitionGroup[T]) Type() reflect.Type {
+	return reflect.TypeOf((*T)(nil)).Elem()
 }
 
 func (this *IPartitionGroup[T]) NewGroup() IPartitionGroupBase {

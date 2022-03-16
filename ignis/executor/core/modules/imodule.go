@@ -38,11 +38,12 @@ func (this *IModule) PackError(err error) error {
 	return ex
 }
 
-func (this *IModule) TypeFromDefault() (base.ITypeBase, error) {
-	return &base.ITypeBaseImpl[any]{}, nil
+func (this *IModule) TypeFromDefault() (base.ITypeFunctions, error) {
+	return base.NewTypeCC[any, any](), nil
 }
 
-func (this *IModule) TypeFromPartition() (base.ITypeBase, error) {
+func (this *IModule) TypeFromPartition() (base.ITypeFunctions, error) {
+	this.executorData.LoadContextType()
 	group, err := core.GetPartitions[any](this.executorData)
 	if err != nil {
 		return nil, ierror.Raise(err)
@@ -65,16 +66,17 @@ func (this *IModule) TypeFromPartition() (base.ITypeBase, error) {
 	return nil, ierror.RaiseMsg("Type not found in partition")
 }
 
-func (this *IModule) TypeFromName(name string) (base.ITypeBase, error) {
-	typeBase := this.executorData.GetBaseTypes(name)
+func (this *IModule) TypeFromName(name string) (base.ITypeFunctions, error) {
+	this.executorData.LoadContextType()
+	typeBase := this.executorData.GetType(name)
 	if typeBase == nil {
 		logger.Warn("Type '", name, "' not found, using 'any' as default")
 		return this.TypeFromDefault()
 	}
-	return typeBase.(base.ITypeBase), nil
+	return typeBase.(base.ITypeFunctions), nil
 }
 
-func (this *IModule) TypeFromSource(src *rpc.ISource) (base.ITypeBase, error) {
+func (this *IModule) TypeFromSource(src *rpc.ISource) (base.ITypeFunctions, error) {
 	basefun, err := this.executorData.LoadLibrary(src)
 	if err != nil {
 		return nil, ierror.Raise(err)
@@ -82,14 +84,13 @@ func (this *IModule) TypeFromSource(src *rpc.ISource) (base.ITypeBase, error) {
 	if err = basefun.Before(this.executorData.GetContext()); err != nil {
 		return nil, ierror.Raise(err)
 	}
-	old := this.executorData.GetLastBaseType()
-	typeBase := this.executorData.GetLastBaseType()
 
-	if typeBase == old || typeBase == nil {
+	typeBase := this.executorData.LoadContextType()
+	if typeBase == nil {
 		return nil, ierror.RaiseMsg("No type found in source")
 	}
 
-	return typeBase.(base.ITypeBase), nil
+	return typeBase.(base.ITypeFunctions), nil
 }
 
 func (this *IModule) CompatibilyError(f reflect.Type, m string) error {

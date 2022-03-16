@@ -52,6 +52,7 @@ func (this *ICacheImpl) SaveContext() (int64, error) {
 }
 
 func (this *ICacheImpl) ClearContext() error {
+	this.executorData.LoadContextType()
 	this.executorData.DeletePartitions()
 	this.executorData.ClearVariables()
 	vars := this.executorData.GetContext().Vars()

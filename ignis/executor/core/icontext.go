@@ -9,8 +9,7 @@ import (
 type iContextImpl struct {
 	properties     map[string]string
 	variables      map[string]any
-	baseTypes      map[string]any
-	lastBaseType   any
+	arrayTypes     []api.IContextType
 	mpiThreadGroup []impi.C_MPI_Comm
 }
 
@@ -62,7 +61,6 @@ func (this *iContextImpl) Vars() map[string]any {
 	return this.variables
 }
 
-func (this *iContextImpl) AddType(name string, tp any) {
-	this.lastBaseType = tp
-	this.baseTypes[name] = tp
+func (this *iContextImpl) Register(tp api.IContextType) {
+	this.arrayTypes = append(this.arrayTypes, tp)
 }

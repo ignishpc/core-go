@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/apache/thrift/lib/go/thrift"
+	"ignis/executor/api/ipair"
 	"ignis/executor/api/iterator"
 	"ignis/executor/core/ierror"
+	"ignis/executor/core/iio"
 	"ignis/executor/core/iprotocol"
 	"ignis/executor/core/itransport"
 	"reflect"
@@ -26,6 +28,19 @@ func NewIMemoryPartition[T any](sz int64, native bool) *IMemoryPartition[T] {
 }
 
 func ConvIMemoryPartition[T any](other IPartitionBase) IPartitionBase {
+	t := iio.TypeObj[T]()
+	if ipair.IsPairType(t) {
+		part := NewIMemoryPartition[T](other.Size(), other.Native())
+		listA := other.Inner().(IList)
+		listB := part.Inner().(IList)
+		listB.Resize(int(other.Size()), false)
+		aux := (any)(new(T)).(ipair.IAbstractPair)
+		for i := 0; i < listA.Size(); i++ {
+			p := listA.GetAny(i).(ipair.IAbstractPair)
+			listB.SetAny(i, aux.New(p.SetFirst, p.SetSecond))
+		}
+		return part
+	}
 	return &IMemoryPartition[T]{
 		other.Inner().(IList),
 		other.Native(),

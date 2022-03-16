@@ -546,3 +546,35 @@ func MapExecutorTo[T any, R any](this *IPipeImpl, f function.IFunction[[][]T, []
 	core.SetPartitions(this.executorData, ouput)
 	return nil
 }
+
+func Foreach[T any](this *IPipeImpl, f function.IVoidFunction[T]) error {
+	return ierror.RaiseMsg("TODO") //TODO
+}
+
+func ForeachPartition[T any](this *IPipeImpl, f function.IVoidFunction[iterator.IReadIterator[T]]) error {
+	return ierror.RaiseMsg("TODO") //TODO
+}
+
+func ForeachExecutor[T any](this *IPipeImpl, f function.IVoidFunction[[][]T]) error {
+	return ierror.RaiseMsg("TODO") //TODO
+}
+
+func Take[T any](this *IPipeImpl, num int64) error {
+	return ierror.RaiseMsg("TODO") //TODO
+}
+
+func Keys[T1 any, T2 any](this *IPipeImpl) error {
+	return ierror.RaiseMsg("TODO") //TODO
+}
+
+func Values[T1 any, T2 any](this *IPipeImpl) error {
+	return ierror.RaiseMsg("TODO") //TODO
+}
+
+func MapValues[K any, T any, R any](this *IPipeImpl, f function.IFunction[T, R]) error {
+	return ierror.RaiseMsg("TODO") //TODO
+}
+
+func FlatMapValues[K any, T any, R any](this *IPipeImpl, f function.IFunction[T, []R]) error {
+	return ierror.RaiseMsg("TODO") //TODO
+}

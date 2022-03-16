@@ -12,4 +12,14 @@ type IContext interface {
 	MpiGroup() impi.C_MPI_Comm
 	Props() map[string]string
 	Vars() map[string]any
+	Register(tp IContextType)
+}
+
+type ITypeBase interface {
+	Types() []IContextType
+}
+
+type IContextType interface {
+	Name() string
+	LoadType()
 }

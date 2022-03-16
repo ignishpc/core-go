@@ -65,8 +65,8 @@ func (this *IMathModule) Max1(ctx context.Context, cmp *rpc.ISource) (_err error
 	if err != nil {
 		return this.PackError(err)
 	}
-	if mapfun, ok := basefun.(base.IMaxByAbs); ok {
-		return this.PackError(mapfun.RunMaxBy(this.sortImpl, basefun))
+	if fun, ok := basefun.(base.IMaxByAbs); ok {
+		return this.PackError(fun.RunMaxBy(this.sortImpl, basefun))
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.MaxBy(this.sortImpl, anyfun))
 	}
@@ -79,8 +79,8 @@ func (this *IMathModule) Min1(ctx context.Context, cmp *rpc.ISource) (_err error
 	if err != nil {
 		return this.PackError(err)
 	}
-	if mapfun, ok := basefun.(base.IMinByAbs); ok {
-		return this.PackError(mapfun.RunMinBy(this.sortImpl, basefun))
+	if fun, ok := basefun.(base.IMinByAbs); ok {
+		return this.PackError(fun.RunMinBy(this.sortImpl, basefun))
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.MinBy(this.sortImpl, anyfun))
 	}

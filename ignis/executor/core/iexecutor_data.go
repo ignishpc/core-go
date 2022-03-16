@@ -25,6 +25,7 @@ type IExecutorData struct {
 	convPartitions storage.IPartitionGroupBase
 	variables      map[string]any
 	functions      map[string]function.IBaseFunction
+	baseTypes      map[string]api.IContextType
 	libraryLoader  ILibraryLoader
 	properties     IPropertyParser
 	partitionTools IPartitionTools
@@ -234,6 +235,11 @@ func (this *IExecutorData) loadLibrary(src *rpc.ISource, withBackup bool, fast b
 		} else {
 			return nil, ierror.Raise(err)
 		}
+
+		types := baseFunction.(api.ITypeBase).Types()
+		for _, tp := range types {
+			this.RegisterType(tp)
+		}
 		this.RegisterFunction(baseFunction)
 
 		if withBackup {
@@ -307,8 +313,22 @@ func (this *IExecutorData) RegisterFunction(f function.IBaseFunction) {
 	this.functions[reflect.TypeOf(f).String()] = f
 }
 
-func (this *IExecutorData) RegisterType(name string, tp any) {
-	this.context.AddType(name, tp)
+func (this *IExecutorData) RegisterType(tp api.IContextType) {
+	tp.LoadType()
+	this.baseTypes[tp.Name()] = tp
+}
+
+func (this *IExecutorData) GetType(name string) api.IContextType {
+	return this.baseTypes[name]
+}
+
+func (this *IExecutorData) LoadContextType() api.IContextType {
+	var last api.IContextType
+	for _, tp := range this.context.arrayTypes {
+		this.RegisterType(tp)
+		last = tp
+	}
+	return last
 }
 
 func (this *IExecutorData) LoadParameters(src *rpc.ISource) error {
@@ -322,14 +342,6 @@ func (this *IExecutorData) LoadParameters(src *rpc.ISource) error {
 		}
 	}
 	return nil
-}
-
-func (this *IExecutorData) GetBaseTypes(name string) any {
-	return this.context.baseTypes[name]
-}
-
-func (this *IExecutorData) GetLastBaseType() any {
-	return this.context.lastBaseType
 }
 
 func (this *IExecutorData) GetPartitionFirst() any {

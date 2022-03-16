@@ -1,9 +1,12 @@
 package core
 
 import (
+	"ignis/executor/api/ipair"
 	"ignis/executor/core/ierror"
+	"ignis/executor/core/logger"
 	"ignis/executor/core/storage"
 	"os"
+	"reflect"
 )
 
 type IPartitionTools struct {
@@ -149,6 +152,17 @@ func ConvertGroupPartitionTo[T any](this *IPartitionTools, other storage.IPartit
 	group, err := NewPartitionGroupDef[T](this)
 	if err != nil {
 		return nil, ierror.Raise(err)
+	}
+
+	if !group.Type().ConvertibleTo(other.Type()) {
+		pt := reflect.TypeOf(ipair.IPair[any, any]{})
+		if (group.Type() == pt && ipair.IsPairType(other.Type())) || (other.Type() == pt && ipair.IsPairType(group.Type())) {
+			if this.IsMemoryGroup(other) {
+				logger.Warn(other.Type().String() + " will be convert to " + group.Type().String())
+			}
+		} else {
+			return nil, ierror.RaiseMsg("Can't convert partition from " + other.Type().String() + " to " + group.Type().String())
+		}
 	}
 
 	var conv func(storage.IPartitionBase) storage.IPartitionBase
