@@ -153,10 +153,10 @@ func (this *IGeneralActionModule) TreeAggregate(ctx context.Context, zero *rpc.I
 	if err != nil {
 		return this.PackError(err)
 	}
-	if fun, ok := combfun.(base.IReduceAbs); ok {
-		err = fun.RunReduce(this.reduceImpl, zerofun)
+	if fun, ok := combfun.(base.ITreeReduceAbs); ok {
+		err = fun.RunTreeReduce(this.reduceImpl, zerofun)
 	} else if anyfun, ok := combfun.(function.IFunction2[any, any, any]); ok {
-		err = impl.Reduce(this.reduceImpl, anyfun)
+		err = impl.TreeReduce(this.reduceImpl, anyfun)
 	} else {
 		return this.CompatibilyError(reflect.TypeOf(combfun), "treeAggregate")
 	}

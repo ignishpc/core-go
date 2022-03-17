@@ -11,6 +11,8 @@ void setThreads(int n){threads = n;}
 */
 import "C"
 import (
+	"errors"
+	"fmt"
 	"math"
 	"sync"
 )
@@ -32,257 +34,193 @@ func SetDefaultCores(n int) {
 	defaultCores = n
 }
 
-type ThreadsInfo struct {
-	static  bool
-	threads int
-	chunk   int
-	before  func(ISync) error
-	after   func(ISync) error
-}
-
-func New() *ThreadsInfo {
-	return &ThreadsInfo{
-		static:  true,
-		threads: defaultCores,
-		chunk:   0,
-	}
-}
-
-func (this *ThreadsInfo) Static() *ThreadsInfo {
-	this.static = true
-	return this
-}
-
-func (this *ThreadsInfo) Dynamic() *ThreadsInfo {
-	this.static = false
-	return this
-}
-
-func (this *ThreadsInfo) Threads(n int) *ThreadsInfo {
-	this.threads = n
-	return this
-}
-
-func (this *ThreadsInfo) Chunk(n int) *ThreadsInfo {
-	this.chunk = n
-	return this
-}
-
-func (this *ThreadsInfo) Before(f func(ISync) error) *ThreadsInfo {
-	this.before = f
-	return this
-}
-
-func (this *ThreadsInfo) After(f func(ISync) error) *ThreadsInfo {
-	this.after = f
-	return this
-}
-
-func (this *ThreadsInfo) RunRange(start int, end int, f func(int, ISync) error) error {
-	if this.chunk == 0 {
-		this.chunk = int(math.Ceil(float64(end-start) / float64(this.threads)))
-	}
-	if this.static {
-		return staticRun(this, start, end, f)
-	} else {
-		return dinamicRun(this, start, end, f)
-	}
-}
-
-func (this *ThreadsInfo) RunN(n int, f func(int, ISync) error) error {
-	return this.RunRange(0, n, f)
-}
-
-func (this *ThreadsInfo) Parallel(f func(int, ISync) error) error {
-	this.static = true
-	return this.RunRange(0, this.threads, f)
-}
-
-type ISync interface {
+type IRuntimeContext interface {
 	Critical(f func() error) error
 	Master(f func() error) error
 	Barrier()
+	For() IForBuilder
 }
 
-type iSyncImpl struct {
+type iRuntimeContextImpl struct {
+	threads  int
+	data     chan [2]int
+	error    chan error
+	f        func(rctx IRuntimeContext) error
 	mutex    sync.Mutex
 	barriers [2]sync.WaitGroup
-	bi       int
-	party    int
+	ibarrier int
 }
 
-func (this *iSyncImpl) Critical(f func() error) error {
+func Parallel(f func(rctx IRuntimeContext) error) error {
+	return ParallelT(defaultCores, f)
+}
+
+func ParallelT(threads int, f func(rctx IRuntimeContext) error) (r error) {
+	rctx := &iRuntimeContextImpl{
+		threads:  threads,
+		data:     nil,
+		error:    make(chan error),
+		f:        f,
+		ibarrier: 0,
+	}
+	rctx.barriers[0].Add(threads)
+	rctx.barriers[1].Add(threads)
+	for i := 1; i < threads; i++ {
+		go worker(i, rctx)
+	}
+	worker(0, rctx)
+
+	for i := 0; i < threads; i++ {
+		if err := <-rctx.error; err != nil {
+			r = err
+		}
+	}
+	return
+}
+
+func worker(id int, rctx *iRuntimeContextImpl) {
+	C.setThreadId(C.int(id))
+	C.setThreads(C.int(rctx.threads))
+	defer func() {
+		if r := recover(); r != nil {
+			if err, ok := r.(error); ok {
+				rctx.error <- err
+			} else {
+				rctx.error <- errors.New(fmt.Sprint(err))
+			}
+		}
+	}()
+
+	rctx.error <- rctx.f(rctx)
+}
+
+func (this *iRuntimeContextImpl) Critical(f func() error) error {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 	return f()
 }
 
-func (this *iSyncImpl) Master(f func() error) error {
+func (this *iRuntimeContextImpl) Master(f func() error) error {
 	if ThreadId() == 0 {
 		return f()
 	}
 	return nil
 }
 
-func (this *iSyncImpl) Barrier() {
-	bi2 := (this.bi + 1) % 2
-	this.barriers[this.bi].Done()
-	this.barriers[this.bi].Wait()
-	this.bi = bi2
+func (this *iRuntimeContextImpl) Barrier() {
+	i := this.ibarrier
+	i2 := (this.ibarrier + 1) % 2
+	this.barriers[i].Done()
+	this.barriers[i].Wait()
+	this.ibarrier = i2
+	if ThreadId() == 0 {
+		this.barriers[i].Add(this.threads)
+	}
 }
 
-func (this *iSyncImpl) fail() {
-	this.barriers[0].Add(-(this.party + 1))
-	this.barriers[1].Add(-(this.party + 1))
+func (this *iRuntimeContextImpl) fail() {
+	this.barriers[0].Add(-(this.threads + 1))
+	this.barriers[1].Add(-(this.threads + 1))
 }
 
-func newISync(party int) ISync {
-	s := &iSyncImpl{bi: 0, party: party}
-	s.barriers[0].Add(party)
-	s.barriers[1].Add(party)
-	return s
+func (this *iRuntimeContextImpl) For() IForBuilder {
+	return &iForBuilderImpl{
+		rctx:    this,
+		static:  true,
+		threads: this.threads,
+		chunk:   -1,
+		start:   0,
+	}
 }
 
-func staticWorker(info *ThreadsInfo, id int, input [][2]int, sync ISync, f func(int, ISync) error, results chan<- error) {
-	C.setThreadId(C.int(id))
-	C.setThreads(C.int(info.threads))
-	defer func() {
-		if r := recover(); r != nil {
-			results <- nil
-		}
-	}()
+type IForBuilder interface {
+	Static() IForBuilder
+	Dynamic() IForBuilder
+	Threads(n int) IForBuilder
+	Chunk(n int) IForBuilder
+	Start(n int) IForBuilder
+	Run(n int, f func(i int) error) error
+}
 
-	if info.before != nil {
-		if err := info.before(sync); err != nil {
-			results <- err
-			sync.(*iSyncImpl).fail()
-			return
+type iForBuilderImpl struct {
+	rctx    *iRuntimeContextImpl
+	static  bool
+	threads int
+	chunk   int
+	start   int
+}
+
+func (this *iForBuilderImpl) Static() IForBuilder {
+	this.static = true
+	return this
+}
+
+func (this *iForBuilderImpl) Dynamic() IForBuilder {
+	this.static = false
+	return this
+}
+
+func (this *iForBuilderImpl) Threads(n int) IForBuilder {
+	if n > 0 && n <= this.threads {
+		this.threads = n
+	}
+	return this
+}
+
+func (this *iForBuilderImpl) Chunk(n int) IForBuilder {
+	this.chunk = n
+	return this
+}
+
+func (this *iForBuilderImpl) Start(n int) IForBuilder {
+	this.start = n
+	return this
+}
+
+func (this *iForBuilderImpl) Run(end int, f func(i int) error) error {
+	if this.chunk == -1 {
+		if this.static {
+			this.chunk = int(math.Ceil(float64(end-this.start) / float64(this.threads)))
+		} else {
+			this.chunk = 1
 		}
 	}
 
-	for _, chunk := range input {
+	data := this.rctx.data
+	threadId := ThreadId()
+	if threadId == 0 || this.static {
+		data = make(chan [2]int)
+		if !this.static {
+			this.rctx.data = data
+		}
+
+		i := this.start
+		id := 0
+		for {
+			next := i + this.chunk
+			if next > end {
+				break
+			}
+			if !this.static || threadId == id {
+				data <- [2]int{i, next}
+			}
+			i = next
+			id++
+			id = id % this.threads
+		}
+		close(data)
+	}
+	this.rctx.Barrier()
+	data = this.rctx.data
+
+	for chunk := range data {
 		for i := chunk[0]; i < chunk[1]; i++ {
-			if err := f(i, sync); err != nil {
-				results <- err
-				sync.(*iSyncImpl).fail()
-				return
+			if err := f(i); err != nil {
+				this.rctx.fail()
+				return err
 			}
 		}
 	}
-
-	if info.after != nil {
-		if err := info.after(sync); err != nil {
-			results <- err
-			sync.(*iSyncImpl).fail()
-			return
-		}
-	}
-
-	results <- nil
-}
-
-func dinamicWorker(info *ThreadsInfo, id int, input <-chan [2]int, sync ISync, f func(int, ISync) error, results chan<- error) {
-	C.setThreadId(C.int(id))
-	C.setThreads(C.int(info.threads))
-	defer func() {
-		if r := recover(); r != nil {
-			results <- nil
-		}
-	}()
-
-	if info.before != nil {
-		if err := info.before(sync); err != nil {
-			results <- err
-			sync.(*iSyncImpl).fail()
-			return
-		}
-	}
-
-	for chunk := range input {
-		for i := chunk[0]; i < chunk[1]; i++ {
-			if err := f(i, sync); err != nil {
-				results <- err
-				sync.(*iSyncImpl).fail()
-				return
-			}
-		}
-	}
-
-	if info.after != nil {
-		if err := info.after(sync); err != nil {
-			results <- err
-			sync.(*iSyncImpl).fail()
-			return
-		}
-	}
-
-	results <- nil
-}
-
-func staticRun(info *ThreadsInfo, start int, end int, f func(int, ISync) error) error {
-	threads := info.threads
-	input := make([][][2]int, threads)
-	results := make(chan error, threads)
-
-	i := start
-	id := 0
-	for {
-		next := i + info.chunk
-		if next > end {
-			break
-		}
-		input[id] = append(input[id], [2]int{i, next})
-		i = next
-		id++
-		id = id % threads
-	}
-
-	sync := newISync(threads)
-	for i := 1; i < threads; i++ {
-		go staticWorker(info, i, input[i], sync, f, results)
-	}
-	staticWorker(info, 0, input[0], sync, f, results)
-
-	var lastErr error
-	for i := 0; i < threads; i++ {
-		if err := <-results; err != nil {
-			lastErr = err
-		}
-	}
-	return lastErr
-}
-
-func dinamicRun(info *ThreadsInfo, start int, end int, f func(int, ISync) error) error {
-	threads := info.threads
-	input := make(chan [2]int, threads)
-	results := make(chan error, threads)
-
-	sync := newISync(threads)
-	for i := 1; i < threads; i++ {
-		go dinamicWorker(info, i, input, sync, f, results)
-	}
-
-	i := start
-	id := 0
-	for {
-		next := i + info.chunk
-		if next > end {
-			break
-		}
-		input <- [2]int{i, next}
-		i = next
-		id++
-		id = id % threads
-	}
-	dinamicWorker(info, 0, input, sync, f, results)
-
-	close(input)
-
-	var lastErr error
-	for i := 0; i < threads; i++ {
-		if err := <-results; err != nil {
-			lastErr = err
-		}
-	}
-	return lastErr
+	this.rctx.Barrier()
+	return nil
 }

@@ -344,7 +344,8 @@ func ImportData[T any](this *ICommImpl, group string, source bool, threads int64
 	}
 	tp := shared.Get(0).Type()
 	var opt *core.MsgOpt
-	if err := ithreads.New().Parallel(func(id int, sync ithreads.ISync) error {
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		id := ithreads.ThreadId()
 		comm := threads_comm[id]
 		for i := 0; i < len(queue); i++ {
 			other := queue[i]
@@ -356,13 +357,13 @@ func ImportData[T any](this *ICommImpl, group string, source bool, threads int64
 			if end-init < 1 {
 				continue
 			}
-			if err = sync.Master(func() error {
+			if err = rctx.Master(func() error {
 				opt, err = this.executorData.Mpi().GetMsgOpt(comm, tp, source, int(other), 0)
 				return err
 			}); err != nil {
 				return ierror.Raise(err)
 			}
-			sync.Barrier()
+			rctx.Barrier()
 			for j := int64(0); j < end-init; j++ {
 				if source {
 					if err = core.SendGroupOpt[T](this.executorData.Mpi(), comm, shared.Get(int(init-offset+j)), int(other), 0, opt); err != nil {

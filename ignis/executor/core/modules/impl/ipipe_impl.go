@@ -104,31 +104,33 @@ func Map[T any, R any](this *IPipeImpl, f function.IFunction[T, R]) error {
 	}
 
 	logger.Info("General: map ", +input.Size(), " partitions")
-	if err := ithreads.New().Dynamic().RunN(input.Size(), func(i int, sync ithreads.ISync) error {
-		reader, err := input.Get(i).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		writer, err := ouput.Get(i).WriteIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		for reader.HasNext() {
-			elem, err := reader.Next()
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			result, err := f.Call(elem, context)
+			writer, err := ouput.Get(i).WriteIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			if err = writer.Write(result); err != nil {
-				return ierror.Raise(err)
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				result, err := f.Call(elem, context)
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if err = writer.Write(result); err != nil {
+					return ierror.Raise(err)
+				}
 			}
-		}
-		return nil
+			return nil
+		})
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 	if err := f.After(context); err != nil {
 		return ierror.Raise(err)
@@ -152,33 +154,35 @@ func Filter[T any](this *IPipeImpl, f function.IFunction[T, bool]) error {
 	}
 
 	logger.Info("General: filter ", +input.Size(), " partitions")
-	if err := ithreads.New().Dynamic().RunN(input.Size(), func(i int, sync ithreads.ISync) error {
-		reader, err := input.Get(i).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		writer, err := ouput.Get(i).WriteIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		for reader.HasNext() {
-			elem, err := reader.Next()
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			result, err := f.Call(elem, context)
+			writer, err := ouput.Get(i).WriteIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			if result {
-				if err = writer.Write(elem); err != nil {
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
 					return ierror.Raise(err)
 				}
+				result, err := f.Call(elem, context)
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if result {
+					if err = writer.Write(elem); err != nil {
+						return ierror.Raise(err)
+					}
+				}
 			}
-		}
-		return nil
+			return nil
+		})
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 	if err := f.After(context); err != nil {
 		return ierror.Raise(err)
@@ -202,33 +206,35 @@ func Flatmap[T any, R any](this *IPipeImpl, f function.IFunction[T, []R]) error 
 	}
 
 	logger.Info("General: flatmap ", +input.Size(), " partitions")
-	if err := ithreads.New().Dynamic().RunN(input.Size(), func(i int, sync ithreads.ISync) error {
-		reader, err := input.Get(i).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		writer, err := ouput.Get(i).WriteIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		for reader.HasNext() {
-			elem, err := reader.Next()
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			result, err := f.Call(elem, context)
+			writer, err := ouput.Get(i).WriteIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			for _, e2 := range result {
-				if err = writer.Write(e2); err != nil {
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
 					return ierror.Raise(err)
 				}
+				result, err := f.Call(elem, context)
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				for _, e2 := range result {
+					if err = writer.Write(e2); err != nil {
+						return ierror.Raise(err)
+					}
+				}
 			}
-		}
-		return nil
+			return nil
+		})
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 	if err := f.After(context); err != nil {
 		return ierror.Raise(err)
@@ -252,31 +258,33 @@ func KeyBy[T any, R comparable](this *IPipeImpl, f function.IFunction[T, R]) err
 	}
 
 	logger.Info("General: keyBy ", +input.Size(), " partitions")
-	if err := ithreads.New().Dynamic().RunN(input.Size(), func(i int, sync ithreads.ISync) error {
-		reader, err := input.Get(i).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		writer, err := ouput.Get(i).WriteIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		for reader.HasNext() {
-			elem, err := reader.Next()
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			result, err := f.Call(elem, context)
+			writer, err := ouput.Get(i).WriteIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			if err = writer.Write(*ipair.New(result, elem)); err != nil {
-				return ierror.Raise(err)
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				result, err := f.Call(elem, context)
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if err = writer.Write(*ipair.New(result, elem)); err != nil {
+					return ierror.Raise(err)
+				}
 			}
-		}
-		return nil
+			return nil
+		})
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 	if err := f.After(context); err != nil {
 		return ierror.Raise(err)
@@ -299,31 +307,33 @@ func MapPartitions[T any, R any](this *IPipeImpl, f function.IFunction[iterator.
 		return ierror.Raise(err)
 	}
 
-	logger.Info("General: flatmap ", +input.Size(), " partitions")
-	if err := ithreads.New().Dynamic().RunN(input.Size(), func(i int, sync ithreads.ISync) error {
-		reader, err := input.Get(i).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		writer, err := ouput.Get(i).WriteIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		result, err := f.Call(reader, context)
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		for _, e2 := range result {
-			if err = writer.Write(e2); err != nil {
+	logger.Info("General: mapPartitions ", +input.Size(), " partitions")
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
+			if err != nil {
 				return ierror.Raise(err)
 			}
-		}
-		return nil
+			writer, err := ouput.Get(i).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			result, err := f.Call(reader, context)
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for _, e2 := range result {
+				if err = writer.Write(e2); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			return nil
+		})
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 	if err := f.After(context); err != nil {
 		return ierror.Raise(err)
@@ -347,31 +357,30 @@ func MapPartitionsWithIndex[T, R any](this *IPipeImpl, f function.IFunction2[int
 		return ierror.Raise(err)
 	}
 
-	logger.Info("General: flatmap ", +input.Size(), " partitions")
-	if err := ithreads.New().Dynamic().RunN(input.Size(), func(i int, sync ithreads.ISync) error {
-		reader, err := input.Get(i).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		writer, err := ouput.Get(i).WriteIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		result, err := f.Call(int64(i), reader, context)
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		for _, e2 := range result {
-			if err = writer.Write(e2); err != nil {
+	logger.Info("General: mapPartitionsWithIndex ", +input.Size(), " partitions")
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
+			if err != nil {
 				return ierror.Raise(err)
 			}
-		}
-		return nil
+			writer, err := ouput.Get(i).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			result, err := f.Call(int64(i), reader, context)
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for _, e2 := range result {
+				if err = writer.Write(e2); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			return nil
+		})
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 	if err := f.After(context); err != nil {
 		return ierror.Raise(err)
@@ -468,7 +477,7 @@ func MapExecutorTo[T any, R any](this *IPipeImpl, f function.IFunction[[][]T, []
 	if err := f.Before(context); err != nil {
 		return ierror.Raise(err)
 	}
-	logger.Info("General: mapExecutor ", +input.Size(), " partitions")
+	logger.Info("General: mapExecutorTo ", +input.Size(), " partitions")
 	ouput, err := core.NewPartitionGroupWithSize[R](this.executorData.GetPartitionTools(), input.Size())
 	if err != nil {
 		return ierror.Raise(err)
@@ -548,33 +557,353 @@ func MapExecutorTo[T any, R any](this *IPipeImpl, f function.IFunction[[][]T, []
 }
 
 func Foreach[T any](this *IPipeImpl, f function.IVoidFunction[T]) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	context := this.executorData.GetContext()
+	input, err := core.GetAndDeletePartitions[T](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+
+	logger.Info("General: foreach ", +input.Size(), " partitions")
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if err := f.Call(elem, context); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
 }
 
 func ForeachPartition[T any](this *IPipeImpl, f function.IVoidFunction[iterator.IReadIterator[T]]) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	context := this.executorData.GetContext()
+	input, err := core.GetAndDeletePartitions[T](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+
+	logger.Info("General: foreachPartition ", +input.Size(), " partitions")
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			if err := f.Call(reader, context); err != nil {
+				return ierror.Raise(err)
+			}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
 }
 
 func ForeachExecutor[T any](this *IPipeImpl, f function.IVoidFunction[[][]T]) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	context := this.executorData.GetContext()
+	input, err := core.GetAndDeletePartitions[T](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	logger.Info("General: foreachExecutor ", +input.Size(), " partitions")
+	inMemory := this.executorData.GetPartitionTools().IsMemoryGroup(input)
+	if !inMemory || input.Cache() {
+		logger.Info("General: loading partitions in memory")
+		aux, err := core.NewPartitionGroupDef[T](this.executorData.GetPartitionTools())
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		for _, part := range input.Iter() {
+			men, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), part.Size())
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			if err = part.CopyTo(men); err != nil {
+				return ierror.Raise(err)
+			}
+			aux.Add(men)
+		}
+		input = aux
+	}
+
+	arg := make([][]T, input.Size())
+	for i, part := range input.Iter() {
+		list := part.Inner().(storage.IList)
+		if array, ok := list.Array().([]T); ok {
+			arg[i] = array
+		} else {
+			array := make([]T, list.Size())
+			for i := 0; i < list.Size(); i++ {
+				array[i] = list.GetAny(i).(T)
+			}
+			arg[i] = array
+		}
+	}
+
+	err = f.Call(arg, context)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
 }
 
 func Take[T any](this *IPipeImpl, num int64) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	input, err := core.GetAndDeletePartitions[T](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	output, err := core.NewPartitionGroupDef[T](this.executorData.GetPartitionTools())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	count := int64(0)
+	for _, part := range input.Iter() {
+		if part.Size()+count > num {
+			if this.executorData.GetPartitionTools().IsMemory(part) && !input.Cache() {
+				part.Inner().(storage.IList).Resize(int(num-count), false)
+			} else {
+				cut, err := core.NewPartitionWithName[T](this.executorData.GetPartitionTools(), part.Type())
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				reader, err := part.ReadIterator()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				writer, err := cut.WriteIterator()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				for count != num {
+					elem, err := reader.Next()
+					if err != nil {
+						return ierror.Raise(err)
+					}
+					if err = writer.Write(elem); err != nil {
+						return ierror.Raise(err)
+					}
+					count++
+				}
+			}
+			break
+		}
+		count += part.Size()
+		output.Add(part)
+	}
+	core.SetPartitions(this.executorData, output)
+	return nil
 }
 
 func Keys[T1 any, T2 any](this *IPipeImpl) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	input, err := core.GetAndDeletePartitions[ipair.IPair[T1, T2]](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	output, err := core.NewPartitionGroupWithSize[T1](this.executorData.GetPartitionTools(), input.Size())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	logger.Info("General: keys ", +input.Size(), " partitions")
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			writer, err := output.Get(i).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if err = writer.Write(elem.First); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+	core.SetPartitions(this.executorData, output)
+	return nil
 }
 
 func Values[T1 any, T2 any](this *IPipeImpl) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	input, err := core.GetAndDeletePartitions[ipair.IPair[T1, T2]](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	output, err := core.NewPartitionGroupWithSize[T2](this.executorData.GetPartitionTools(), input.Size())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	logger.Info("General: values ", +input.Size(), " partitions")
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			writer, err := output.Get(i).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if err = writer.Write(elem.Second); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+	core.SetPartitions(this.executorData, output)
+	return nil
 }
 
 func MapValues[K any, T any, R any](this *IPipeImpl, f function.IFunction[T, R]) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	context := this.executorData.GetContext()
+	input, err := core.GetAndDeletePartitions[ipair.IPair[K, T]](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	ouput, err := core.NewPartitionGroupWithSize[ipair.IPair[K, R]](this.executorData.GetPartitionTools(), input.Size())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	logger.Info("General: mapValues ", +input.Size(), " partitions")
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			writer, err := ouput.Get(i).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				result, err := f.Call(elem.Second, context)
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if err = writer.Write(*ipair.New(elem.First, result)); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	core.SetPartitions(this.executorData, ouput)
+	return nil
 }
 
 func FlatMapValues[K any, T any, R any](this *IPipeImpl, f function.IFunction[T, []R]) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	context := this.executorData.GetContext()
+	input, err := core.GetAndDeletePartitions[ipair.IPair[K, T]](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	ouput, err := core.NewPartitionGroupWithSize[ipair.IPair[K, R]](this.executorData.GetPartitionTools(), input.Size())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	logger.Info("General: flatMapValues ", +input.Size(), " partitions")
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			writer, err := ouput.Get(i).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				result, err := f.Call(elem.Second, context)
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				for _, e2 := range result {
+					if err = writer.Write(*ipair.New(elem.First, e2)); err != nil {
+						return ierror.Raise(err)
+					}
+				}
+			}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	core.SetPartitions(this.executorData, ouput)
+	return nil
 }

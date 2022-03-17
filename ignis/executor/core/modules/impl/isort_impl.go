@@ -388,20 +388,22 @@ func sortImpl[T any](this *ISortImpl, f func(T, T) bool, ascending bool, partiti
 func parallelLocalSort[T any](this *ISortImpl, f func(T, T) bool, group *storage.IPartitionGroup[T], ascending bool) error {
 	inMemory := this.executorData.GetPartitionTools().IsMemoryGroup(group)
 	/*Sort each partition locally*/
-	if err := ithreads.New().Dynamic().RunN(group.Size(), func(i int, sync ithreads.ISync) error {
-		if inMemory {
-			sortPartition[T](this, f, group.Get(i).(*storage.IMemoryPartition[T]), ascending)
-		} else {
-			tmp := storage.NewIMemoryPartition[T](group.Get(i).Size(), false)
-			if err := group.Get(i).CopyTo(tmp); err != nil {
-				return ierror.Raise(err)
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(group.Size(), func(i int) error {
+			if inMemory {
+				sortPartition[T](this, f, group.Get(i).(*storage.IMemoryPartition[T]), ascending)
+			} else {
+				tmp := storage.NewIMemoryPartition[T](group.Get(i).Size(), false)
+				if err := group.Get(i).CopyTo(tmp); err != nil {
+					return ierror.Raise(err)
+				}
+				sortPartition[T](this, f, tmp, ascending)
+				if err := group.Get(i).CopyFrom(tmp); err != nil {
+					return ierror.Raise(err)
+				}
 			}
-			sortPartition[T](this, f, tmp, ascending)
-			if err := group.Get(i).CopyFrom(tmp); err != nil {
-				return ierror.Raise(err)
-			}
-		}
-		return nil
+			return nil
+		})
 	}); err != nil {
 		return ierror.Raise(err)
 	}
@@ -431,39 +433,42 @@ func selectPivots[T any](this *ISortImpl, f func(T, T) bool, group *storage.IPar
 	if err != nil {
 		return nil, ierror.Raise(err)
 	}
-	if err := ithreads.New().Dynamic().RunN(group.Size(), func(p int, sync ithreads.ISync) error {
-		if group.Get(p).Size() < samples {
-			return ierror.Raise(group.Get(p).CopyTo(pivots))
-		}
 
-		skip := (group.Get(p).Size() - samples) / (samples + 1)
-		rem := (group.Get(p).Size() - samples) % (samples + 1)
-		reader, err := group.Get(p).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		for n := int64(0); n < samples; n++ {
-			for i := int64(0); i < skip; i++ {
-				if _, err := reader.Next(); err != nil {
-					return ierror.Raise(err)
-				}
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(group.Size(), func(p int) error {
+			if group.Get(p).Size() < samples {
+				return ierror.Raise(group.Get(p).CopyTo(pivots))
 			}
-			if n < rem {
-				if _, err := reader.Next(); err != nil {
-					return ierror.Raise(err)
-				}
-			}
-			if err = sync.Critical(func() error {
-				if elem, err := reader.Next(); err != nil {
-					return ierror.Raise(err)
-				} else {
-					return writer.Write(elem)
-				}
-			}); err != nil {
+
+			skip := (group.Get(p).Size() - samples) / (samples + 1)
+			rem := (group.Get(p).Size() - samples) % (samples + 1)
+			reader, err := group.Get(p).ReadIterator()
+			if err != nil {
 				return ierror.Raise(err)
 			}
-		}
-		return nil
+			for n := int64(0); n < samples; n++ {
+				for i := int64(0); i < skip; i++ {
+					if _, err := reader.Next(); err != nil {
+						return ierror.Raise(err)
+					}
+				}
+				if n < rem {
+					if _, err := reader.Next(); err != nil {
+						return ierror.Raise(err)
+					}
+				}
+				if err = rctx.Critical(func() error {
+					if elem, err := reader.Next(); err != nil {
+						return ierror.Raise(err)
+					} else {
+						return writer.Write(elem)
+					}
+				}); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			return nil
+		})
 	}); err != nil {
 		return nil, ierror.Raise(err)
 	}
@@ -478,46 +483,48 @@ func selectMemoryPivots[T any](this *ISortImpl, f func(T, T) bool, group *storag
 
 	threadPivots := make([]storage.IPartition[T], this.executorData.GetCores())
 
-	if err := ithreads.New().Dynamic().RunN(group.Size(), func(p int, sync ithreads.ISync) error {
-		part, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), samples)
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		threadPivots[p] = part
-		if group.Get(p).Size() < samples {
-			return ierror.Raise(group.Get(p).CopyTo(part))
-		}
-		writer, err := part.WriteIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(group.Size(), func(p int) error {
+			part, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), samples)
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			threadPivots[p] = part
+			if group.Get(p).Size() < samples {
+				return ierror.Raise(group.Get(p).CopyTo(part))
+			}
+			writer, err := part.WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
 
-		skip := (group.Get(p).Size() - samples) / (samples + 1)
-		rem := (group.Get(p).Size() - samples) % (samples + 1)
-		pos := skip + int64(utils.Ternary(rem > 0, 1, 0))
-		list := part.Inner().(storage.IList)
-		if array, ok := list.Array().([]T); ok {
-			for n := int64(0); n < samples; n++ {
-				if err = writer.Write(array[pos]); err != nil {
-					return ierror.Raise(err)
+			skip := (group.Get(p).Size() - samples) / (samples + 1)
+			rem := (group.Get(p).Size() - samples) % (samples + 1)
+			pos := skip + int64(utils.Ternary(rem > 0, 1, 0))
+			list := part.Inner().(storage.IList)
+			if array, ok := list.Array().([]T); ok {
+				for n := int64(0); n < samples; n++ {
+					if err = writer.Write(array[pos]); err != nil {
+						return ierror.Raise(err)
+					}
+					pos += skip + 1
+					if n < rem-1 {
+						pos++
+					}
 				}
-				pos += skip + 1
-				if n < rem-1 {
-					pos++
+			} else {
+				for n := int64(0); n < samples; n++ {
+					if err = writer.Write(list.GetAny(p).(T)); err != nil {
+						return ierror.Raise(err)
+					}
+					pos += skip + 1
+					if n < rem-1 {
+						pos++
+					}
 				}
 			}
-		} else {
-			for n := int64(0); n < samples; n++ {
-				if err = writer.Write(list.GetAny(p).(T)); err != nil {
-					return ierror.Raise(err)
-				}
-				pos += skip + 1
-				if n < rem-1 {
-					pos++
-				}
-			}
-		}
-		return nil
+			return nil
+		})
 	}); err != nil {
 		return nil, ierror.Raise(err)
 	}
@@ -623,54 +630,52 @@ func generateRanges[T any](this *ISortImpl, f func(T, T) bool, group *storage.IP
 	if err != nil {
 		return nil, ierror.Raise(err)
 	}
-	threadRangesV := make([]*storage.IPartitionGroup[T], this.executorData.GetCores())
-	writersV := make([][]iterator.IWriteIterator[T], this.executorData.GetCores())
 	pivotsList := pivots.Inner().(storage.IList)
 
-	if err := ithreads.New().Dynamic().Before(
-		func(sync ithreads.ISync) (err error) {
-			id := ithreads.ThreadId()
-			threadRangesV[id], err = core.NewPartitionGroupWithSize[T](this.executorData.GetPartitionTools(), ranges.Size())
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		threadRanges, err := core.NewPartitionGroupWithSize[T](this.executorData.GetPartitionTools(), ranges.Size())
+		writers := make([]iterator.IWriteIterator[T], ranges.Size())
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		for i, part := range threadRanges.Iter() {
+			it, err := part.WriteIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			for _, part := range threadRangesV[id].Iter() {
-				it, err := part.WriteIterator()
+			writers[i] = it
+		}
+
+		if err := rctx.For().Dynamic().Run(group.Size(), func(p int) error {
+			reader, err := group.Get(p).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
 				if err != nil {
 					return ierror.Raise(err)
 				}
-				writersV[id] = append(writersV[id], it)
+				err = writers[searchRange(this, f, elem, ascending, pivotsList)].Write(elem)
+				if err != nil {
+					return ierror.Raise(err)
+				}
 			}
+			group.SetBase(p, nil)
 			return nil
-		},
-	).After(func(sync ithreads.ISync) error {
-		return sync.Critical(func() error {
-			id := ithreads.ThreadId()
-			for p := 0; p < threadRangesV[id].Size(); p++ {
-				if err := threadRangesV[id].Get(p).MoveTo(ranges.Get(p)); err != nil {
+		}); err != nil {
+			return ierror.Raise(err)
+		}
+
+		return rctx.Critical(func() error {
+			for p := 0; p < threadRanges.Size(); p++ {
+				if err := threadRanges.Get(p).MoveTo(ranges.Get(p)); err != nil {
 					return ierror.Raise(err)
 				}
 			}
 			return nil
 		})
-	}).RunN(group.Size(), func(p int, sync ithreads.ISync) error {
-		reader, err := group.Get(p).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		id := ithreads.ThreadId()
-		for reader.HasNext() {
-			elem, err := reader.Next()
-			if err != nil {
-				return ierror.Raise(err)
-			}
-			err = writersV[id][searchRange(this, f, elem, ascending, pivotsList)].Write(elem)
-			if err != nil {
-				return ierror.Raise(err)
-			}
-		}
-		group.SetBase(p, nil)
-		return nil
+
 	}); err != nil {
 		return nil, ierror.Raise(err)
 	}
@@ -683,112 +688,110 @@ func generateMemoryRanges[T any](this *ISortImpl, f func(T, T) bool, group *stor
 	if err != nil {
 		return nil, ierror.Raise(err)
 	}
-	threadRangesV := make([]*storage.IPartitionGroup[T], this.executorData.GetCores())
-	writersV := make([][]iterator.IWriteIterator[T], this.executorData.GetCores())
 	pivotsList := pivots.Inner().(storage.IList)
 
-	if err := ithreads.New().Dynamic().Before(
-		func(sync ithreads.ISync) (err error) {
-			id := ithreads.ThreadId()
-			threadRangesV[id], err = core.NewPartitionGroupWithSize[T](this.executorData.GetPartitionTools(), ranges.Size())
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		threadRanges, err := core.NewPartitionGroupWithSize[T](this.executorData.GetPartitionTools(), ranges.Size())
+		writers := make([]iterator.IWriteIterator[T], ranges.Size())
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		for i, part := range threadRanges.Iter() {
+			it, err := part.WriteIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			for _, part := range threadRangesV[id].Iter() {
-				it, err := part.WriteIterator()
-				if err != nil {
+			writers[i] = it
+		}
+
+		if err := rctx.For().Dynamic().Run(group.Size(), func(p int) error {
+			part := group.Get(p)
+			list := part.Inner().(storage.IList)
+			if part.Empty() {
+				return nil
+			}
+			var elemsStack []ipair.IPair[int64, int64]
+			var rangesStack []ipair.IPair[int64, int64]
+
+			for i := int64(0); i < part.Size(); i++ {
+				elemsStack = append(elemsStack, *ipair.New(int64(0), int64(part.Size()-1)))
+			}
+			for i := int64(0); i < part.Size(); i++ {
+				rangesStack = append(rangesStack, *ipair.New(int64(0), pivots.Size()))
+			}
+
+			for len(elemsStack) > 0 {
+				back := len(elemsStack) - 1
+				start := elemsStack[back].First
+				end := elemsStack[back].Second
+				mid := (start + end) / 2
+				elemsStack = elemsStack[:back]
+
+				back = len(rangesStack) - 1
+				first := rangesStack[back].First
+				last := rangesStack[back].Second
+				rangesStack = rangesStack[:back]
+
+				elem := list.GetAny(int(mid)).(T)
+				r := searchRange(this, f, elem, ascending, pivotsList)
+				if err := writers[r].Write(elem); err != nil {
 					return ierror.Raise(err)
 				}
-				writersV[id] = append(writersV[id], it)
+
+				if first == r {
+					if array, ok := list.Array().([]T); ok {
+						for i := start; i < mid; i++ {
+							if err := writers[r].Write(array[i]); err != nil {
+								return ierror.Raise(err)
+							}
+						}
+					} else {
+						for i := start; i < mid; i++ {
+							if err := writers[r].Write(list.GetAny(int(i)).(T)); err != nil {
+								return ierror.Raise(err)
+							}
+						}
+					}
+				} else if start < mid {
+					elemsStack = append(elemsStack, *ipair.New(start, mid-1))
+					rangesStack = append(rangesStack, *ipair.New(first, r))
+				}
+
+				if r == last {
+					if array, ok := list.Array().([]T); ok {
+						for i := mid + 1; i <= end; i++ {
+							if err := writers[r].Write(array[i]); err != nil {
+								return ierror.Raise(err)
+							}
+						}
+					} else {
+						for i := mid + 1; i <= end; i++ {
+							if err := writers[r].Write(list.GetAny(int(i)).(T)); err != nil {
+								return ierror.Raise(err)
+							}
+						}
+					}
+				} else if start < mid {
+					elemsStack = append(elemsStack, *ipair.New(mid+1, end))
+					rangesStack = append(rangesStack, *ipair.New(r, last))
+				}
+
 			}
+			group.SetBase(p, nil)
 			return nil
-		},
-	).After(func(sync ithreads.ISync) error {
-		return sync.Critical(func() error {
-			id := ithreads.ThreadId()
-			for p := 0; p < threadRangesV[id].Size(); p++ {
-				if err := threadRangesV[id].Get(p).MoveTo(ranges.Get(p)); err != nil {
+		}); err != nil {
+			return ierror.Raise(err)
+		}
+
+		return rctx.Critical(func() error {
+			for p := 0; p < threadRanges.Size(); p++ {
+				if err := threadRanges.Get(p).MoveTo(ranges.Get(p)); err != nil {
 					return ierror.Raise(err)
 				}
 			}
 			return nil
 		})
-	}).RunN(group.Size(), func(p int, sync ithreads.ISync) error {
-		id := ithreads.ThreadId()
-		part := group.Get(p)
-		list := part.Inner().(storage.IList)
-		if part.Empty() {
-			return nil
-		}
-		var elemsStack []ipair.IPair[int64, int64]
-		var rangesStack []ipair.IPair[int64, int64]
 
-		for i := int64(0); i < part.Size(); i++ {
-			elemsStack = append(elemsStack, *ipair.New(int64(0), int64(part.Size()-1)))
-		}
-		for i := int64(0); i < part.Size(); i++ {
-			rangesStack = append(rangesStack, *ipair.New(int64(0), pivots.Size()))
-		}
-
-		for len(elemsStack) > 0 {
-			back := len(elemsStack) - 1
-			start := elemsStack[back].First
-			end := elemsStack[back].Second
-			mid := (start + end) / 2
-			elemsStack = elemsStack[:back]
-
-			back = len(rangesStack) - 1
-			first := rangesStack[back].First
-			last := rangesStack[back].Second
-			rangesStack = rangesStack[:back]
-
-			elem := list.GetAny(int(mid)).(T)
-			r := searchRange(this, f, elem, ascending, pivotsList)
-			if err := writersV[id][r].Write(elem); err != nil {
-				return ierror.Raise(err)
-			}
-
-			if first == r {
-				if array, ok := list.Array().([]T); ok {
-					for i := start; i < mid; i++ {
-						if err := writersV[id][r].Write(array[i]); err != nil {
-							return ierror.Raise(err)
-						}
-					}
-				} else {
-					for i := start; i < mid; i++ {
-						if err := writersV[id][r].Write(list.GetAny(int(i)).(T)); err != nil {
-							return ierror.Raise(err)
-						}
-					}
-				}
-			} else if start < mid {
-				elemsStack = append(elemsStack, *ipair.New(start, mid-1))
-				rangesStack = append(rangesStack, *ipair.New(first, r))
-			}
-
-			if r == last {
-				if array, ok := list.Array().([]T); ok {
-					for i := mid + 1; i <= end; i++ {
-						if err := writersV[id][r].Write(array[i]); err != nil {
-							return ierror.Raise(err)
-						}
-					}
-				} else {
-					for i := mid + 1; i <= end; i++ {
-						if err := writersV[id][r].Write(list.GetAny(int(i)).(T)); err != nil {
-							return ierror.Raise(err)
-						}
-					}
-				}
-			} else if start < mid {
-				elemsStack = append(elemsStack, *ipair.New(mid+1, end))
-				rangesStack = append(rangesStack, *ipair.New(r, last))
-			}
-
-		}
-		group.SetBase(p, nil)
-		return nil
 	}); err != nil {
 		return nil, ierror.Raise(err)
 	}
@@ -847,39 +850,38 @@ func takeOrderedImpl[T any](this *ISortImpl, f func(T, T) bool, ascending bool, 
 	if err != nil {
 		return ierror.Raise(err)
 	}
-	localTopv := make([]*storage.IMemoryPartition[T], this.executorData.GetCores())
 
 	logger.Info("Sort: local partition top/takeOrdered")
-	if err := ithreads.New().Dynamic().Before(func(sync ithreads.ISync) error {
-		aux, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), n)
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		localTop, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), n)
 		if err != nil {
 			return ierror.Raise(err)
 		}
-		localTopv[ithreads.ThreadId()] = aux
-		return nil
-	}).After(func(sync ithreads.ISync) error {
-		return sync.Critical(func() error {
-			return ierror.Raise(localTopv[ithreads.ThreadId()].MoveTo(top))
+		if err := rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			reader, err := input.Get(p).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			ltop := localTop.Inner().(*storage.IListImpl[T])
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				err = takeOrderedAdd(this, f, ascending, ltop, elem, n)
+				if err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			return nil
+		}); err != nil {
+			return ierror.Raise(err)
+		}
+		return rctx.Critical(func() error {
+			return ierror.Raise(localTop.MoveTo(top))
 		})
-	}).RunN(input.Size(), func(p int, sync ithreads.ISync) error {
-		reader, err := input.Get(p).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		ltop := localTopv[ithreads.ThreadId()].Inner().(*storage.IListImpl[T])
-		for reader.HasNext() {
-			elem, err := reader.Next()
-			if err != nil {
-				return ierror.Raise(err)
-			}
-			err = takeOrderedAdd(this, f, ascending, ltop, elem, n)
-			if err != nil {
-				return ierror.Raise(err)
-			}
-		}
-		return nil
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 
 	logger.Info("Sort: local executor top/takeOrdered")
@@ -938,37 +940,35 @@ func maxImpl[T any](this *ISortImpl, f func(T, T) bool, ascending bool) error {
 	logger.Info("Sort: local max/min")
 
 	elem := first.(T)
-	localElems := make([]T, this.executorData.GetCores())
 
-	if err := ithreads.New().Dynamic().Before(func(sync ithreads.ISync) error {
-		localElems[ithreads.ThreadId()] = elem
-		return nil
-	}).After(func(sync ithreads.ISync) error {
-		return sync.Critical(func() error {
-			if f(elem, localElems[ithreads.ThreadId()]) != ascending {
-				elem = localElems[ithreads.ThreadId()]
-			}
-			return nil
-		})
-	}).RunN(input.Size(), func(p int, sync ithreads.ISync) error {
-		reader, err := input.Get(p).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		myElem := localElems[ithreads.ThreadId()]
-		for reader.HasNext() {
-			elem, err := reader.Next()
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		localElem := elem
+		if err := rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			reader, err := input.Get(p).ReadIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			if f(myElem, elem) != ascending {
-				myElem = elem
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if f(localElem, elem) != ascending {
+					localElem = elem
+				}
 			}
+			return nil
+		}); err != nil {
+			return ierror.Raise(err)
 		}
-		localElems[ithreads.ThreadId()] = myElem
-		return nil
+		return rctx.Critical(func() error {
+			if f(elem, localElem) != ascending {
+				elem = localElem
+			}
+			return nil
+		})
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 
 	logger.Info("Sort: global max/min")

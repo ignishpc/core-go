@@ -34,72 +34,70 @@ func Sample[T any](this *IMathImpl, withReplacement bool, num []int64, seed int3
 	if err != nil {
 		return ierror.Raise(err)
 	}
-	distv := make([]*rand.Rand, this.executorData.GetCores())
 
 	logger.Info("Math: sample ", +input.Size(), " partitions")
-	if err := ithreads.New().Dynamic().After(func(sync ithreads.ISync) error {
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
 		id := ithreads.ThreadId()
-		distv[id] = rand.New(rand.NewSource(int64(int(seed) + id)))
-		return nil
-	}).RunN(input.Size(), func(p int, sync ithreads.ISync) error {
-		writer, err := output.Get(p).WriteIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		part := input.Get(p)
-		size := part.Size()
-		if !isMemory {
-			aux, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), int64(part.Size()))
+		dist := rand.New(rand.NewSource(int64(int(seed) + id)))
+		return rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			writer, err := output.Get(p).WriteIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			if err = part.CopyTo(aux); err != nil {
-				return ierror.Raise(err)
+			part := input.Get(p)
+			size := part.Size()
+			if !isMemory {
+				aux, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), int64(part.Size()))
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if err = part.CopyTo(aux); err != nil {
+					return ierror.Raise(err)
+				}
+				part = aux
 			}
-			part = aux
-		}
-		list := part.Inner().(storage.IList)
-		array, ok := list.Array().([]T)
-		dist := distv[ithreads.ThreadId()]
+			list := part.Inner().(storage.IList)
+			array, ok := list.Array().([]T)
 
-		if withReplacement {
-			if ok {
-				for i := int64(0); i < num[p]; i++ {
-					if err := writer.Write(array[dist.Intn(int(size-1))]); err != nil {
-						return ierror.Raise(err)
+			if withReplacement {
+				if ok {
+					for i := int64(0); i < num[p]; i++ {
+						if err := writer.Write(array[dist.Intn(int(size-1))]); err != nil {
+							return ierror.Raise(err)
+						}
+					}
+				} else {
+					for i := int64(0); i < num[p]; i++ {
+						if err := writer.Write(list.GetAny(dist.Intn(int(size - 1))).(T)); err != nil {
+							return ierror.Raise(err)
+						}
 					}
 				}
 			} else {
-				for i := int64(0); i < num[p]; i++ {
-					if err := writer.Write(list.GetAny(dist.Intn(int(size - 1))).(T)); err != nil {
-						return ierror.Raise(err)
+				picked := int64(0)
+				for i := int64(0); i < int64(list.Size()) && num[p] > picked; i++ {
+					prob := float64(num[p]-picked) / float64(size-i)
+					random := dist.Float64()
+					if random < prob {
+						if ok {
+							if err := writer.Write(array[i]); err != nil {
+								return ierror.Raise(err)
+							}
+						} else {
+							if err := writer.Write(list.GetAny(int(i)).(T)); err != nil {
+								return ierror.Raise(err)
+							}
+						}
+						picked++
 					}
 				}
-			}
-		} else {
-			picked := int64(0)
-			for i := int64(0); i < int64(list.Size()) && num[p] > picked; i++ {
-				prob := float64(num[p]-picked) / float64(size-i)
-				random := dist.Float64()
-				if random < prob {
-					if ok {
-						if err := writer.Write(array[i]); err != nil {
-							return ierror.Raise(err)
-						}
-					} else {
-						if err := writer.Write(list.GetAny(int(i)).(T)); err != nil {
-							return ierror.Raise(err)
-						}
-					}
-					picked++
-				}
-			}
 
-		}
-		input.SetBase(p, nil)
-		return ierror.Raise(output.Get(p).Fit())
+			}
+			input.SetBase(p, nil)
+			return ierror.Raise(output.Get(p).Fit())
+		})
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 	core.SetPartitions(this.executorData, output)
 	return nil
@@ -126,30 +124,32 @@ func SampleByKeyFilter[T any, K comparable](this *IMathImpl) (int64, error) {
 	fractions := this.Context().Vars()["fractions"].(map[K]float64)
 
 	logger.Info("Math: filtering key before sample ", +input.Size(), " partitions")
-	if err := ithreads.New().Dynamic().RunN(input.Size(), func(p int, sync ithreads.ISync) error {
-		reader, err := input.Get(p).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		writer, err := tmp.Get(p).WriteIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		for reader.HasNext() {
-			elem, err := reader.Next()
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			reader, err := input.Get(p).ReadIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			if _, present := fractions[elem.First]; present {
-				if err = writer.Write(elem); err != nil {
+			writer, err := tmp.Get(p).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
 					return ierror.Raise(err)
 				}
+				if _, present := fractions[elem.First]; present {
+					if err = writer.Write(elem); err != nil {
+						return ierror.Raise(err)
+					}
+				}
 			}
-		}
-		input.SetBase(p, nil)
-		return ierror.Raise(tmp.Get(p).Fit())
+			input.SetBase(p, nil)
+			return ierror.Raise(tmp.Get(p).Fit())
+		})
 	}); err != nil {
-		return 0, err
+		return 0, ierror.Raise(err)
 	}
 	output, err := core.NewPartitionGroupWithSize[ipair.IPair[K, T]](this.executorData.GetPartitionTools(), input.Size())
 	if err != nil {
@@ -190,32 +190,34 @@ func SampleByKey[T any, K comparable](this *IMathImpl, withReplacement bool, see
 		output.Add(part)
 	}
 	logger.Info("Math: sampleByKey copying values to single partition")
-	if err := ithreads.New().Dynamic().RunN(input.Size(), func(p int, sync ithreads.ISync) error {
-		reader, err := input.Get(p).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		for reader.HasNext() {
-			elem, err := reader.Next()
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			reader, err := input.Get(p).ReadIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			pos := pmap[elem.First]
-			num[pos] = int64(float64(len(elem.Second)) * fractions[elem.First])
-			writer, err := output.Get(p).WriteIterator()
-			if err != nil {
-				return ierror.Raise(err)
-			}
-			for _, value := range elem.Second {
-				if err = writer.Write(*ipair.New[K, T](elem.First, value)); err != nil {
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
 					return ierror.Raise(err)
 				}
+				pos := pmap[elem.First]
+				num[pos] = int64(float64(len(elem.Second)) * fractions[elem.First])
+				writer, err := output.Get(p).WriteIterator()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				for _, value := range elem.Second {
+					if err = writer.Write(*ipair.New[K, T](elem.First, value)); err != nil {
+						return ierror.Raise(err)
+					}
+				}
 			}
-		}
-		input.SetBase(p, nil)
-		return nil
+			input.SetBase(p, nil)
+			return nil
+		})
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 	core.SetPartitions(this.executorData, output)
 	return Sample[T](this, withReplacement, num, seed)
@@ -230,12 +232,29 @@ func CountByKey[T any, K comparable](this *IMathImpl) error {
 	acum := make([]map[K]int64, threads)
 	logger.Info("Math: counting local keys ", input.Size(), " partitions")
 
-	if err := ithreads.New().Dynamic().After(func(sync ithreads.ISync) error {
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		id := ithreads.ThreadId()
+		if err := rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			reader, err := input.Get(p).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				acum[id][elem.First]++
+			}
+			input.SetBase(p, nil)
+			return nil
+		}); err != nil {
+			return ierror.Raise(err)
+		}
 		distance := 1
 		order := 1
-		id := ithreads.ThreadId()
 		for order < threads {
-			sync.Barrier()
+			rctx.Barrier()
 			order *= 2
 			if id%order == 0 {
 				other := id + distance
@@ -249,23 +268,8 @@ func CountByKey[T any, K comparable](this *IMathImpl) error {
 			}
 		}
 		return nil
-	}).RunN(input.Size(), func(p int, sync ithreads.ISync) error {
-		id := ithreads.ThreadId()
-		reader, err := input.Get(p).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		for reader.HasNext() {
-			elem, err := reader.Next()
-			if err != nil {
-				return ierror.Raise(err)
-			}
-			acum[id][elem.First]++
-		}
-		input.SetBase(p, nil)
-		return nil
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 	return countByReduce[K](this, acum[0])
 }
@@ -279,12 +283,29 @@ func CountByValue[T comparable, K any](this *IMathImpl) error {
 	acum := make([]map[T]int64, threads)
 	logger.Info("Math: counting local keys ", input.Size(), " partitions")
 
-	if err := ithreads.New().Dynamic().After(func(sync ithreads.ISync) error {
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		id := ithreads.ThreadId()
+		if err := rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			reader, err := input.Get(p).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				acum[id][elem.Second]++
+			}
+			input.SetBase(p, nil)
+			return nil
+		}); err != nil {
+			return ierror.Raise(err)
+		}
 		distance := 1
 		order := 1
-		id := ithreads.ThreadId()
 		for order < threads {
-			sync.Barrier()
+			rctx.Barrier()
 			order *= 2
 			if id%order == 0 {
 				other := id + distance
@@ -298,23 +319,8 @@ func CountByValue[T comparable, K any](this *IMathImpl) error {
 			}
 		}
 		return nil
-	}).RunN(input.Size(), func(p int, sync ithreads.ISync) error {
-		id := ithreads.ThreadId()
-		reader, err := input.Get(p).ReadIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		for reader.HasNext() {
-			elem, err := reader.Next()
-			if err != nil {
-				return ierror.Raise(err)
-			}
-			acum[id][elem.Second]++
-		}
-		input.SetBase(p, nil)
-		return nil
 	}); err != nil {
-		return err
+		return ierror.Raise(err)
 	}
 	return countByReduce[T](this, acum[0])
 }

@@ -81,7 +81,7 @@ func (this *IIOImpl) TextFile(path string, minPartitions int64) error {
 	threadGroup := make([]*storage.IPartitionGroup[string], ioCores)
 	elements := int64(0)
 
-	if err := ithreads.New().Threads(ioCores).Parallel(func(i int, sync ithreads.ISync) error {
+	if err := ithreads.ParallelT(ioCores, func(rctx ithreads.IRuntimeContext) error {
 		file, err := this.openFileRead(path)
 		if err != nil {
 			return ierror.Raise(err)
@@ -179,11 +179,10 @@ func (this *IIOImpl) TextFile(path string, minPartitions int64) error {
 				break
 			}
 		}
-		sync.Critical(func() error {
+		return rctx.Critical(func() error {
 			elements += threadElements
 			return nil
 		})
-		return nil
 	}); err != nil {
 		return err
 	}
@@ -211,24 +210,26 @@ func PartitionObjectFile[T any](this *IIOImpl, path string, first int64, partiti
 		return ierror.Raise(err)
 	}
 
-	if err = ithreads.New().Dynamic().Threads(ioCores).RunN(int(partitions), func(p int, sync ithreads.ISync) error {
-		fileName, err := this.partitionFileName(path, first+int64(p))
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		file, err := this.openFileRead(fileName) //Only to check
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		_ = file.Close()
-		open, err := storage.NewIDiskPartition[T](fileName, 0, true, true, true)
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		if err = group.Get(p).CopyFrom(open); err != nil {
-			return ierror.Raise(err)
-		}
-		return ierror.Raise(group.Get(p).Fit())
+	if err := ithreads.ParallelT(ioCores, func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(int(partitions), func(p int) error {
+			fileName, err := this.partitionFileName(path, first+int64(p))
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			file, err := this.openFileRead(fileName) //Only to check
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			_ = file.Close()
+			open, err := storage.NewIDiskPartition[T](fileName, 0, true, true, true)
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			if err = group.Get(p).CopyFrom(open); err != nil {
+				return ierror.Raise(err)
+			}
+			return ierror.Raise(group.Get(p).Fit())
+		})
 	}); err != nil {
 		return err
 	}
@@ -249,37 +250,39 @@ func (this *IIOImpl) PartitionTextFile(path string, first int64, partitions int6
 		return ierror.Raise(err)
 	}
 
-	if err = ithreads.New().Dynamic().Threads(ioCores).RunN(int(partitions), func(p int, sync ithreads.ISync) error {
-		fileName, err := this.partitionFileName(path, first+int64(p))
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		file, err := this.openFileRead(fileName)
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		partition := group.Get(p)
-		writeIterator, err := partition.WriteIterator()
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		reader := bufio.NewReader(file)
-		line, err := reader.ReadBytes('\n')
-		eof := err == io.EOF
-		if err != nil && err != io.EOF {
-			return ierror.Raise(err)
-		}
-		if eof {
-			if err = writeIterator.Write(string(line)); err != nil {
+	if err := ithreads.ParallelT(ioCores, func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(int(partitions), func(p int) error {
+			fileName, err := this.partitionFileName(path, first+int64(p))
+			if err != nil {
 				return ierror.Raise(err)
 			}
-		} else {
-			if err = writeIterator.Write(string(line[:len(line)-1])); err != nil {
+			file, err := this.openFileRead(fileName)
+			if err != nil {
 				return ierror.Raise(err)
+			}
+			partition := group.Get(p)
+			writeIterator, err := partition.WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			reader := bufio.NewReader(file)
+			line, err := reader.ReadBytes('\n')
+			eof := err == io.EOF
+			if err != nil && err != io.EOF {
+				return ierror.Raise(err)
+			}
+			if eof {
+				if err = writeIterator.Write(string(line)); err != nil {
+					return ierror.Raise(err)
+				}
+			} else {
+				if err = writeIterator.Write(string(line[:len(line)-1])); err != nil {
+					return ierror.Raise(err)
+				}
+				return nil
 			}
 			return nil
-		}
-		return nil
+		})
 	}); err != nil {
 		return err
 	}
@@ -305,35 +308,37 @@ func SaveAsObjectFile[T any](this *IIOImpl, path string, compression int8, first
 		return ierror.Raise(err)
 	}
 
-	if err = ithreads.New().Dynamic().Threads(ioCores).RunN(group.Size(), func(p int, sync ithreads.ISync) error {
-		var fileName string
-		if err := sync.Critical(func() error {
-			fileName, err = this.partitionFileName(path, first+int64(p))
-			if err != nil {
+	if err := ithreads.ParallelT(ioCores, func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(group.Size(), func(p int) error {
+			var fileName string
+			if err := rctx.Critical(func() error {
+				fileName, err = this.partitionFileName(path, first+int64(p))
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				file, err := this.openFileWrite(fileName) //Only to check
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				_ = file.Close()
+				return err
+			}); err != nil {
 				return ierror.Raise(err)
 			}
-			file, err := this.openFileWrite(fileName) //Only to check
-			if err != nil {
-				return ierror.Raise(err)
-			}
-			_ = file.Close()
-			return err
-		}); err != nil {
-			return ierror.Raise(err)
-		}
 
-		save, err := storage.NewIDiskPartition[T](fileName, 0, true, true, false)
-		if err != nil {
-			return ierror.Raise(err)
-		}
-		if err = group.Get(p).CopyTo(save); err != nil {
-			return ierror.Raise(err)
-		}
-		if err = save.Sync(); err != nil {
-			return ierror.Raise(err)
-		}
-		group.SetBase(p, nil)
-		return nil
+			save, err := storage.NewIDiskPartition[T](fileName, 0, true, true, false)
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			if err = group.Get(p).CopyTo(save); err != nil {
+				return ierror.Raise(err)
+			}
+			if err = save.Sync(); err != nil {
+				return ierror.Raise(err)
+			}
+			group.SetBase(p, nil)
+			return nil
+		})
 	}); err != nil {
 		return err
 	}
@@ -354,41 +359,43 @@ func SaveAsTextFile[T any](this *IIOImpl, path string, first int64) error {
 		return ierror.Raise(err)
 	}
 
-	if err = ithreads.New().Dynamic().Threads(ioCores).RunN(group.Size(), func(p int, sync ithreads.ISync) error {
-		var fileName string
-		var file *os.File
-		if err := sync.Critical(func() error {
-			fileName, err = this.partitionFileName(path, first+int64(p))
-			if err != nil {
+	if err := ithreads.ParallelT(ioCores, func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Dynamic().Run(group.Size(), func(p int) error {
+			var fileName string
+			var file *os.File
+			if err := rctx.Critical(func() error {
+				fileName, err = this.partitionFileName(path, first+int64(p))
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				file, err = this.openFileWrite(fileName) //Only to check
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				_ = file.Close()
+				return err
+			}); err != nil {
 				return ierror.Raise(err)
 			}
-			file, err = this.openFileWrite(fileName) //Only to check
-			if err != nil {
-				return ierror.Raise(err)
-			}
-			_ = file.Close()
-			return err
-		}); err != nil {
-			return ierror.Raise(err)
-		}
 
-		if isMemory {
-			list := group.Get(p).Inner().(storage.IList)
-			if err = iio.Print(file, list); err != nil {
-				return ierror.Raise(err)
+			if isMemory {
+				list := group.Get(p).Inner().(storage.IList)
+				if err = iio.Print(file, list); err != nil {
+					return ierror.Raise(err)
+				}
+			} else {
+				it, err := group.Get(p).ReadIterator()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if err = iio.Print(file, it); err != nil {
+					return ierror.Raise(err)
+				}
 			}
-		} else {
-			it, err := group.Get(p).ReadIterator()
-			if err != nil {
-				return ierror.Raise(err)
-			}
-			if err = iio.Print(file, it); err != nil {
-				return ierror.Raise(err)
-			}
-		}
 
-		group.SetBase(p, nil)
-		return nil
+			group.SetBase(p, nil)
+			return nil
+		})
 	}); err != nil {
 		return err
 	}

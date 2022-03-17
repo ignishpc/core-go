@@ -132,22 +132,24 @@ func exchangeSync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *s
 	}
 	mpiCores := this.executorData.GetMpiCores()
 
-	if err := ithreads.New().Static().Threads(mpiCores).Chunk(1).RunN(numPartitions, func(i int, sync ithreads.ISync) error {
-		p := partsTargets[i].First
-		target := partsTargets[i].Second
+	if err := ithreads.ParallelT(mpiCores, func(rctx ithreads.IRuntimeContext) error {
+		return rctx.For().Static().Run(numPartitions, func(i int) error {
+			p := partsTargets[i].First
+			target := partsTargets[i].Second
 
-		if err := core.Gather(this.executorData.Mpi(), in.Get(int(p)), int(target)); err != nil {
-			return ierror.Raise(err)
-		}
-
-		if this.executorData.Mpi().IsRoot(int(target)) {
-			if err := in.Get(int(p)).Fit(); err != nil {
+			if err := core.Gather(this.executorData.Mpi(), in.Get(int(p)), int(target)); err != nil {
 				return ierror.Raise(err)
 			}
-		} else {
-			in.Set(int(p), nil)
-		}
-		return nil
+
+			if this.executorData.Mpi().IsRoot(int(target)) {
+				if err := in.Get(int(p)).Fit(); err != nil {
+					return ierror.Raise(err)
+				}
+			} else {
+				in.SetBase(int(p), nil)
+			}
+			return nil
+		})
 	}); err != nil {
 		return ierror.Raise(err)
 	}
@@ -212,68 +214,75 @@ func exchangeAsync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *
 
 	ignores := make([]bool, len(queue))
 
-	if err := ithreads.New().Static().Threads(mpiCores).RunN(len(queue), func(i int, sync ithreads.ISync) error {
-		other := queue[i]
-		ignore := impi.C_int8(1)
-		ignoreOther := impi.C_int8(1)
-		if other == int64(executors) {
+	if err := ithreads.ParallelT(mpiCores, func(rctx ithreads.IRuntimeContext) error {
+		err := rctx.For().Static().Run(len(queue), func(i int) error {
+			other := queue[i]
+			ignore := impi.C_int8(1)
+			ignoreOther := impi.C_int8(1)
+			if other == int64(executors) {
+				return nil
+			}
+			for j := ranges[other].First; j < ranges[other].Second; j++ {
+				ignore = utils.Ternary[impi.C_int8](ignore != 0 && in.Get(int(j)).Empty(), 1, 0)
+			}
+			if err := impi.MPI_Sendrecv(impi.P(&ignore), 1, impi.MPI_C_BOOL, impi.C_int(other), 0, impi.P(&ignoreOther), 1,
+				impi.MPI_C_BOOL, impi.C_int(other), 0, this.executorData.Mpi().Native(), impi.MPI_STATUS_IGNORE); err != nil {
+				return ierror.Raise(err)
+			}
+
+			if ignore != 0 && ignoreOther != 0 {
+				ignores[i] = true
+				for j := ranges[other].First; j < ranges[other].Second; j++ {
+					in.SetBase(int(j), nil)
+				}
+			}
 			return nil
-		}
-		for j := ranges[other].First; j < ranges[other].Second; j++ {
-			ignore = utils.Ternary[impi.C_int8](ignore != 0 && in.Get(int(j)).Empty(), 1, 0)
-		}
-		if err := impi.MPI_Sendrecv(impi.P(&ignore), 1, impi.MPI_C_BOOL, impi.C_int(other), 0, impi.P(&ignoreOther), 1,
-			impi.MPI_C_BOOL, impi.C_int(other), 0, this.executorData.Mpi().Native(), impi.MPI_STATUS_IGNORE); err != nil {
+		})
+		if err != nil {
 			return ierror.Raise(err)
 		}
 
-		if ignore != 0 && ignoreOther != 0 {
-			ignores[i] = true
-			for j := ranges[other].First; j < ranges[other].Second; j++ {
-				in.Set(int(j), nil)
+		for i := 0; i < len(queue); i++ {
+			other := queue[i]
+			if ignores[i] || other == int64(executors) {
+				continue
+			}
+			otherPart := ranges[other].First
+			otherEnd := ranges[other].Second
+			mePart := ranges[rank].First
+			meEnd := ranges[rank].Second
+			its := int(utils.Max(otherEnd-otherPart, meEnd-mePart))
+
+			err := rctx.For().Static().Chunk(1).Run(its, func(j int) error {
+				mepart := ranges[rank].First + int64(j)
+				otherPart := ranges[other].First + int64(j)
+				if otherPart >= otherEnd || mepart >= meEnd {
+					if otherPart >= otherEnd {
+						if err := core.Recv(this.executorData.Mpi(), in.Get(int(mepart)), int(other), 0); err != nil {
+							return ierror.Raise(err)
+						}
+					} else if mepart >= meEnd {
+						if err := core.Send(this.executorData.Mpi(), in.Get(int(otherPart)), int(other), 0); err != nil {
+							return ierror.Raise(err)
+						}
+					} else {
+						return nil
+					}
+				} else {
+					if err := core.SendRcv(this.executorData.Mpi(), in.Get(int(otherPart)), in.Get(int(mepart)), int(other), 0); err != nil {
+						return ierror.Raise(err)
+					}
+				}
+				in.SetBase(int(otherPart), nil)
+				return nil
+			})
+			if err != nil {
+				return ierror.Raise(err)
 			}
 		}
 		return nil
 	}); err != nil {
 		return ierror.Raise(err)
-	}
-
-	for i := 0; i < len(queue); i++ {
-		other := queue[i]
-		if ignores[i] || other == int64(executors) {
-			continue
-		}
-		otherPart := ranges[other].First
-		otherEnd := ranges[other].Second
-		mePart := ranges[rank].First
-		meEnd := ranges[rank].Second
-		its := int(utils.Max(otherEnd-otherPart, meEnd-mePart))
-
-		if err := ithreads.New().Static().Threads(mpiCores).Chunk(1).RunN(its, func(j int, sync ithreads.ISync) error {
-			mepart := ranges[rank].First + int64(j)
-			otherPart := ranges[other].First + int64(j)
-			if otherPart >= otherEnd || mepart >= meEnd {
-				if otherPart >= otherEnd {
-					if err := core.Recv(this.executorData.Mpi(), in.Get(int(mepart)), int(other), 0); err != nil {
-						return ierror.Raise(err)
-					}
-				} else if mepart >= meEnd {
-					if err := core.Send(this.executorData.Mpi(), in.Get(int(otherPart)), int(other), 0); err != nil {
-						return ierror.Raise(err)
-					}
-				} else {
-					return nil
-				}
-			} else {
-				if err := core.SendRcv(this.executorData.Mpi(), in.Get(int(otherPart)), in.Get(int(mepart)), int(other), 0); err != nil {
-					return ierror.Raise(err)
-				}
-			}
-			in.Set(int(otherPart), nil)
-			return nil
-		}); err != nil {
-			return ierror.Raise(err)
-		}
 	}
 
 	for i := 0; i < numPartitions; i++ {

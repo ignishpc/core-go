@@ -436,30 +436,30 @@ type IFoldAbs interface {
 	RunFold(i *impl.IReduceImpl, f function.IBaseFunction) error
 }
 
-type IFold[T1 any, T2 any] struct {
+type IFold[T1 any] struct {
 }
 
-func (this *IFold[T1, T2]) Types() []api.IContextType {
-	return []api.IContextType{NewTypeA[T1](), NewTypeA[T2]()}
+func (this *IFold[T]) Types() []api.IContextType {
+	return []api.IContextType{NewTypeA[T]()}
 }
 
-func (this *IFold[T1, T2]) RunFold(i *impl.IReduceImpl, f function.IBaseFunction) error {
-	return impl.Fold(i, f.(function.IFunction2[T1, T2, T1]))
+func (this *IFold[T]) RunFold(i *impl.IReduceImpl, f function.IBaseFunction) error {
+	return impl.Fold(i, f.(function.IFunction2[T, T, T]))
 }
 
 type ITreeFoldAbs interface {
 	RunTreeFold(i *impl.IReduceImpl, f function.IBaseFunction) error
 }
 
-type ITreeFold[T1 any, T2 any] struct {
+type ITreeFold[T1 any] struct {
 }
 
-func (this *ITreeFold[T1, T2]) Types() []api.IContextType {
-	return []api.IContextType{NewTypeA[T1](), NewTypeA[T2]()}
+func (this *ITreeFold[T1]) Types() []api.IContextType {
+	return []api.IContextType{NewTypeA[T1]()}
 }
 
-func (this *ITreeFold[T1, T2]) RunTreeFold(i *impl.IReduceImpl, f function.IBaseFunction) error {
-	return impl.TreeFold(i, f.(function.IFunction2[T1, T2, T1]))
+func (this *ITreeFold[T]) RunTreeFold(i *impl.IReduceImpl, f function.IBaseFunction) error {
+	return impl.TreeFold(i, f.(function.IFunction2[T, T, T]))
 }
 
 type ISortByKeyAbs interface {
