@@ -61,6 +61,10 @@ func (this *iTypeC[T]) GroupByKey(reduceImpl *impl.IReduceImpl, numPartitions in
 	return typeCError()
 }
 
+func (this *iTypeC[T]) Join(reduceImpl *impl.IReduceImpl, other string, numPartitions int64) error {
+	return typeCError()
+}
+
 func (this *iTypeC[T]) Distinct(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
 	return impl.Distinct[T](reduceImpl, numPartitions)
 }

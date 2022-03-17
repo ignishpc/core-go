@@ -156,7 +156,7 @@ func (this *iTypeA[T]) Union(reduceImpl *impl.IReduceImpl, other string, preserv
 }
 
 func (this *iTypeA[T]) Join(reduceImpl *impl.IReduceImpl, other string, numPartitions int64) error {
-	return impl.Join[T](reduceImpl, other, numPartitions)
+	return typeAError()
 }
 
 func (this *iTypeA[T]) Distinct(reduceImpl *impl.IReduceImpl, numPartitions int64) error {

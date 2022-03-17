@@ -51,29 +51,33 @@ func (this *iTypeAC[T1, T2]) Values(pipeImpl *impl.IPipeImpl) error {
 /*IMathImpl*/
 
 func (this *iTypeAC[T1, T2]) SampleByKeyFilter(mathImpl *impl.IMathImpl) (int64, error) {
-	return 0, typeAAError()
+	return 0, typeACError()
 }
 
 func (this *iTypeAC[T1, T2]) SampleByKey(mathImpl *impl.IMathImpl, withReplacement bool, seed int32) error {
-	return typeAAError()
+	return typeACError()
 }
 
 func (this *iTypeAC[T1, T2]) CountByKey(mathImpl *impl.IMathImpl) error {
-	return typeAAError()
+	return typeACError()
 }
 
 func (this *iTypeAC[T1, T2]) CountByValue(mathImpl *impl.IMathImpl) error {
-	return typeAAError()
+	return typeACError()
 }
 
 /*IReduceImpl*/
 
 func (this *iTypeAC[T1, T2]) GroupByKey(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
-	return typeAAError()
+	return typeACError()
+}
+
+func (this *iTypeAC[T1, T2]) Join(reduceImpl *impl.IReduceImpl, other string, numPartitions int64) error {
+	return typeACError()
 }
 
 func (this *iTypeAC[T1, T2]) Distinct(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
-	return typeAAError()
+	return typeACError()
 }
 
 /*IRepartitionImpl*/

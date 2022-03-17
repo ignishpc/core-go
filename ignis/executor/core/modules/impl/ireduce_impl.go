@@ -2,12 +2,17 @@ package impl
 
 import (
 	"ignis/executor/api/function"
+	"ignis/executor/api/ipair"
+	"ignis/executor/api/iterator"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
+	"ignis/executor/core/impi"
 	"ignis/executor/core/ithreads"
 	"ignis/executor/core/logger"
 	"ignis/executor/core/storage"
+	"ignis/executor/core/utils"
 	"math"
+	"reflect"
 )
 
 type IReduceImpl struct {
@@ -224,31 +229,397 @@ func TreeFold[T any](this *IReduceImpl, f function.IFunction2[T, T, T]) error {
 }
 
 func GroupByKey[T any, K comparable](this *IReduceImpl, numPartitions int64) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	if err := keyHashing[K, T](this, numPartitions); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := keyExchanging[K, T](this); err != nil {
+		return ierror.Raise(err)
+	}
+
+	input, err := core.GetPartitions[ipair.IPair[K, T]](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	output, err := core.NewPartitionGroupWithSize[ipair.IPair[K, []T]](this.executorData.GetPartitionTools(), int(numPartitions))
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	logger.Info("Reduce: reducing key elements")
+
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		acum := map[K][]T{}
+		return rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			part := input.Get(p)
+			reader, err := part.ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				acum[elem.First] = append(acum[elem.First], elem.Second)
+			}
+			writer, err := output.Get(p).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for key, values := range acum {
+				if err := writer.Write(*ipair.New(key, values)); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			acum = map[K][]T{}
+			input.SetBase(p, nil)
+			return output.Get(p).Fit()
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+	core.SetPartitions(this.executorData, output)
+	return nil
 }
 
 func ReduceByKey[K comparable, T any](this *IReduceImpl, f function.IFunction2[T, T, T], numPartitions int64, localReduce bool) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	context := this.Context()
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	if localReduce {
+		logger.Info("Reduce: local reducing key elements")
+		if err := localReduceByKey[K](this, f); err != nil {
+			return ierror.Raise(err)
+		}
+	}
+	if err := keyHashing[K, T](this, numPartitions); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := keyExchanging[K, T](this); err != nil {
+		return ierror.Raise(err)
+	}
+	logger.Info("Reduce: reducing key elements")
+	if err := localReduceByKey[K](this, f); err != nil {
+		return ierror.Raise(err)
+	}
+	return ierror.Raise(f.After(context))
 }
 
 func AggregateByKey[K comparable, T any, T2 any](this *IReduceImpl, f function.IFunction2[T, T2, T], numPartitions int64, hashing bool) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	context := this.Context()
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	if hashing {
+		if err := keyHashing[K, T](this, numPartitions); err != nil {
+			return ierror.Raise(err)
+		}
+		if err := keyExchanging[K, T](this); err != nil {
+			return ierror.Raise(err)
+		}
+	}
+	logger.Info("Reduce: aggregating key elements")
+	if err := localAggregateByKey[K](this, f); err != nil {
+		return ierror.Raise(err)
+	}
+	return ierror.Raise(f.After(context))
 }
 
-func FoldByKey[K comparable, T any, T2 any](this *IReduceImpl, f function.IFunction2[T, T2, T], numPartitions int64, localFold bool) error {
-	return ierror.RaiseMsg("TODO") //TODO
+func FoldByKey[K comparable, T any](this *IReduceImpl, f function.IFunction2[T, T, T], numPartitions int64, localFold bool) error {
+	context := this.Context()
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	if localFold {
+		logger.Info("Reduce: local folding key elements")
+		if err := localAggregateByKey[K](this, f); err != nil {
+			return ierror.Raise(err)
+		}
+	}
+	if err := keyHashing[K, T](this, numPartitions); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := keyExchanging[K, T](this); err != nil {
+		return ierror.Raise(err)
+	}
+	logger.Info("Reduce: folding key elements")
+	if err := localReduceByKey[K](this, f); err != nil {
+		return ierror.Raise(err)
+	}
+	return ierror.Raise(f.After(context))
 }
 
 func Union[T any](this *IReduceImpl, other string, preserveOrder bool) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	input, err := core.GetPartitions[T](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	core.SetPartitions(this.executorData, core.GetVariable[*storage.IPartitionGroup[T]](this.executorData, other))
+	input2, err := core.GetPartitions[T](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	output, err := core.NewPartitionGroupDef[T](this.executorData.GetPartitionTools())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	logger.Info("Reduce: union ", input.Size(), " and ", input2.Size(), " partitions")
+	var storage string
+	if input.Size() > 0 {
+		storage = input.Get(0).Type()
+		if input2.Size() > 0 {
+			if input.Get(0).Type() != input2.Get(0).Type() {
+				for i, part := range input2.Iter() {
+					newPart, err := core.NewPartitionWithName[T](this.executorData.GetPartitionTools(), storage)
+					if err != nil {
+						return ierror.Raise(err)
+					}
+					if err := part.CopyTo(newPart); err != nil {
+						return ierror.Raise(err)
+					}
+					input2.Set(i, newPart)
+				}
+			}
+		}
+	} else if input2.Size() > 0 {
+		storage = input2.Get(0).Type()
+	} else {
+		storage, err = this.executorData.GetProperties().PartitionType()
+		if err != nil {
+			return ierror.Raise(err)
+		}
+	}
+
+	if preserveOrder {
+		logger.Info("Reduce: union using order mode")
+		executors := this.executorData.Mpi().Executors()
+		rank := this.executorData.Mpi().Rank()
+		count := input.Size()
+		globalCount := int64(0)
+		offset := int64(0)
+		execCounts := make([]impi.C_int64, executors)
+		count2 := input2.Size()
+		globalCount2 := int64(0)
+		offset2 := int64(0)
+		execCounts2 := make([]impi.C_int64, executors)
+		if err = impi.MPI_Allgather(impi.P(&count), 1, impi.MPI_LONG_LONG_INT, impi.P(&execCounts[0]), 1, impi.MPI_LONG_LONG_INT, this.executorData.Mpi().Native()); err != nil {
+			return ierror.Raise(err)
+		}
+		if err = impi.MPI_Allgather(impi.P(&count2), 1, impi.MPI_LONG_LONG_INT, impi.P(&execCounts2[0]), 1, impi.MPI_LONG_LONG_INT, this.executorData.Mpi().Native()); err != nil {
+			return ierror.Raise(err)
+		}
+
+		for i := 0; i < executors; i++ {
+			if i == rank {
+				offset = globalCount
+				offset2 = globalCount2
+			}
+			globalCount += int64(execCounts[i])
+			globalCount2 += int64(execCounts2[i])
+		}
+		tmp, err := core.NewPartitionGroupDef[T](this.executorData.GetPartitionTools())
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		create := func(n int64) error {
+			for i := int64(0); i < n; i++ {
+				part, err := core.NewPartitionWithName[T](this.executorData.GetPartitionTools(), storage)
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				tmp.Add(part)
+			}
+			return nil
+		}
+
+		if err = create(offset); err != nil {
+			return ierror.Raise(err)
+		}
+		for _, part := range input.Iter() {
+			tmp.Add(part)
+		}
+		if err = create(globalCount - int64(tmp.Size())); err != nil {
+			return ierror.Raise(err)
+		}
+		if err = create(offset2); err != nil {
+			return ierror.Raise(err)
+		}
+		for _, part := range input2.Iter() {
+			tmp.Add(part)
+		}
+		if err = create(globalCount + globalCount2 - int64(tmp.Size())); err != nil {
+			return ierror.Raise(err)
+		}
+		if err = Exchange[T](&this.IBaseImpl, tmp, output); err != nil {
+			return ierror.Raise(err)
+		}
+	} else {
+		logger.Info("Reduce: union using fast mode")
+		for _, part := range input.Iter() {
+			output.Add(part)
+		}
+		for _, part := range input2.Iter() {
+			output.Add(part)
+		}
+	}
+
+	core.SetPartitions(this.executorData, output)
+	return nil
 }
 
-func Join[T any](this *IReduceImpl, other string, numPartitions int64) error {
-	return ierror.RaiseMsg("TODO") //TODO
+func Join[K comparable, T any](this *IReduceImpl, other string, numPartitions int64) error {
+	logger.Info("Reduce: preparing first partitions")
+	if err := keyHashing[K, T](this, numPartitions); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := keyExchanging[K, T](this); err != nil {
+		return ierror.Raise(err)
+	}
+	input, err := core.GetPartitions[ipair.IPair[K, T]](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	logger.Info("Reduce: preparing second partitions")
+	core.SetPartitions(this.executorData, core.GetVariable[*storage.IPartitionGroup[T]](this.executorData, other))
+	if err := keyHashing[K, T](this, numPartitions); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := keyExchanging[K, T](this); err != nil {
+		return ierror.Raise(err)
+	}
+	input2, err := core.GetPartitions[ipair.IPair[K, T]](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	logger.Info("Reduce: joining key elements")
+	output, err := core.NewPartitionGroupWithSize[ipair.IPair[K, ipair.IPair[T, T]]](this.executorData.GetPartitionTools(), int(numPartitions))
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		acum := map[K][]T{}
+		return rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			writer, err := output.Get(p).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			reader, err := input.Get(p).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				acum[elem.First] = append(acum[elem.First], elem.Second)
+			}
+
+			reader, err = input2.Get(p).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if values, present := acum[elem.First]; present {
+					for _, value := range values {
+						if err = writer.Write(*ipair.New(elem.First, *ipair.New(value, elem.Second))); err != nil {
+							return ierror.Raise(err)
+						}
+
+					}
+				}
+			}
+			acum = map[K][]T{}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+
+	core.SetPartitions(this.executorData, output)
+	return nil
 }
 
 func Distinct[T comparable](this *IReduceImpl, numPartitions int64) error {
-	return ierror.RaiseMsg("TODO") //TODO
+	input, err := core.GetPartitions[T](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	logger.Info("Reduce: distinct ", input.Size(), " partitions")
+	tmp, err := core.NewPartitionGroupWithSize[T](this.executorData.GetPartitionTools(), int(numPartitions))
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	logger.Info("Reduce: creating ", numPartitions, " new partitions with hashing")
+	hasher := utils.GetHasher(reflect.TypeOf(*new(T)))
+	if err = ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		threadRanges, err := core.NewPartitionGroupWithSize[T](this.executorData.GetPartitionTools(), tmp.Size())
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		writers := make([]iterator.IWriteIterator[T], tmp.Size())
+		for p := 0; p < tmp.Size(); p++ {
+			writers[p], err = threadRanges.Get(p).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+		}
+		if err = rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			reader, err := input.Get(p).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if err = writers[utils.Hash(elem, hasher)%uint64(numPartitions)].Write(elem); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			input.SetBase(p, nil)
+
+			return nil
+		}); err != nil {
+			return ierror.Raise(err)
+		}
+		return rctx.Critical(func() error {
+			for p, part := range threadRanges.Iter() {
+				if err := part.MoveTo(tmp.Get(p)); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+
+	output, err := core.NewPartitionGroupDef[T](this.executorData.GetPartitionTools())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	if err = distinctFilter(this, tmp); err != nil {
+		return ierror.Raise(err)
+	}
+	if err = Exchange(&this.IBaseImpl, tmp, output); err != nil {
+		return ierror.Raise(err)
+	}
+	if err = distinctFilter(this, tmp); err != nil {
+		return ierror.Raise(err)
+	}
+
+	core.SetPartitions(this.executorData, output)
+	return nil
 }
 
 func reducePartition[T any](this *IReduceImpl, f function.IFunction2[T, T, T], part storage.IPartition[T]) (T, error) {
@@ -417,4 +788,227 @@ func aggregatePartition[T any, T2 any](this *IReduceImpl, f function.IFunction2[
 	}
 
 	return acum, nil
+}
+
+func localReduceByKey[K comparable, T any](this *IReduceImpl, f function.IFunction2[T, T, T]) error {
+	input, err := core.GetPartitions[ipair.IPair[K, T]](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	output := input
+	if output.Cache() {
+		if output, err = core.NewPartitionGroupDef[ipair.IPair[K, T]](this.executorData.GetPartitionTools()); err != nil {
+			return ierror.Raise(err)
+		}
+		for p := 0; p < input.Size(); p++ {
+			part, err := core.NewPartitionWithName[ipair.IPair[K, T]](this.executorData.GetPartitionTools(), input.Get(0).Type())
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			output.Add(part)
+		}
+	}
+
+	context := this.executorData.GetContext()
+	if err = ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		acum := map[K]T{}
+		return rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			reader, err := input.Get(p).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if val, present := acum[elem.First]; !present {
+					acum[elem.First] = elem.Second
+				} else {
+					acum[elem.First], err = f.Call(val, elem.Second, context)
+					if err != nil {
+						return ierror.Raise(err)
+					}
+				}
+			}
+			if err = output.Get(p).Clear(); err != nil {
+				return ierror.Raise(err)
+			}
+			writer, err := output.Get(p).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for key, value := range acum {
+				if err = writer.Write(*ipair.New(key, value)); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			acum = map[K]T{}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+
+	core.SetPartitions(this.executorData, output)
+	return nil
+}
+
+func localAggregateByKey[K comparable, T any, T2 any](this *IReduceImpl, f function.IFunction2[T, T2, T]) error {
+	input, err := core.GetAndDeletePartitions[ipair.IPair[K, T2]](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	output, err := core.NewPartitionGroupWithSize[ipair.IPair[K, T]](this.executorData.GetPartitionTools(), input.Size())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	context := this.executorData.GetContext()
+	baseAcum := core.GetVariable[T](this.executorData, "zero")
+	if err = ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		acum := map[K]T{}
+		return rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			reader, err := input.Get(p).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if val, present := acum[elem.First]; !present {
+					acum[elem.First], err = f.Call(baseAcum, elem.Second, context)
+				} else {
+					acum[elem.First], err = f.Call(val, elem.Second, context)
+				}
+				if err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			acum = map[K]T{}
+			input.SetBase(p, nil)
+			if err = output.Get(p).Fit(); err != nil {
+				return ierror.Raise(err)
+			}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+
+	core.SetPartitions(this.executorData, output)
+	return nil
+}
+
+func keyHashing[K comparable, T any](this *IReduceImpl, numPartitions int64) error {
+	input, err := core.GetPartitions[ipair.IPair[K, T]](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	output, err := core.NewPartitionGroupWithSize[ipair.IPair[K, T]](this.executorData.GetPartitionTools(), int(numPartitions))
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	hasher := utils.GetHasher(reflect.TypeOf(*new(K)))
+	logger.Info("Reduce: creating ", numPartitions, " new partitions with key hashing")
+
+	if err = ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		threadRanges, err := core.NewPartitionGroupWithSize[ipair.IPair[K, T]](this.executorData.GetPartitionTools(), output.Size())
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		writers := make([]iterator.IWriteIterator[ipair.IPair[K, T]], threadRanges.Size())
+		for p := 0; p < threadRanges.Size(); p++ {
+			writers[p], err = threadRanges.Get(p).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+		}
+		if err = rctx.For().Dynamic().Run(input.Size(), func(p int) error {
+			reader, err := input.Get(p).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				if err = writers[utils.Hash(elem.First, hasher)%uint64(numPartitions)].Write(elem); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			input.SetBase(p, nil)
+			return nil
+		}); err != nil {
+			return ierror.Raise(err)
+		}
+		return rctx.Critical(func() error {
+			for p, part := range threadRanges.Iter() {
+				if err := part.MoveTo(output.Get(p)); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+
+	return nil
+}
+
+func keyExchanging[K comparable, T any](this *IReduceImpl) error {
+	input, err := core.GetPartitions[ipair.IPair[K, T]](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	output, err := core.NewPartitionGroupDef[ipair.IPair[K, T]](this.executorData.GetPartitionTools())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	logger.Info("Reduce: exchanging ", input.Size(), " partitions keys")
+
+	if err = Exchange(&this.IBaseImpl, input, output); err != nil {
+		return ierror.Raise(err)
+	}
+
+	core.SetPartitions(this.executorData, output)
+	return nil
+}
+
+func distinctFilter[T comparable](this *IReduceImpl, parts *storage.IPartitionGroup[T]) error {
+	return ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		distinct := map[T]bool{}
+		return rctx.For().Dynamic().Run(parts.Size(), func(p int) error {
+			newPart, err := core.NewPartitionDef[T](this.executorData.GetPartitionTools())
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			reader, err := parts.Get(p).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			writer, err := newPart.WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				distinct[elem] = true
+			}
+			for elem, _ := range distinct {
+				if err = writer.Write(elem); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			parts.Set(p, newPart)
+			distinct = map[T]bool{}
+			return nil
+		})
+	})
 }

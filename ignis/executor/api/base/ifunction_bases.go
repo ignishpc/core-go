@@ -266,15 +266,15 @@ type IFoldByKeyAbs interface {
 	RunFoldByKey(i *impl.IReduceImpl, f function.IBaseFunction, numPartitions int64, localFold bool) error
 }
 
-type IFoldByKey[K comparable, T1 any, T2 any] struct {
+type IFoldByKey[K comparable, T any] struct {
 }
 
-func (this *IFoldByKey[K, T1, T2]) Types() []api.IContextType {
-	return []api.IContextType{NewTypeC[K](), NewTypeA[T1](), NewTypeA[T2](), NewTypeCA[K, T1](), NewTypeCA[K, T2]()}
+func (this *IFoldByKey[K, T]) Types() []api.IContextType {
+	return []api.IContextType{NewTypeC[K](), NewTypeA[T](), NewTypeCA[K, T]()}
 }
 
-func (this *IFoldByKey[K, T1, T2]) RunFoldByKey(i *impl.IReduceImpl, f function.IBaseFunction, numPartitions int64, localFold bool) error {
-	return impl.FoldByKey[K](i, f.(function.IFunction2[T1, T2, T1]), numPartitions, localFold)
+func (this *IFoldByKey[K, T]) RunFoldByKey(i *impl.IReduceImpl, f function.IBaseFunction, numPartitions int64, localFold bool) error {
+	return impl.FoldByKey[K](i, f.(function.IFunction2[T, T, T]), numPartitions, localFold)
 }
 
 type ISortByAbs interface {

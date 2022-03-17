@@ -72,6 +72,10 @@ func (this *iTypeAA[T1, T2]) GroupByKey(reduceImpl *impl.IReduceImpl, numPartiti
 	return typeAAError()
 }
 
+func (this *iTypeAA[T1, T2]) Join(reduceImpl *impl.IReduceImpl, other string, numPartitions int64) error {
+	return typeAAError()
+}
+
 func (this *iTypeAA[T1, T2]) Distinct(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
 	return typeAAError()
 }

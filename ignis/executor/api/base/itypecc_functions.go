@@ -69,6 +69,10 @@ func (this *iTypeCC[T1, T2]) GroupByKey(reduceImpl *impl.IReduceImpl, numPartiti
 	return impl.GroupByKey[T2, T1](reduceImpl, numPartitions)
 }
 
+func (this *iTypeCC[T1, T2]) Join(reduceImpl *impl.IReduceImpl, other string, numPartitions int64) error {
+	return impl.Join[T1, T2](reduceImpl, other, numPartitions)
+}
+
 func (this *iTypeCC[T1, T2]) Distinct(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
 	return impl.Distinct[ipair.IPair[T1, T2]](reduceImpl, numPartitions)
 }
