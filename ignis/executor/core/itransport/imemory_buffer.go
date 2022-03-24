@@ -52,7 +52,7 @@ func (this *IMemoryBuffer) initCommon(buf []byte, size int64, owner bool, wPos i
 		buf = make([]byte, int(size), int(size))
 	}
 	this.buffer = buf
-	this.rBase = wPos
+	this.rBase = 0
 	this.wBase = wPos
 	this.owner = owner
 }

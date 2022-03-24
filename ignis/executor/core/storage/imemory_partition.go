@@ -10,10 +10,11 @@ import (
 	"ignis/executor/core/iio"
 	"ignis/executor/core/iprotocol"
 	"ignis/executor/core/itransport"
+	"ignis/executor/core/utils"
 	"reflect"
 )
 
-const IMemoryPartitionType = "IMemoryPartition"
+const IMemoryPartitionType = "Memory"
 
 type IMemoryPartition[T any] struct {
 	elems  IList
@@ -138,12 +139,11 @@ func (this *IMemoryPartition[T]) CopyTo(target IPartitionBase) error {
 func (this *IMemoryPartition[T]) MoveFrom(source IPartitionBase) error {
 	if men, ok := source.(*IMemoryPartition[T]); ok {
 		if this.Empty() {
-			this.elems = men.elems
-			men.elems = nil
+			this.elems, men.elems = men.elems, this.elems
 			return nil
 		}
 	}
-	if err := source.CopyFrom(source); err != nil {
+	if err := this.CopyFrom(source); err != nil {
 		return ierror.Raise(err)
 	}
 	return source.Clear()
@@ -162,16 +162,16 @@ func (this *IMemoryPartition[T]) Empty() bool {
 }
 
 func (this *IMemoryPartition[T]) Bytes() int64 {
-	value := reflect.ValueOf(this.elems.Array())
+	value := reflect.TypeOf(this.elems.Array())
 	sz := this.Size()
 
 	switch value.Elem().Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
 		reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
-		return sz * int64(value.Elem().Type().Size())
+		return sz * int64(value.Elem().Size())
 	case reflect.String:
-		return sz * int64(value.Elem().Len())
+		return sz * int64(len(this.elems.GetAny(0).(string)))
 	default:
 		return sz * int64(100)
 	}
@@ -377,7 +377,7 @@ func (this *IListImpl[T]) Set(i int, value T) {
 
 func (this *IListImpl[T]) AddAny(value any) {
 	if this.pos == len(this.array) {
-		this.Reserve(int(float32(len(this.array)) * 1.5))
+		this.Reserve(utils.Max(int(float32(len(this.array))*1.5), 1))
 	}
 	this.array[this.pos] = value.(T)
 	this.pos++
@@ -405,7 +405,7 @@ func (this *IListImpl[T]) Merge(array any) error {
 
 func (this *IListImpl[T]) Add(value T) {
 	if this.pos == len(this.array) {
-		this.Reserve(int(float32(len(this.array)) * 1.5))
+		this.Reserve(utils.Max(int(float32(len(this.array))*1.5), 1))
 	}
 	this.array[this.pos] = value
 	this.pos++

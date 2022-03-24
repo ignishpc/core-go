@@ -351,7 +351,7 @@ func countByReduce[K comparable](this *IMathImpl, acum map[K]int64) error {
 			return ierror.Raise(err)
 		}
 	}
-	if err := Exchange(&this.IBaseImpl, group, output); err != nil {
+	if err := Exchange(this.Base(), group, output); err != nil {
 		return ierror.Raise(err)
 	}
 	acum = map[K]int64{}

@@ -611,7 +611,7 @@ func Distinct[T comparable](this *IReduceImpl, numPartitions int64) error {
 	if err = distinctFilter(this, tmp); err != nil {
 		return ierror.Raise(err)
 	}
-	if err = Exchange(&this.IBaseImpl, tmp, output); err != nil {
+	if err = Exchange(this.Base(), tmp, output); err != nil {
 		return ierror.Raise(err)
 	}
 	if err = distinctFilter(this, tmp); err != nil {
@@ -970,7 +970,7 @@ func keyExchanging[K comparable, T any](this *IReduceImpl) error {
 	}
 	logger.Info("Reduce: exchanging ", input.Size(), " partitions keys")
 
-	if err = Exchange(&this.IBaseImpl, input, output); err != nil {
+	if err = Exchange(this.Base(), input, output); err != nil {
 		return ierror.Raise(err)
 	}
 

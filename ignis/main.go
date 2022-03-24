@@ -4,7 +4,6 @@ import (
 	"github.com/apache/thrift/lib/go/thrift"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
-	"ignis/executor/core/impi"
 	"ignis/executor/core/itype"
 	"ignis/executor/core/logger"
 	"ignis/executor/core/modules"
@@ -36,17 +35,14 @@ func _init_(args []string) error {
 		processor.RegisterProcessor("ICacheContext", executor.NewICacheContextModuleProcessor(modules.NewICacheContextModule(executorData)))
 		processor.RegisterProcessor("IComm", executor.NewICommModuleProcessor(modules.NewICommModule(executorData)))
 
-		itype.DefaultTypes(executorData)
-		itype.DefaultFunctions(executorData)
-	}
+		for _, dtype := range itype.DefaultTypes() {
+			executorData.RegisterType(dtype)
+		}
 
-	if _, present := os.LookupEnv(""); present {
-		err = impi.MPI_Init_thread(nil, nil, impi.MPI_THREAD_MULTIPLE, nil)
-	} else {
-		err = impi.MPI_Init(nil, nil)
-	}
-	if err != nil {
-		return ierror.Raise(err)
+		for _, df := range itype.DefaultFunctions() {
+			executorData.RegisterFunction(df)
+		}
+
 	}
 
 	server := modules.NewIExecutorServerModule(executorData)

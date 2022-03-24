@@ -26,9 +26,9 @@ func NewISourceNative(name string, native bool) *ISource {
 }
 
 func (this *ISource) addParam(key string, value interface{}) *ISource {
-	buffer :=thrift.NewTMemoryBuffer()
+	buffer := thrift.NewTMemoryBuffer()
 	proto := iprotocol.NewIObjectProtocol(buffer)
-	proto.WriteObjectNative(value, this.native)
+	proto.WriteObjectWithNative(value, this.native)
 	this.inner.Params[key] = buffer.Bytes()
 	return this
 }

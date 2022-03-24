@@ -372,7 +372,7 @@ func sortImpl[T any](this *ISortImpl, f func(T, T) bool, ascending bool, partiti
 	}
 
 	logger.Info("Sort: exchanging ranges")
-	if err = Exchange(&this.IBaseImpl, ranges, output); err != nil {
+	if err = Exchange(this.Base(), ranges, output); err != nil {
 		return ierror.Raise(err)
 	}
 

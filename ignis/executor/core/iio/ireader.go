@@ -285,7 +285,7 @@ func init() {
 	}, 0))
 	setReaderR(I_LIST, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
 		var err error
-		var info IArrayReaderInfo
+		info := new(IArrayReaderInfo)
 
 		if info.sz, err = ReadSizeAux(protocol); err != nil {
 			return nil, ierror.Raise(err)
@@ -324,7 +324,7 @@ func init() {
 	})
 	setReaderR(I_PAIR_LIST, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
 		var err error
-		var info IPairArrayReaderInfo
+		info := new(IPairArrayReaderInfo)
 
 		if info.sz, err = ReadSizeAux(protocol); err != nil {
 			return nil, ierror.Raise(err)
@@ -397,7 +397,7 @@ func init() {
 	}, []byte{}))
 	setReaderR(I_MAP, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
 		var err error
-		var info IMapReaderInfo
+		info := new(IMapReaderInfo)
 
 		if info.sz, err = ReadSizeAux(protocol); err != nil {
 			return nil, ierror.Raise(err)
@@ -455,7 +455,7 @@ func init() {
 	})
 	setReaderR(I_SET, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
 		var err error
-		var info ISetReaderInfo
+		info := new(ISetReaderInfo)
 
 		if info.sz, err = ReadSizeAux(protocol); err != nil {
 			return nil, ierror.Raise(err)
@@ -497,7 +497,7 @@ func init() {
 	})
 	setReaderR(I_PAIR, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
 		var err error
-		var info IPairReaderInfo
+		info := new(IPairReaderInfo)
 
 		firstId, err := ReadTypeAux(protocol)
 		if err != nil {

@@ -20,6 +20,10 @@ func (this *IBaseImpl) Context() api.IContext {
 	return this.executorData.GetContext()
 }
 
+func (this *IBaseImpl) Base() *IBaseImpl {
+	return this
+}
+
 func Exchange[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *storage.IPartitionGroup[T]) error {
 	executors := this.executorData.Mpi().Executors()
 	if executors == 1 {

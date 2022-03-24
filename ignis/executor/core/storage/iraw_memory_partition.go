@@ -1,6 +1,6 @@
 package storage
 
-const IRawMemoryPartitionType = "IRawMemoryPartition"
+const IRawMemoryPartitionType = "RawMemory"
 
 type IRawMemoryPartition[T any] struct {
 	IRawPartition[T]

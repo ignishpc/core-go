@@ -1,17 +1,13 @@
 package utils
 
-import (
-	"constraints"
-)
-
-func Min[T constraints.Ordered](a, b T) T {
+func Min[T Ordered](a, b T) T {
 	if a > b {
 		return b
 	}
 	return a
 }
 
-func Max[T constraints.Ordered](a, b T) T {
+func Max[T Ordered](a, b T) T {
 	if a < b {
 		return b
 	}

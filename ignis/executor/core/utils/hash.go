@@ -2,7 +2,6 @@ package utils
 
 import (
 	"C"
-	"constraints"
 	"github.com/pierrec/xxHash/xxHash64"
 	"reflect"
 	"unsafe"
@@ -16,7 +15,7 @@ type Hasher interface {
 	Hash(p unsafe.Pointer) uint64
 }
 
-type fastHasher[T constraints.Integer] struct {
+type fastHasher[T Integer] struct {
 }
 
 func (this *fastHasher[T]) Hash(p unsafe.Pointer) uint64 {

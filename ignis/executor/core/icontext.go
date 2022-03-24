@@ -15,6 +15,8 @@ type iContextImpl struct {
 
 func NewIContext() api.IContext {
 	return &iContextImpl{
+		properties:     make(map[string]string),
+		variables:      make(map[string]any),
 		mpiThreadGroup: []impi.C_MPI_Comm{impi.MPI_COMM_WORLD},
 	}
 }

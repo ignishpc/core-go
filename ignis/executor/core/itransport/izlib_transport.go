@@ -30,7 +30,9 @@ func NewIZlibTransportWithLevel(trans thrift.TTransport, level int) (*IZlibTrans
 func (this *IZlibTransport) Read(p []byte) (int, error) {
 	if !this.rinit {
 		aux := []byte{0}
-		this.trans.Read(aux)
+		if _, err := this.trans.Read(aux); err != nil {
+			return 0, err
+		}
 		this.inCompression = int(aux[0])
 		this.rinit = true
 	}
@@ -75,16 +77,20 @@ func (this *IZlibTransport) GetTransport() thrift.TTransport {
 func (this *IZlibTransport) GetInCompression() (int, error) {
 	if !this.rinit {
 		aux := []byte{}
-		this.Read(aux)
+		if _, err := this.Read(aux); err != nil {
+			return 0, err
+		}
 	}
 	return this.inCompression, nil
 }
 
 func (this *IZlibTransport) Reset() error {
-	other, err := NewIZlibTransportWithLevel(this.trans, this.outCompression)
+	parent, err := thrift.NewTZlibTransport(this.trans, 6)
 	if err != nil {
 		return ierror.Raise(err)
 	}
-	*this = *other
+	this.TZlibTransport = *parent
+	this.rinit = false
+	this.winit = false
 	return nil
 }

@@ -224,11 +224,11 @@ func (m *MpiError) Error() string {
 	return "Mpi error code " + strconv.Itoa(m.Code)
 }
 
-func mpi_check(code C.int) *MpiError {
+func mpi_check(code C.int) error {
 	if code == MPI_SUCCESS {
 		return nil
 	}
-	return &MpiError{int(0)}
+	return &MpiError{int(code)}
 }
 
 """)
@@ -247,7 +247,7 @@ func mpi_check(code C.int) *MpiError {
                 go_source.write(", ")
         go_source.write(") ")
         if f.rtype == "int":
-            go_source.write("*MpiError")
+            go_source.write("error")
         else:
             go_source.write(goAlias(mpi.getVarTypeAsGo(f.rtype)))
         go_source.write(" {\n   return ")

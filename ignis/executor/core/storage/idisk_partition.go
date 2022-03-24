@@ -4,7 +4,7 @@ import (
 	"ignis/executor/core/ierror"
 )
 
-const IDiskPartitionType = "IDiskMemoryPartition"
+const IDiskPartitionType = "Disk"
 
 type IDiskPartition[T any] struct {
 	IRawPartition[T]

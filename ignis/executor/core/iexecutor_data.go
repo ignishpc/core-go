@@ -34,7 +34,22 @@ type IExecutorData struct {
 }
 
 func NewIExecutorData() *IExecutorData {
-	return &IExecutorData{}
+	this := &IExecutorData{
+		variables: make(map[string]any),
+		functions: make(map[string]function.IBaseFunction),
+		baseTypes: make(map[string]api.IContextType),
+		context:   NewIContext().(*iContextImpl),
+	}
+
+	this.libraryLoader.executorData = this
+	this.partitionTools.properties = &this.properties
+	this.properties.properties = this.context.properties
+
+	this.mpi_.propertyParser = &this.properties
+	this.mpi_.partitionTools = &this.partitionTools
+	this.mpi_.context = this.context
+
+	return this
 }
 
 func (this *IExecutorData) GetPartitionsAny() storage.IPartitionGroupBase {

@@ -3,36 +3,33 @@ package storage
 import "math/rand"
 
 func init() {
-	addPartitionTest(&IMemoryPartitionTest[int64]{
-		IPartitionTest[int64]{
-			"IMemoryPartitionInt64Test",
-			func() IPartition[int64] {
-				return NewIMemoryPartitionWithNative[int64](100, false)
-			},
-			func(n int) []int64 {
-				array := make([]int64, n)
-				for i := 0; i < n; i++ {
-					array[i] = rand.Int63() % int64(n)
-				}
-				return array
-			},
-		}})
-	addPartitionTest(&IMemoryPartitionTest[any]{
-		IPartitionTest[any]{
-			"IMemoryPartitionAnyTest",
-			func() IPartition[any] {
-				return NewIMemoryPartitionWithNative[any](100, false)
-			},
-			func(n int) []any {
-				array := make([]any, n)
-				for i := 0; i < n; i++ {
-					array[i] = rand.Int63() % int64(n)
-				}
-				return array
-			},
-		}})
-}
-
-type IMemoryPartitionTest[T any] struct {
-	IPartitionTest[T]
+	CreateList[int64]()
+	addPartitionTest(&IPartitionTest[int64]{
+		"IMemoryPartitionInt64Test",
+		func() IPartition[int64] {
+			return NewIMemoryPartition[int64](100, false)
+		},
+		func(n int, seed int) []int64 {
+			array := make([]int64, n)
+			rand.Seed(int64(seed))
+			for i := 0; i < n; i++ {
+				array[i] = rand.Int63() % int64(n)
+			}
+			return array
+		},
+	})
+	addPartitionTest(&IPartitionTest[any]{
+		"IMemoryPartitionAnyTest",
+		func() IPartition[any] {
+			return NewIMemoryPartition[any](100, false)
+		},
+		func(n int, seed int) []any {
+			array := make([]any, n)
+			rand.Seed(int64(seed))
+			for i := 0; i < n; i++ {
+				array[i] = rand.Int63() % int64(n)
+			}
+			return array
+		},
+	})
 }

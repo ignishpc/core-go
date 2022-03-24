@@ -621,210 +621,210 @@ func (m *MpiError) Error() string {
 	return "Mpi error code " + strconv.Itoa(m.Code)
 }
 
-func mpi_check(code C.int) *MpiError {
+func mpi_check(code C.int) error {
 	if code == MPI_SUCCESS {
 		return nil
 	}
-	return &MpiError{int(0)}
+	return &MpiError{int(code)}
 }
 
-func MPI_File_iread_all(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) *MpiError {
+func MPI_File_iread_all(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_File_iread_all(fh, buf, count, datatype, request))
 }
 
-func MPIX_Comm_agree(comm C_MPI_Comm, flag *C_int) *MpiError {
+func MPIX_Comm_agree(comm C_MPI_Comm, flag *C_int) error {
 	return mpi_check(C.MPIX_Comm_agree(comm, flag))
 }
 
-func MPI_File_iread_at(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPIO_Request) *MpiError {
+func MPI_File_iread_at(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPIO_Request) error {
 	return mpi_check(C.MPI_File_iread_at(fh, offset, buf, count, datatype, request))
 }
 
-func MPIX_Comm_failure_ack(comm C_MPI_Comm) *MpiError {
+func MPIX_Comm_failure_ack(comm C_MPI_Comm) error {
 	return mpi_check(C.MPIX_Comm_failure_ack(comm))
 }
 
-func MPI_File_iread_at_all(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) *MpiError {
+func MPI_File_iread_at_all(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_File_iread_at_all(fh, offset, buf, count, datatype, request))
 }
 
-func MPIX_Comm_failure_get_acked(comm C_MPI_Comm, failedgrp *C_MPI_Group) *MpiError {
+func MPIX_Comm_failure_get_acked(comm C_MPI_Comm, failedgrp *C_MPI_Group) error {
 	return mpi_check(C.MPIX_Comm_failure_get_acked(comm, failedgrp))
 }
 
-func MPI_File_iread_shared(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) *MpiError {
+func MPI_File_iread_shared(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_File_iread_shared(fh, buf, count, datatype, request))
 }
 
-func MPIX_Comm_revoke(comm C_MPI_Comm) *MpiError {
+func MPIX_Comm_revoke(comm C_MPI_Comm) error {
 	return mpi_check(C.MPIX_Comm_revoke(comm))
 }
 
-func MPI_File_iwrite(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) *MpiError {
+func MPI_File_iwrite(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_File_iwrite(fh, buf, count, datatype, request))
 }
 
-func MPIX_Comm_shrink(comm C_MPI_Comm, newcomm *C_MPI_Comm) *MpiError {
+func MPIX_Comm_shrink(comm C_MPI_Comm, newcomm *C_MPI_Comm) error {
 	return mpi_check(C.MPIX_Comm_shrink(comm, newcomm))
 }
 
-func MPI_File_iwrite_all(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) *MpiError {
+func MPI_File_iwrite_all(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_File_iwrite_all(fh, buf, count, datatype, request))
 }
 
-func MPIX_GPU_query_support(gpu_type C_int, is_supported *C_int) *MpiError {
+func MPIX_GPU_query_support(gpu_type C_int, is_supported *C_int) error {
 	return mpi_check(C.MPIX_GPU_query_support(gpu_type, is_supported))
 }
 
-func MPI_File_iwrite_at(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPIO_Request) *MpiError {
+func MPI_File_iwrite_at(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPIO_Request) error {
 	return mpi_check(C.MPI_File_iwrite_at(fh, offset, buf, count, datatype, request))
 }
 
-func MPI_File_iwrite_at_all(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) *MpiError {
+func MPI_File_iwrite_at_all(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_File_iwrite_at_all(fh, offset, buf, count, datatype, request))
 }
 
-func MPI_File_iwrite_shared(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPIO_Request) *MpiError {
+func MPI_File_iwrite_shared(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPIO_Request) error {
 	return mpi_check(C.MPI_File_iwrite_shared(fh, buf, count, datatype, request))
 }
 
-func MPI_File_open(comm C_MPI_Comm, filename *C_char, amode C_int, info C_MPI_Info, fh *C_MPI_File) *MpiError {
+func MPI_File_open(comm C_MPI_Comm, filename *C_char, amode C_int, info C_MPI_Info, fh *C_MPI_File) error {
 	return mpi_check(C.MPI_File_open(comm, filename, amode, info, fh))
 }
 
-func MPI_Scan(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm) *MpiError {
+func MPI_Scan(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Scan(sendbuf, recvbuf, count, datatype, op, comm))
 }
 
-func MPI_File_preallocate(fh C_MPI_File, size C_MPI_Offset) *MpiError {
+func MPI_File_preallocate(fh C_MPI_File, size C_MPI_Offset) error {
 	return mpi_check(C.MPI_File_preallocate(fh, size))
 }
 
-func MPI_Scatter(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm) *MpiError {
+func MPI_Scatter(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Scatter(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm))
 }
 
-func MPI_File_read(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_read(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_read(fh, buf, count, datatype, status))
 }
 
-func MPI_Scatterv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, displs *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm) *MpiError {
+func MPI_Scatterv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, displs *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Scatterv(sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm))
 }
 
-func MPI_File_read_all(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_read_all(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_read_all(fh, buf, count, datatype, status))
 }
 
-func MPI_Send(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm) *MpiError {
+func MPI_Send(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Send(buf, count, datatype, dest, tag, comm))
 }
 
-func MPI_File_read_all_begin(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) *MpiError {
+func MPI_File_read_all_begin(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) error {
 	return mpi_check(C.MPI_File_read_all_begin(fh, buf, count, datatype))
 }
 
-func MPI_Send_init(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Send_init(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Send_init(buf, count, datatype, dest, tag, comm, request))
 }
 
-func MPI_File_read_all_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) *MpiError {
+func MPI_File_read_all_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_read_all_end(fh, buf, status))
 }
 
-func MPI_Sendrecv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, dest C_int, sendtag C_int, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, source C_int, recvtag C_int, comm C_MPI_Comm, status *C_MPI_Status) *MpiError {
+func MPI_Sendrecv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, dest C_int, sendtag C_int, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, source C_int, recvtag C_int, comm C_MPI_Comm, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Sendrecv(sendbuf, sendcount, sendtype, dest, sendtag, recvbuf, recvcount, recvtype, source, recvtag, comm, status))
 }
 
-func MPI_File_read_at(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_read_at(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_read_at(fh, offset, buf, count, datatype, status))
 }
 
-func MPI_Sendrecv_replace(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, sendtag C_int, source C_int, recvtag C_int, comm C_MPI_Comm, status *C_MPI_Status) *MpiError {
+func MPI_Sendrecv_replace(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, sendtag C_int, source C_int, recvtag C_int, comm C_MPI_Comm, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Sendrecv_replace(buf, count, datatype, dest, sendtag, source, recvtag, comm, status))
 }
 
-func MPI_File_read_at_all(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_read_at_all(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_read_at_all(fh, offset, buf, count, datatype, status))
 }
 
-func MPI_Ssend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm) *MpiError {
+func MPI_Ssend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Ssend(buf, count, datatype, dest, tag, comm))
 }
 
-func MPI_Abort(comm C_MPI_Comm, errorcode C_int) *MpiError {
+func MPI_Abort(comm C_MPI_Comm, errorcode C_int) error {
 	return mpi_check(C.MPI_Abort(comm, errorcode))
 }
 
-func MPI_File_read_at_all_begin(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) *MpiError {
+func MPI_File_read_at_all_begin(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) error {
 	return mpi_check(C.MPI_File_read_at_all_begin(fh, offset, buf, count, datatype))
 }
 
-func MPI_Ssend_init(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ssend_init(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ssend_init(buf, count, datatype, dest, tag, comm, request))
 }
 
-func MPI_Accumulate(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, op C_MPI_Op, win C_MPI_Win) *MpiError {
+func MPI_Accumulate(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, op C_MPI_Op, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Accumulate(origin_addr, origin_count, origin_datatype, target_rank, target_disp, target_count, target_datatype, op, win))
 }
 
-func MPI_File_read_at_all_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) *MpiError {
+func MPI_File_read_at_all_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_read_at_all_end(fh, buf, status))
 }
 
-func MPI_Start(request *C_MPI_Request) *MpiError {
+func MPI_Start(request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Start(request))
 }
 
-func MPI_Add_error_class(errorclass *C_int) *MpiError {
+func MPI_Add_error_class(errorclass *C_int) error {
 	return mpi_check(C.MPI_Add_error_class(errorclass))
 }
 
-func MPI_File_read_ordered(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_read_ordered(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_read_ordered(fh, buf, count, datatype, status))
 }
 
-func MPI_Startall(count C_int, array_of_requests *C_MPI_Request) *MpiError {
+func MPI_Startall(count C_int, array_of_requests *C_MPI_Request) error {
 	return mpi_check(C.MPI_Startall(count, array_of_requests))
 }
 
-func MPI_Add_error_code(errorclass C_int, errorcode *C_int) *MpiError {
+func MPI_Add_error_code(errorclass C_int, errorcode *C_int) error {
 	return mpi_check(C.MPI_Add_error_code(errorclass, errorcode))
 }
 
-func MPI_File_read_ordered_begin(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) *MpiError {
+func MPI_File_read_ordered_begin(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) error {
 	return mpi_check(C.MPI_File_read_ordered_begin(fh, buf, count, datatype))
 }
 
-func MPI_Status_set_cancelled(status *C_MPI_Status, flag C_int) *MpiError {
+func MPI_Status_set_cancelled(status *C_MPI_Status, flag C_int) error {
 	return mpi_check(C.MPI_Status_set_cancelled(status, flag))
 }
 
-func MPI_Add_error_string(errorcode C_int, string *C_char) *MpiError {
+func MPI_Add_error_string(errorcode C_int, string *C_char) error {
 	return mpi_check(C.MPI_Add_error_string(errorcode, string))
 }
 
-func MPI_File_read_ordered_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) *MpiError {
+func MPI_File_read_ordered_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_read_ordered_end(fh, buf, status))
 }
 
-func MPI_Status_set_elements(status *C_MPI_Status, datatype C_MPI_Datatype, count C_int) *MpiError {
+func MPI_Status_set_elements(status *C_MPI_Status, datatype C_MPI_Datatype, count C_int) error {
 	return mpi_check(C.MPI_Status_set_elements(status, datatype, count))
 }
 
-func MPI_Address(location unsafe.Pointer /*(void *)*/, address *C_MPI_Aint) *MpiError {
+func MPI_Address(location unsafe.Pointer /*(void *)*/, address *C_MPI_Aint) error {
 	return mpi_check(C.MPI_Address(location, address))
 }
 
-func MPI_File_read_shared(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_read_shared(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_read_shared(fh, buf, count, datatype, status))
 }
 
-func MPI_Status_set_elements_x(status *C_MPI_Status, datatype C_MPI_Datatype, count C_MPI_Count) *MpiError {
+func MPI_Status_set_elements_x(status *C_MPI_Status, datatype C_MPI_Datatype, count C_MPI_Count) error {
 	return mpi_check(C.MPI_Status_set_elements_x(status, datatype, count))
 }
 
-func MPI_File_seek(fh C_MPI_File, offset C_MPI_Offset, whence C_int) *MpiError {
+func MPI_File_seek(fh C_MPI_File, offset C_MPI_Offset, whence C_int) error {
 	return mpi_check(C.MPI_File_seek(fh, offset, whence))
 }
 
@@ -832,7 +832,7 @@ func MPI_Aint_add(base C_MPI_Aint, disp C_MPI_Aint) C_MPI_Aint {
 	return C.MPI_Aint_add(base, disp)
 }
 
-func MPI_File_seek_shared(fh C_MPI_File, offset C_MPI_Offset, whence C_int) *MpiError {
+func MPI_File_seek_shared(fh C_MPI_File, offset C_MPI_Offset, whence C_int) error {
 	return mpi_check(C.MPI_File_seek_shared(fh, offset, whence))
 }
 
@@ -840,1171 +840,1171 @@ func MPI_Aint_diff(addr1 C_MPI_Aint, addr2 C_MPI_Aint) C_MPI_Aint {
 	return C.MPI_Aint_diff(addr1, addr2)
 }
 
-func MPI_File_set_atomicity(fh C_MPI_File, flag C_int) *MpiError {
+func MPI_File_set_atomicity(fh C_MPI_File, flag C_int) error {
 	return mpi_check(C.MPI_File_set_atomicity(fh, flag))
 }
 
-func MPI_Allgather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) *MpiError {
+func MPI_Allgather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Allgather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm))
 }
 
-func MPI_File_set_errhandler(file C_MPI_File, errhandler C_MPI_Errhandler) *MpiError {
+func MPI_File_set_errhandler(file C_MPI_File, errhandler C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_File_set_errhandler(file, errhandler))
 }
 
-func MPI_Allgatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) *MpiError {
+func MPI_Allgatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Allgatherv(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm))
 }
 
-func MPI_File_set_info(fh C_MPI_File, info C_MPI_Info) *MpiError {
+func MPI_File_set_info(fh C_MPI_File, info C_MPI_Info) error {
 	return mpi_check(C.MPI_File_set_info(fh, info))
 }
 
-func MPI_Alloc_mem(size C_MPI_Aint, info C_MPI_Info, baseptr unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Alloc_mem(size C_MPI_Aint, info C_MPI_Info, baseptr unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Alloc_mem(size, info, baseptr))
 }
 
-func MPI_File_set_size(fh C_MPI_File, size C_MPI_Offset) *MpiError {
+func MPI_File_set_size(fh C_MPI_File, size C_MPI_Offset) error {
 	return mpi_check(C.MPI_File_set_size(fh, size))
 }
 
-func MPI_Allreduce(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm) *MpiError {
+func MPI_Allreduce(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm))
 }
 
-func MPI_File_set_view(fh C_MPI_File, disp C_MPI_Offset, etype C_MPI_Datatype, filetype C_MPI_Datatype, datarep *C_char, info C_MPI_Info) *MpiError {
+func MPI_File_set_view(fh C_MPI_File, disp C_MPI_Offset, etype C_MPI_Datatype, filetype C_MPI_Datatype, datarep *C_char, info C_MPI_Info) error {
 	return mpi_check(C.MPI_File_set_view(fh, disp, etype, filetype, datarep, info))
 }
 
-func MPI_Alltoall(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) *MpiError {
+func MPI_Alltoall(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Alltoall(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm))
 }
 
-func MPI_File_sync(fh C_MPI_File) *MpiError {
+func MPI_File_sync(fh C_MPI_File) error {
 	return mpi_check(C.MPI_File_sync(fh))
 }
 
-func MPI_Alltoallv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) *MpiError {
+func MPI_Alltoallv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Alltoallv(sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm))
 }
 
-func MPI_File_write(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_write(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_write(fh, buf, count, datatype, status))
 }
 
-func MPI_Alltoallw(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtypes *C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtypes *C_MPI_Datatype, comm C_MPI_Comm) *MpiError {
+func MPI_Alltoallw(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtypes *C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtypes *C_MPI_Datatype, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Alltoallw(sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm))
 }
 
-func MPI_File_write_all(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_write_all(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_write_all(fh, buf, count, datatype, status))
 }
 
-func MPI_Attr_delete(comm C_MPI_Comm, keyval C_int) *MpiError {
+func MPI_Attr_delete(comm C_MPI_Comm, keyval C_int) error {
 	return mpi_check(C.MPI_Attr_delete(comm, keyval))
 }
 
-func MPI_File_write_all_begin(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) *MpiError {
+func MPI_File_write_all_begin(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) error {
 	return mpi_check(C.MPI_File_write_all_begin(fh, buf, count, datatype))
 }
 
-func MPI_Attr_get(comm C_MPI_Comm, keyval C_int, attribute_val unsafe.Pointer /*(void *)*/, flag *C_int) *MpiError {
+func MPI_Attr_get(comm C_MPI_Comm, keyval C_int, attribute_val unsafe.Pointer /*(void *)*/, flag *C_int) error {
 	return mpi_check(C.MPI_Attr_get(comm, keyval, attribute_val, flag))
 }
 
-func MPI_File_write_all_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) *MpiError {
+func MPI_File_write_all_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_write_all_end(fh, buf, status))
 }
 
-func MPI_Attr_put(comm C_MPI_Comm, keyval C_int, attribute_val unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Attr_put(comm C_MPI_Comm, keyval C_int, attribute_val unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Attr_put(comm, keyval, attribute_val))
 }
 
-func MPI_File_write_at(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_write_at(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_write_at(fh, offset, buf, count, datatype, status))
 }
 
-func MPI_File_write_at_all(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_write_at_all(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_write_at_all(fh, offset, buf, count, datatype, status))
 }
 
-func MPI_File_write_at_all_begin(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) *MpiError {
+func MPI_File_write_at_all_begin(fh C_MPI_File, offset C_MPI_Offset, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) error {
 	return mpi_check(C.MPI_File_write_at_all_begin(fh, offset, buf, count, datatype))
 }
 
-func MPI_File_write_at_all_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) *MpiError {
+func MPI_File_write_at_all_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_write_at_all_end(fh, buf, status))
 }
 
-func MPI_File_write_ordered(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_write_ordered(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_write_ordered(fh, buf, count, datatype, status))
 }
 
-func MPI_File_write_ordered_begin(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) *MpiError {
+func MPI_File_write_ordered_begin(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype) error {
 	return mpi_check(C.MPI_File_write_ordered_begin(fh, buf, count, datatype))
 }
 
-func MPI_File_write_ordered_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) *MpiError {
+func MPI_File_write_ordered_end(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_write_ordered_end(fh, buf, status))
 }
 
-func MPI_Barrier(comm C_MPI_Comm) *MpiError {
+func MPI_Barrier(comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Barrier(comm))
 }
 
-func MPI_File_write_shared(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) *MpiError {
+func MPI_File_write_shared(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_File_write_shared(fh, buf, count, datatype, status))
 }
 
-func MPI_Bcast(buffer unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, root C_int, comm C_MPI_Comm) *MpiError {
+func MPI_Bcast(buffer unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, root C_int, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Bcast(buffer, count, datatype, root, comm))
 }
 
-func MPI_Finalize() *MpiError {
+func MPI_Finalize() error {
 	return mpi_check(C.MPI_Finalize())
 }
 
-func MPI_Bsend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm) *MpiError {
+func MPI_Bsend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Bsend(buf, count, datatype, dest, tag, comm))
 }
 
-func MPI_Finalized(flag *C_int) *MpiError {
+func MPI_Finalized(flag *C_int) error {
 	return mpi_check(C.MPI_Finalized(flag))
 }
 
-func MPI_Bsend_init(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Bsend_init(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Bsend_init(buf, count, datatype, dest, tag, comm, request))
 }
 
-func MPI_Free_mem(base unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Free_mem(base unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Free_mem(base))
 }
 
-func MPI_Buffer_attach(buffer unsafe.Pointer /*(void *)*/, size C_int) *MpiError {
+func MPI_Buffer_attach(buffer unsafe.Pointer /*(void *)*/, size C_int) error {
 	return mpi_check(C.MPI_Buffer_attach(buffer, size))
 }
 
-func MPI_Buffer_detach(buffer_addr unsafe.Pointer /*(void *)*/, size *C_int) *MpiError {
+func MPI_Buffer_detach(buffer_addr unsafe.Pointer /*(void *)*/, size *C_int) error {
 	return mpi_check(C.MPI_Buffer_detach(buffer_addr, size))
 }
 
-func MPI_Gather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm) *MpiError {
+func MPI_Gather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Gather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm))
 }
 
-func MPI_Gatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm) *MpiError {
+func MPI_Gatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Gatherv(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm))
 }
 
-func MPI_Get(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, win C_MPI_Win) *MpiError {
+func MPI_Get(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Get(origin_addr, origin_count, origin_datatype, target_rank, target_disp, target_count, target_datatype, win))
 }
 
-func MPI_Get_accumulate(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, result_addr unsafe.Pointer /*(void *)*/, result_count C_int, result_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, op C_MPI_Op, win C_MPI_Win) *MpiError {
+func MPI_Get_accumulate(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, result_addr unsafe.Pointer /*(void *)*/, result_count C_int, result_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, op C_MPI_Op, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Get_accumulate(origin_addr, origin_count, origin_datatype, result_addr, result_count, result_datatype, target_rank, target_disp, target_count, target_datatype, op, win))
 }
 
-func MPI_Get_address(location unsafe.Pointer /*(void *)*/, address *C_MPI_Aint) *MpiError {
+func MPI_Get_address(location unsafe.Pointer /*(void *)*/, address *C_MPI_Aint) error {
 	return mpi_check(C.MPI_Get_address(location, address))
 }
 
-func MPI_Get_count(status *C_MPI_Status, datatype C_MPI_Datatype, count *C_int) *MpiError {
+func MPI_Get_count(status *C_MPI_Status, datatype C_MPI_Datatype, count *C_int) error {
 	return mpi_check(C.MPI_Get_count(status, datatype, count))
 }
 
-func MPI_Get_elements(status *C_MPI_Status, datatype C_MPI_Datatype, count *C_int) *MpiError {
+func MPI_Get_elements(status *C_MPI_Status, datatype C_MPI_Datatype, count *C_int) error {
 	return mpi_check(C.MPI_Get_elements(status, datatype, count))
 }
 
-func MPI_Get_elements_x(status *C_MPI_Status, datatype C_MPI_Datatype, count *C_MPI_Count) *MpiError {
+func MPI_Get_elements_x(status *C_MPI_Status, datatype C_MPI_Datatype, count *C_MPI_Count) error {
 	return mpi_check(C.MPI_Get_elements_x(status, datatype, count))
 }
 
-func MPI_Get_library_version(version *C_char, resultlen *C_int) *MpiError {
+func MPI_Get_library_version(version *C_char, resultlen *C_int) error {
 	return mpi_check(C.MPI_Get_library_version(version, resultlen))
 }
 
-func MPI_Get_processor_name(name *C_char, resultlen *C_int) *MpiError {
+func MPI_Get_processor_name(name *C_char, resultlen *C_int) error {
 	return mpi_check(C.MPI_Get_processor_name(name, resultlen))
 }
 
-func MPI_Get_version(version *C_int, subversion *C_int) *MpiError {
+func MPI_Get_version(version *C_int, subversion *C_int) error {
 	return mpi_check(C.MPI_Get_version(version, subversion))
 }
 
-func MPI_Graph_create(comm_old C_MPI_Comm, nnodes C_int, indx *C_int, edges *C_int, reorder C_int, comm_graph *C_MPI_Comm) *MpiError {
+func MPI_Graph_create(comm_old C_MPI_Comm, nnodes C_int, indx *C_int, edges *C_int, reorder C_int, comm_graph *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Graph_create(comm_old, nnodes, indx, edges, reorder, comm_graph))
 }
 
-func MPI_Graph_get(comm C_MPI_Comm, maxindex C_int, maxedges C_int, indx *C_int, edges *C_int) *MpiError {
+func MPI_Graph_get(comm C_MPI_Comm, maxindex C_int, maxedges C_int, indx *C_int, edges *C_int) error {
 	return mpi_check(C.MPI_Graph_get(comm, maxindex, maxedges, indx, edges))
 }
 
-func MPI_Graph_map(comm C_MPI_Comm, nnodes C_int, indx *C_int, edges *C_int, newrank *C_int) *MpiError {
+func MPI_Graph_map(comm C_MPI_Comm, nnodes C_int, indx *C_int, edges *C_int, newrank *C_int) error {
 	return mpi_check(C.MPI_Graph_map(comm, nnodes, indx, edges, newrank))
 }
 
-func MPI_Graph_neighbors(comm C_MPI_Comm, rank C_int, maxneighbors C_int, neighbors *C_int) *MpiError {
+func MPI_Graph_neighbors(comm C_MPI_Comm, rank C_int, maxneighbors C_int, neighbors *C_int) error {
 	return mpi_check(C.MPI_Graph_neighbors(comm, rank, maxneighbors, neighbors))
 }
 
-func MPI_Graph_neighbors_count(comm C_MPI_Comm, rank C_int, nneighbors *C_int) *MpiError {
+func MPI_Graph_neighbors_count(comm C_MPI_Comm, rank C_int, nneighbors *C_int) error {
 	return mpi_check(C.MPI_Graph_neighbors_count(comm, rank, nneighbors))
 }
 
-func MPI_Graphdims_get(comm C_MPI_Comm, nnodes *C_int, nedges *C_int) *MpiError {
+func MPI_Graphdims_get(comm C_MPI_Comm, nnodes *C_int, nedges *C_int) error {
 	return mpi_check(C.MPI_Graphdims_get(comm, nnodes, nedges))
 }
 
-func MPI_Grequest_complete(request C_MPI_Request) *MpiError {
+func MPI_Grequest_complete(request C_MPI_Request) error {
 	return mpi_check(C.MPI_Grequest_complete(request))
 }
 
-func MPI_Grequest_start(query_fn *C_MPI_Grequest_query_function, free_fn *C_MPI_Grequest_free_function, cancel_fn *C_MPI_Grequest_cancel_function, extra_state unsafe.Pointer /*(void *)*/, request *C_MPI_Request) *MpiError {
+func MPI_Grequest_start(query_fn *C_MPI_Grequest_query_function, free_fn *C_MPI_Grequest_free_function, cancel_fn *C_MPI_Grequest_cancel_function, extra_state unsafe.Pointer /*(void *)*/, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Grequest_start(query_fn, free_fn, cancel_fn, extra_state, request))
 }
 
-func MPI_Group_compare(group1 C_MPI_Group, group2 C_MPI_Group, result *C_int) *MpiError {
+func MPI_Group_compare(group1 C_MPI_Group, group2 C_MPI_Group, result *C_int) error {
 	return mpi_check(C.MPI_Group_compare(group1, group2, result))
 }
 
-func MPI_Group_difference(group1 C_MPI_Group, group2 C_MPI_Group, newgroup *C_MPI_Group) *MpiError {
+func MPI_Group_difference(group1 C_MPI_Group, group2 C_MPI_Group, newgroup *C_MPI_Group) error {
 	return mpi_check(C.MPI_Group_difference(group1, group2, newgroup))
 }
 
-func MPI_Group_excl(group C_MPI_Group, n C_int, ranks *C_int, newgroup *C_MPI_Group) *MpiError {
+func MPI_Group_excl(group C_MPI_Group, n C_int, ranks *C_int, newgroup *C_MPI_Group) error {
 	return mpi_check(C.MPI_Group_excl(group, n, ranks, newgroup))
 }
 
-func MPI_Group_free(group *C_MPI_Group) *MpiError {
+func MPI_Group_free(group *C_MPI_Group) error {
 	return mpi_check(C.MPI_Group_free(group))
 }
 
-func MPI_Group_incl(group C_MPI_Group, n C_int, ranks *C_int, newgroup *C_MPI_Group) *MpiError {
+func MPI_Group_incl(group C_MPI_Group, n C_int, ranks *C_int, newgroup *C_MPI_Group) error {
 	return mpi_check(C.MPI_Group_incl(group, n, ranks, newgroup))
 }
 
-func MPI_Group_intersection(group1 C_MPI_Group, group2 C_MPI_Group, newgroup *C_MPI_Group) *MpiError {
+func MPI_Group_intersection(group1 C_MPI_Group, group2 C_MPI_Group, newgroup *C_MPI_Group) error {
 	return mpi_check(C.MPI_Group_intersection(group1, group2, newgroup))
 }
 
-func MPI_Group_range_excl(group C_MPI_Group, n C_int, ranges *[3]C_int, newgroup *C_MPI_Group) *MpiError {
+func MPI_Group_range_excl(group C_MPI_Group, n C_int, ranges *[3]C_int, newgroup *C_MPI_Group) error {
 	return mpi_check(C.MPI_Group_range_excl(group, n, ranges, newgroup))
 }
 
-func MPI_Group_range_incl(group C_MPI_Group, n C_int, ranges *[3]C_int, newgroup *C_MPI_Group) *MpiError {
+func MPI_Group_range_incl(group C_MPI_Group, n C_int, ranges *[3]C_int, newgroup *C_MPI_Group) error {
 	return mpi_check(C.MPI_Group_range_incl(group, n, ranges, newgroup))
 }
 
-func MPI_Group_rank(group C_MPI_Group, rank *C_int) *MpiError {
+func MPI_Group_rank(group C_MPI_Group, rank *C_int) error {
 	return mpi_check(C.MPI_Group_rank(group, rank))
 }
 
-func MPI_Group_size(group C_MPI_Group, size *C_int) *MpiError {
+func MPI_Group_size(group C_MPI_Group, size *C_int) error {
 	return mpi_check(C.MPI_Group_size(group, size))
 }
 
-func MPI_Group_translate_ranks(group1 C_MPI_Group, n C_int, ranks1 *C_int, group2 C_MPI_Group, ranks2 *C_int) *MpiError {
+func MPI_Group_translate_ranks(group1 C_MPI_Group, n C_int, ranks1 *C_int, group2 C_MPI_Group, ranks2 *C_int) error {
 	return mpi_check(C.MPI_Group_translate_ranks(group1, n, ranks1, group2, ranks2))
 }
 
-func MPI_Group_union(group1 C_MPI_Group, group2 C_MPI_Group, newgroup *C_MPI_Group) *MpiError {
+func MPI_Group_union(group1 C_MPI_Group, group2 C_MPI_Group, newgroup *C_MPI_Group) error {
 	return mpi_check(C.MPI_Group_union(group1, group2, newgroup))
 }
 
-func MPI_Cancel(request *C_MPI_Request) *MpiError {
+func MPI_Cancel(request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Cancel(request))
 }
 
-func MPI_Cart_coords(comm C_MPI_Comm, rank C_int, maxdims C_int, coords *C_int) *MpiError {
+func MPI_Cart_coords(comm C_MPI_Comm, rank C_int, maxdims C_int, coords *C_int) error {
 	return mpi_check(C.MPI_Cart_coords(comm, rank, maxdims, coords))
 }
 
-func MPI_Cart_create(comm_old C_MPI_Comm, ndims C_int, dims *C_int, periods *C_int, reorder C_int, comm_cart *C_MPI_Comm) *MpiError {
+func MPI_Cart_create(comm_old C_MPI_Comm, ndims C_int, dims *C_int, periods *C_int, reorder C_int, comm_cart *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Cart_create(comm_old, ndims, dims, periods, reorder, comm_cart))
 }
 
-func MPI_Cart_get(comm C_MPI_Comm, maxdims C_int, dims *C_int, periods *C_int, coords *C_int) *MpiError {
+func MPI_Cart_get(comm C_MPI_Comm, maxdims C_int, dims *C_int, periods *C_int, coords *C_int) error {
 	return mpi_check(C.MPI_Cart_get(comm, maxdims, dims, periods, coords))
 }
 
-func MPI_Cart_map(comm C_MPI_Comm, ndims C_int, dims *C_int, periods *C_int, newrank *C_int) *MpiError {
+func MPI_Cart_map(comm C_MPI_Comm, ndims C_int, dims *C_int, periods *C_int, newrank *C_int) error {
 	return mpi_check(C.MPI_Cart_map(comm, ndims, dims, periods, newrank))
 }
 
-func MPI_Cart_rank(comm C_MPI_Comm, coords *C_int, rank *C_int) *MpiError {
+func MPI_Cart_rank(comm C_MPI_Comm, coords *C_int, rank *C_int) error {
 	return mpi_check(C.MPI_Cart_rank(comm, coords, rank))
 }
 
-func MPI_Cart_shift(comm C_MPI_Comm, direction C_int, disp C_int, rank_source *C_int, rank_dest *C_int) *MpiError {
+func MPI_Cart_shift(comm C_MPI_Comm, direction C_int, disp C_int, rank_source *C_int, rank_dest *C_int) error {
 	return mpi_check(C.MPI_Cart_shift(comm, direction, disp, rank_source, rank_dest))
 }
 
-func MPI_Cart_sub(comm C_MPI_Comm, remain_dims *C_int, newcomm *C_MPI_Comm) *MpiError {
+func MPI_Cart_sub(comm C_MPI_Comm, remain_dims *C_int, newcomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Cart_sub(comm, remain_dims, newcomm))
 }
 
-func MPI_Cartdim_get(comm C_MPI_Comm, ndims *C_int) *MpiError {
+func MPI_Cartdim_get(comm C_MPI_Comm, ndims *C_int) error {
 	return mpi_check(C.MPI_Cartdim_get(comm, ndims))
 }
 
-func MPI_T_category_changed(stamp *C_int) *MpiError {
+func MPI_T_category_changed(stamp *C_int) error {
 	return mpi_check(C.MPI_T_category_changed(stamp))
 }
 
-func MPI_Close_port(port_name *C_char) *MpiError {
+func MPI_Close_port(port_name *C_char) error {
 	return mpi_check(C.MPI_Close_port(port_name))
 }
 
-func MPI_T_category_get_categories(cat_index C_int, len C_int, indices *C_int) *MpiError {
+func MPI_T_category_get_categories(cat_index C_int, len C_int, indices *C_int) error {
 	return mpi_check(C.MPI_T_category_get_categories(cat_index, len, indices))
 }
 
-func MPI_Comm_accept(port_name *C_char, info C_MPI_Info, root C_int, comm C_MPI_Comm, newcomm *C_MPI_Comm) *MpiError {
+func MPI_Comm_accept(port_name *C_char, info C_MPI_Info, root C_int, comm C_MPI_Comm, newcomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_accept(port_name, info, root, comm, newcomm))
 }
 
-func MPI_T_category_get_cvars(cat_index C_int, len C_int, indices *C_int) *MpiError {
+func MPI_T_category_get_cvars(cat_index C_int, len C_int, indices *C_int) error {
 	return mpi_check(C.MPI_T_category_get_cvars(cat_index, len, indices))
 }
 
-func MPI_Comm_call_errhandler(comm C_MPI_Comm, errorcode C_int) *MpiError {
+func MPI_Comm_call_errhandler(comm C_MPI_Comm, errorcode C_int) error {
 	return mpi_check(C.MPI_Comm_call_errhandler(comm, errorcode))
 }
 
-func MPI_T_category_get_info(cat_index C_int, name *C_char, name_len *C_int, desc *C_char, desc_len *C_int, num_cvars *C_int, num_pvars *C_int, num_categories *C_int) *MpiError {
+func MPI_T_category_get_info(cat_index C_int, name *C_char, name_len *C_int, desc *C_char, desc_len *C_int, num_cvars *C_int, num_pvars *C_int, num_categories *C_int) error {
 	return mpi_check(C.MPI_T_category_get_info(cat_index, name, name_len, desc, desc_len, num_cvars, num_pvars, num_categories))
 }
 
-func MPI_Comm_compare(comm1 C_MPI_Comm, comm2 C_MPI_Comm, result *C_int) *MpiError {
+func MPI_Comm_compare(comm1 C_MPI_Comm, comm2 C_MPI_Comm, result *C_int) error {
 	return mpi_check(C.MPI_Comm_compare(comm1, comm2, result))
 }
 
-func MPI_T_category_get_num(num_cat *C_int) *MpiError {
+func MPI_T_category_get_num(num_cat *C_int) error {
 	return mpi_check(C.MPI_T_category_get_num(num_cat))
 }
 
-func MPI_Comm_connect(port_name *C_char, info C_MPI_Info, root C_int, comm C_MPI_Comm, newcomm *C_MPI_Comm) *MpiError {
+func MPI_Comm_connect(port_name *C_char, info C_MPI_Info, root C_int, comm C_MPI_Comm, newcomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_connect(port_name, info, root, comm, newcomm))
 }
 
-func MPI_T_category_get_pvars(cat_index C_int, len C_int, indices *C_int) *MpiError {
+func MPI_T_category_get_pvars(cat_index C_int, len C_int, indices *C_int) error {
 	return mpi_check(C.MPI_T_category_get_pvars(cat_index, len, indices))
 }
 
-func MPI_Comm_create(comm C_MPI_Comm, group C_MPI_Group, newcomm *C_MPI_Comm) *MpiError {
+func MPI_Comm_create(comm C_MPI_Comm, group C_MPI_Group, newcomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_create(comm, group, newcomm))
 }
 
-func MPI_Iallgather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Iallgather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Iallgather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request))
 }
 
-func MPI_T_cvar_get_info(cvar_index C_int, name *C_char, name_len *C_int, verbosity *C_int, datatype *C_MPI_Datatype, enumtype *C_MPI_T_enum, desc *C_char, desc_len *C_int, binding *C_int, scope *C_int) *MpiError {
+func MPI_T_cvar_get_info(cvar_index C_int, name *C_char, name_len *C_int, verbosity *C_int, datatype *C_MPI_Datatype, enumtype *C_MPI_T_enum, desc *C_char, desc_len *C_int, binding *C_int, scope *C_int) error {
 	return mpi_check(C.MPI_T_cvar_get_info(cvar_index, name, name_len, verbosity, datatype, enumtype, desc, desc_len, binding, scope))
 }
 
-func MPI_Comm_create_errhandler(comm_errhandler_fn *C_MPI_Comm_errhandler_function, errhandler *C_MPI_Errhandler) *MpiError {
+func MPI_Comm_create_errhandler(comm_errhandler_fn *C_MPI_Comm_errhandler_function, errhandler *C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_Comm_create_errhandler(comm_errhandler_fn, errhandler))
 }
 
-func MPI_Iallgatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Iallgatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Iallgatherv(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, request))
 }
 
-func MPI_T_cvar_get_num(num_cvar *C_int) *MpiError {
+func MPI_T_cvar_get_num(num_cvar *C_int) error {
 	return mpi_check(C.MPI_T_cvar_get_num(num_cvar))
 }
 
-func MPI_Comm_create_group(comm C_MPI_Comm, group C_MPI_Group, tag C_int, newcomm *C_MPI_Comm) *MpiError {
+func MPI_Comm_create_group(comm C_MPI_Comm, group C_MPI_Group, tag C_int, newcomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_create_group(comm, group, tag, newcomm))
 }
 
-func MPI_Iallreduce(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Iallreduce(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Iallreduce(sendbuf, recvbuf, count, datatype, op, comm, request))
 }
 
-func MPI_T_cvar_handle_alloc(cvar_index C_int, obj_handle unsafe.Pointer /*(void *)*/, handle *C_MPI_T_cvar_handle, count *C_int) *MpiError {
+func MPI_T_cvar_handle_alloc(cvar_index C_int, obj_handle unsafe.Pointer /*(void *)*/, handle *C_MPI_T_cvar_handle, count *C_int) error {
 	return mpi_check(C.MPI_T_cvar_handle_alloc(cvar_index, obj_handle, handle, count))
 }
 
-func MPI_Comm_create_keyval(comm_copy_attr_fn *C_MPI_Comm_copy_attr_function, comm_delete_attr_fn *C_MPI_Comm_delete_attr_function, comm_keyval *C_int, extra_state unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Comm_create_keyval(comm_copy_attr_fn *C_MPI_Comm_copy_attr_function, comm_delete_attr_fn *C_MPI_Comm_delete_attr_function, comm_keyval *C_int, extra_state unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Comm_create_keyval(comm_copy_attr_fn, comm_delete_attr_fn, comm_keyval, extra_state))
 }
 
-func MPI_Ialltoall(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ialltoall(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ialltoall(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request))
 }
 
-func MPI_T_cvar_handle_free(handle *C_MPI_T_cvar_handle) *MpiError {
+func MPI_T_cvar_handle_free(handle *C_MPI_T_cvar_handle) error {
 	return mpi_check(C.MPI_T_cvar_handle_free(handle))
 }
 
-func MPI_Comm_delete_attr(comm C_MPI_Comm, comm_keyval C_int) *MpiError {
+func MPI_Comm_delete_attr(comm C_MPI_Comm, comm_keyval C_int) error {
 	return mpi_check(C.MPI_Comm_delete_attr(comm, comm_keyval))
 }
 
-func MPI_Ialltoallv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ialltoallv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ialltoallv(sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, request))
 }
 
-func MPI_T_cvar_read(handle C_MPI_T_cvar_handle, buf unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_T_cvar_read(handle C_MPI_T_cvar_handle, buf unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_T_cvar_read(handle, buf))
 }
 
-func MPI_Comm_disconnect(comm *C_MPI_Comm) *MpiError {
+func MPI_Comm_disconnect(comm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_disconnect(comm))
 }
 
-func MPI_Ialltoallw(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtypes *C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtypes *C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ialltoallw(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtypes *C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtypes *C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ialltoallw(sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, request))
 }
 
-func MPI_T_cvar_write(handle C_MPI_T_cvar_handle, buf unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_T_cvar_write(handle C_MPI_T_cvar_handle, buf unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_T_cvar_write(handle, buf))
 }
 
-func MPI_Comm_dup(comm C_MPI_Comm, newcomm *C_MPI_Comm) *MpiError {
+func MPI_Comm_dup(comm C_MPI_Comm, newcomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_dup(comm, newcomm))
 }
 
-func MPI_Ibarrier(comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ibarrier(comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ibarrier(comm, request))
 }
 
-func MPI_T_enum_get_info(enumtype C_MPI_T_enum, num *C_int, name *C_char, name_len *C_int) *MpiError {
+func MPI_T_enum_get_info(enumtype C_MPI_T_enum, num *C_int, name *C_char, name_len *C_int) error {
 	return mpi_check(C.MPI_T_enum_get_info(enumtype, num, name, name_len))
 }
 
-func MPI_Comm_dup_with_info(comm C_MPI_Comm, info C_MPI_Info, newcomm *C_MPI_Comm) *MpiError {
+func MPI_Comm_dup_with_info(comm C_MPI_Comm, info C_MPI_Info, newcomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_dup_with_info(comm, info, newcomm))
 }
 
-func MPI_Ibcast(buffer unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, root C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ibcast(buffer unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, root C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ibcast(buffer, count, datatype, root, comm, request))
 }
 
-func MPI_T_enum_get_item(enumtype C_MPI_T_enum, indx C_int, value *C_int, name *C_char, name_len *C_int) *MpiError {
+func MPI_T_enum_get_item(enumtype C_MPI_T_enum, indx C_int, value *C_int, name *C_char, name_len *C_int) error {
 	return mpi_check(C.MPI_T_enum_get_item(enumtype, indx, value, name, name_len))
 }
 
-func MPI_Comm_free(comm *C_MPI_Comm) *MpiError {
+func MPI_Comm_free(comm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_free(comm))
 }
 
-func MPI_Ibsend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ibsend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ibsend(buf, count, datatype, dest, tag, comm, request))
 }
 
-func MPI_T_finalize() *MpiError {
+func MPI_T_finalize() error {
 	return mpi_check(C.MPI_T_finalize())
 }
 
-func MPI_Comm_free_keyval(comm_keyval *C_int) *MpiError {
+func MPI_Comm_free_keyval(comm_keyval *C_int) error {
 	return mpi_check(C.MPI_Comm_free_keyval(comm_keyval))
 }
 
-func MPI_Iexscan(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Iexscan(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Iexscan(sendbuf, recvbuf, count, datatype, op, comm, request))
 }
 
-func MPI_T_init_thread(required C_int, provided *C_int) *MpiError {
+func MPI_T_init_thread(required C_int, provided *C_int) error {
 	return mpi_check(C.MPI_T_init_thread(required, provided))
 }
 
-func MPI_Comm_get_attr(comm C_MPI_Comm, comm_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/, flag *C_int) *MpiError {
+func MPI_Comm_get_attr(comm C_MPI_Comm, comm_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/, flag *C_int) error {
 	return mpi_check(C.MPI_Comm_get_attr(comm, comm_keyval, attribute_val, flag))
 }
 
-func MPI_Igather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Igather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Igather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, request))
 }
 
-func MPI_T_pvar_get_info(pvar_index C_int, name *C_char, name_len *C_int, verbosity *C_int, var_class *C_int, datatype *C_MPI_Datatype, enumtype *C_MPI_T_enum, desc *C_char, desc_len *C_int, binding *C_int, readonly *C_int, continuous *C_int, atomic *C_int) *MpiError {
+func MPI_T_pvar_get_info(pvar_index C_int, name *C_char, name_len *C_int, verbosity *C_int, var_class *C_int, datatype *C_MPI_Datatype, enumtype *C_MPI_T_enum, desc *C_char, desc_len *C_int, binding *C_int, readonly *C_int, continuous *C_int, atomic *C_int) error {
 	return mpi_check(C.MPI_T_pvar_get_info(pvar_index, name, name_len, verbosity, var_class, datatype, enumtype, desc, desc_len, binding, readonly, continuous, atomic))
 }
 
-func MPI_Comm_get_errhandler(comm C_MPI_Comm, errhandler *C_MPI_Errhandler) *MpiError {
+func MPI_Comm_get_errhandler(comm C_MPI_Comm, errhandler *C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_Comm_get_errhandler(comm, errhandler))
 }
 
-func MPI_Igatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Igatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Igatherv(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm, request))
 }
 
-func MPI_T_pvar_get_num(num_pvar *C_int) *MpiError {
+func MPI_T_pvar_get_num(num_pvar *C_int) error {
 	return mpi_check(C.MPI_T_pvar_get_num(num_pvar))
 }
 
-func MPI_Comm_get_info(comm C_MPI_Comm, info_used *C_MPI_Info) *MpiError {
+func MPI_Comm_get_info(comm C_MPI_Comm, info_used *C_MPI_Info) error {
 	return mpi_check(C.MPI_Comm_get_info(comm, info_used))
 }
 
-func MPI_Improbe(source C_int, tag C_int, comm C_MPI_Comm, flag *C_int, message *C_MPI_Message, status *C_MPI_Status) *MpiError {
+func MPI_Improbe(source C_int, tag C_int, comm C_MPI_Comm, flag *C_int, message *C_MPI_Message, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Improbe(source, tag, comm, flag, message, status))
 }
 
-func MPI_T_pvar_handle_alloc(session C_MPI_T_pvar_session, pvar_index C_int, obj_handle unsafe.Pointer /*(void *)*/, handle *C_MPI_T_pvar_handle, count *C_int) *MpiError {
+func MPI_T_pvar_handle_alloc(session C_MPI_T_pvar_session, pvar_index C_int, obj_handle unsafe.Pointer /*(void *)*/, handle *C_MPI_T_pvar_handle, count *C_int) error {
 	return mpi_check(C.MPI_T_pvar_handle_alloc(session, pvar_index, obj_handle, handle, count))
 }
 
-func MPI_Comm_get_name(comm C_MPI_Comm, comm_name *C_char, resultlen *C_int) *MpiError {
+func MPI_Comm_get_name(comm C_MPI_Comm, comm_name *C_char, resultlen *C_int) error {
 	return mpi_check(C.MPI_Comm_get_name(comm, comm_name, resultlen))
 }
 
-func MPI_Imrecv(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, message *C_MPI_Message, request *C_MPI_Request) *MpiError {
+func MPI_Imrecv(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, message *C_MPI_Message, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Imrecv(buf, count, datatype, message, request))
 }
 
-func MPI_T_pvar_handle_free(session C_MPI_T_pvar_session, handle *C_MPI_T_pvar_handle) *MpiError {
+func MPI_T_pvar_handle_free(session C_MPI_T_pvar_session, handle *C_MPI_T_pvar_handle) error {
 	return mpi_check(C.MPI_T_pvar_handle_free(session, handle))
 }
 
-func MPI_Comm_get_parent(parent *C_MPI_Comm) *MpiError {
+func MPI_Comm_get_parent(parent *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_get_parent(parent))
 }
 
-func MPI_Ineighbor_allgather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ineighbor_allgather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ineighbor_allgather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request))
 }
 
-func MPI_T_pvar_read(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle, buf unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_T_pvar_read(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle, buf unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_T_pvar_read(session, handle, buf))
 }
 
-func MPI_Comm_group(comm C_MPI_Comm, group *C_MPI_Group) *MpiError {
+func MPI_Comm_group(comm C_MPI_Comm, group *C_MPI_Group) error {
 	return mpi_check(C.MPI_Comm_group(comm, group))
 }
 
-func MPI_Ineighbor_allgatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ineighbor_allgatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ineighbor_allgatherv(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, request))
 }
 
-func MPI_T_pvar_readreset(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle, buf unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_T_pvar_readreset(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle, buf unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_T_pvar_readreset(session, handle, buf))
 }
 
-func MPI_Comm_idup(comm C_MPI_Comm, newcomm *C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Comm_idup(comm C_MPI_Comm, newcomm *C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Comm_idup(comm, newcomm, request))
 }
 
-func MPI_Ineighbor_alltoall(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ineighbor_alltoall(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ineighbor_alltoall(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request))
 }
 
-func MPI_T_pvar_reset(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle) *MpiError {
+func MPI_T_pvar_reset(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle) error {
 	return mpi_check(C.MPI_T_pvar_reset(session, handle))
 }
 
-func MPI_Comm_join(fd C_int, intercomm *C_MPI_Comm) *MpiError {
+func MPI_Comm_join(fd C_int, intercomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_join(fd, intercomm))
 }
 
-func MPI_Ineighbor_alltoallv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ineighbor_alltoallv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ineighbor_alltoallv(sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, request))
 }
 
-func MPI_T_pvar_session_create(session *C_MPI_T_pvar_session) *MpiError {
+func MPI_T_pvar_session_create(session *C_MPI_T_pvar_session) error {
 	return mpi_check(C.MPI_T_pvar_session_create(session))
 }
 
-func MPI_Comm_rank(comm C_MPI_Comm, rank *C_int) *MpiError {
+func MPI_Comm_rank(comm C_MPI_Comm, rank *C_int) error {
 	return mpi_check(C.MPI_Comm_rank(comm, rank))
 }
 
-func MPI_Ineighbor_alltoallw(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_MPI_Aint, sendtypes *C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_MPI_Aint, recvtypes *C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ineighbor_alltoallw(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_MPI_Aint, sendtypes *C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_MPI_Aint, recvtypes *C_MPI_Datatype, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ineighbor_alltoallw(sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, request))
 }
 
-func MPI_T_pvar_session_free(session *C_MPI_T_pvar_session) *MpiError {
+func MPI_T_pvar_session_free(session *C_MPI_T_pvar_session) error {
 	return mpi_check(C.MPI_T_pvar_session_free(session))
 }
 
-func MPI_Comm_remote_group(comm C_MPI_Comm, group *C_MPI_Group) *MpiError {
+func MPI_Comm_remote_group(comm C_MPI_Comm, group *C_MPI_Group) error {
 	return mpi_check(C.MPI_Comm_remote_group(comm, group))
 }
 
-func MPI_Info_create(info *C_MPI_Info) *MpiError {
+func MPI_Info_create(info *C_MPI_Info) error {
 	return mpi_check(C.MPI_Info_create(info))
 }
 
-func MPI_T_pvar_start(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle) *MpiError {
+func MPI_T_pvar_start(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle) error {
 	return mpi_check(C.MPI_T_pvar_start(session, handle))
 }
 
-func MPI_Comm_remote_size(comm C_MPI_Comm, size *C_int) *MpiError {
+func MPI_Comm_remote_size(comm C_MPI_Comm, size *C_int) error {
 	return mpi_check(C.MPI_Comm_remote_size(comm, size))
 }
 
-func MPI_Info_delete(info C_MPI_Info, key *C_char) *MpiError {
+func MPI_Info_delete(info C_MPI_Info, key *C_char) error {
 	return mpi_check(C.MPI_Info_delete(info, key))
 }
 
-func MPI_T_pvar_stop(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle) *MpiError {
+func MPI_T_pvar_stop(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle) error {
 	return mpi_check(C.MPI_T_pvar_stop(session, handle))
 }
 
-func MPI_Comm_set_attr(comm C_MPI_Comm, comm_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Comm_set_attr(comm C_MPI_Comm, comm_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Comm_set_attr(comm, comm_keyval, attribute_val))
 }
 
-func MPI_Info_dup(info C_MPI_Info, newinfo *C_MPI_Info) *MpiError {
+func MPI_Info_dup(info C_MPI_Info, newinfo *C_MPI_Info) error {
 	return mpi_check(C.MPI_Info_dup(info, newinfo))
 }
 
-func MPI_T_pvar_write(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle, buf unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_T_pvar_write(session C_MPI_T_pvar_session, handle C_MPI_T_pvar_handle, buf unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_T_pvar_write(session, handle, buf))
 }
 
-func MPI_Comm_set_errhandler(comm C_MPI_Comm, errhandler C_MPI_Errhandler) *MpiError {
+func MPI_Comm_set_errhandler(comm C_MPI_Comm, errhandler C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_Comm_set_errhandler(comm, errhandler))
 }
 
-func MPI_Info_free(info *C_MPI_Info) *MpiError {
+func MPI_Info_free(info *C_MPI_Info) error {
 	return mpi_check(C.MPI_Info_free(info))
 }
 
-func MPI_Test(request *C_MPI_Request, flag *C_int, status *C_MPI_Status) *MpiError {
+func MPI_Test(request *C_MPI_Request, flag *C_int, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Test(request, flag, status))
 }
 
-func MPI_Comm_set_info(comm C_MPI_Comm, info C_MPI_Info) *MpiError {
+func MPI_Comm_set_info(comm C_MPI_Comm, info C_MPI_Info) error {
 	return mpi_check(C.MPI_Comm_set_info(comm, info))
 }
 
-func MPI_Info_get(info C_MPI_Info, key *C_char, valuelen C_int, value *C_char, flag *C_int) *MpiError {
+func MPI_Info_get(info C_MPI_Info, key *C_char, valuelen C_int, value *C_char, flag *C_int) error {
 	return mpi_check(C.MPI_Info_get(info, key, valuelen, value, flag))
 }
 
-func MPI_Test_cancelled(status *C_MPI_Status, flag *C_int) *MpiError {
+func MPI_Test_cancelled(status *C_MPI_Status, flag *C_int) error {
 	return mpi_check(C.MPI_Test_cancelled(status, flag))
 }
 
-func MPI_Comm_set_name(comm C_MPI_Comm, comm_name *C_char) *MpiError {
+func MPI_Comm_set_name(comm C_MPI_Comm, comm_name *C_char) error {
 	return mpi_check(C.MPI_Comm_set_name(comm, comm_name))
 }
 
-func MPI_Info_get_nkeys(info C_MPI_Info, nkeys *C_int) *MpiError {
+func MPI_Info_get_nkeys(info C_MPI_Info, nkeys *C_int) error {
 	return mpi_check(C.MPI_Info_get_nkeys(info, nkeys))
 }
 
-func MPI_Testall(count C_int, array_of_requests *C_MPI_Request, flag *C_int, array_of_statuses *C_MPI_Status) *MpiError {
+func MPI_Testall(count C_int, array_of_requests *C_MPI_Request, flag *C_int, array_of_statuses *C_MPI_Status) error {
 	return mpi_check(C.MPI_Testall(count, array_of_requests, flag, array_of_statuses))
 }
 
-func MPI_Comm_size(comm C_MPI_Comm, size *C_int) *MpiError {
+func MPI_Comm_size(comm C_MPI_Comm, size *C_int) error {
 	return mpi_check(C.MPI_Comm_size(comm, size))
 }
 
-func MPI_Info_get_nthkey(info C_MPI_Info, n C_int, key *C_char) *MpiError {
+func MPI_Info_get_nthkey(info C_MPI_Info, n C_int, key *C_char) error {
 	return mpi_check(C.MPI_Info_get_nthkey(info, n, key))
 }
 
-func MPI_Testany(count C_int, array_of_requests *C_MPI_Request, indx *C_int, flag *C_int, status *C_MPI_Status) *MpiError {
+func MPI_Testany(count C_int, array_of_requests *C_MPI_Request, indx *C_int, flag *C_int, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Testany(count, array_of_requests, indx, flag, status))
 }
 
-func MPI_Comm_spawn(command *C_char, argv **C_char, maxprocs C_int, info C_MPI_Info, root C_int, comm C_MPI_Comm, intercomm *C_MPI_Comm, array_of_errcodes *C_int) *MpiError {
+func MPI_Comm_spawn(command *C_char, argv **C_char, maxprocs C_int, info C_MPI_Info, root C_int, comm C_MPI_Comm, intercomm *C_MPI_Comm, array_of_errcodes *C_int) error {
 	return mpi_check(C.MPI_Comm_spawn(command, argv, maxprocs, info, root, comm, intercomm, array_of_errcodes))
 }
 
-func MPI_Info_get_valuelen(info C_MPI_Info, key *C_char, valuelen *C_int, flag *C_int) *MpiError {
+func MPI_Info_get_valuelen(info C_MPI_Info, key *C_char, valuelen *C_int, flag *C_int) error {
 	return mpi_check(C.MPI_Info_get_valuelen(info, key, valuelen, flag))
 }
 
-func MPI_Testsome(incount C_int, array_of_requests *C_MPI_Request, outcount *C_int, array_of_indices *C_int, array_of_statuses *C_MPI_Status) *MpiError {
+func MPI_Testsome(incount C_int, array_of_requests *C_MPI_Request, outcount *C_int, array_of_indices *C_int, array_of_statuses *C_MPI_Status) error {
 	return mpi_check(C.MPI_Testsome(incount, array_of_requests, outcount, array_of_indices, array_of_statuses))
 }
 
-func MPI_Comm_spawn_multiple(count C_int, array_of_commands **C_char, array_of_argv ***C_char, array_of_maxprocs *C_int, array_of_info *C_MPI_Info, root C_int, comm C_MPI_Comm, intercomm *C_MPI_Comm, array_of_errcodes *C_int) *MpiError {
+func MPI_Comm_spawn_multiple(count C_int, array_of_commands **C_char, array_of_argv ***C_char, array_of_maxprocs *C_int, array_of_info *C_MPI_Info, root C_int, comm C_MPI_Comm, intercomm *C_MPI_Comm, array_of_errcodes *C_int) error {
 	return mpi_check(C.MPI_Comm_spawn_multiple(count, array_of_commands, array_of_argv, array_of_maxprocs, array_of_info, root, comm, intercomm, array_of_errcodes))
 }
 
-func MPI_Info_set(info C_MPI_Info, key *C_char, value *C_char) *MpiError {
+func MPI_Info_set(info C_MPI_Info, key *C_char, value *C_char) error {
 	return mpi_check(C.MPI_Info_set(info, key, value))
 }
 
-func MPI_Topo_test(comm C_MPI_Comm, status *C_int) *MpiError {
+func MPI_Topo_test(comm C_MPI_Comm, status *C_int) error {
 	return mpi_check(C.MPI_Topo_test(comm, status))
 }
 
-func MPI_Comm_split(comm C_MPI_Comm, color C_int, key C_int, newcomm *C_MPI_Comm) *MpiError {
+func MPI_Comm_split(comm C_MPI_Comm, color C_int, key C_int, newcomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_split(comm, color, key, newcomm))
 }
 
-func MPI_Init(argc *C_int, argv ***C_char) *MpiError {
+func MPI_Init(argc *C_int, argv ***C_char) error {
 	return mpi_check(C.MPI_Init(argc, argv))
 }
 
-func MPI_Type_commit(datatype *C_MPI_Datatype) *MpiError {
+func MPI_Type_commit(datatype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_commit(datatype))
 }
 
-func MPI_Comm_split_type(comm C_MPI_Comm, split_type C_int, key C_int, info C_MPI_Info, newcomm *C_MPI_Comm) *MpiError {
+func MPI_Comm_split_type(comm C_MPI_Comm, split_type C_int, key C_int, info C_MPI_Info, newcomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Comm_split_type(comm, split_type, key, info, newcomm))
 }
 
-func MPI_Init_thread(argc *C_int, argv ***C_char, required C_int, provided *C_int) *MpiError {
+func MPI_Init_thread(argc *C_int, argv ***C_char, required C_int, provided *C_int) error {
 	return mpi_check(C.MPI_Init_thread(argc, argv, required, provided))
 }
 
-func MPI_Type_contiguous(count C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_contiguous(count C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_contiguous(count, oldtype, newtype))
 }
 
-func MPI_Comm_test_inter(comm C_MPI_Comm, flag *C_int) *MpiError {
+func MPI_Comm_test_inter(comm C_MPI_Comm, flag *C_int) error {
 	return mpi_check(C.MPI_Comm_test_inter(comm, flag))
 }
 
-func MPI_Initialized(flag *C_int) *MpiError {
+func MPI_Initialized(flag *C_int) error {
 	return mpi_check(C.MPI_Initialized(flag))
 }
 
-func MPI_Type_create_darray(size C_int, rank C_int, ndims C_int, array_of_gsizes *C_int, array_of_distribs *C_int, array_of_dargs *C_int, array_of_psizes *C_int, order C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_create_darray(size C_int, rank C_int, ndims C_int, array_of_gsizes *C_int, array_of_distribs *C_int, array_of_dargs *C_int, array_of_psizes *C_int, order C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_create_darray(size, rank, ndims, array_of_gsizes, array_of_distribs, array_of_dargs, array_of_psizes, order, oldtype, newtype))
 }
 
-func MPI_Compare_and_swap(origin_addr unsafe.Pointer /*(void *)*/, compare_addr unsafe.Pointer /*(void *)*/, result_addr unsafe.Pointer /*(void *)*/, datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, win C_MPI_Win) *MpiError {
+func MPI_Compare_and_swap(origin_addr unsafe.Pointer /*(void *)*/, compare_addr unsafe.Pointer /*(void *)*/, result_addr unsafe.Pointer /*(void *)*/, datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Compare_and_swap(origin_addr, compare_addr, result_addr, datatype, target_rank, target_disp, win))
 }
 
-func MPI_Intercomm_create(local_comm C_MPI_Comm, local_leader C_int, peer_comm C_MPI_Comm, remote_leader C_int, tag C_int, newintercomm *C_MPI_Comm) *MpiError {
+func MPI_Intercomm_create(local_comm C_MPI_Comm, local_leader C_int, peer_comm C_MPI_Comm, remote_leader C_int, tag C_int, newintercomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Intercomm_create(local_comm, local_leader, peer_comm, remote_leader, tag, newintercomm))
 }
 
-func MPI_Type_create_hindexed(count C_int, array_of_blocklengths *C_int, array_of_displacements *C_MPI_Aint, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_create_hindexed(count C_int, array_of_blocklengths *C_int, array_of_displacements *C_MPI_Aint, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_create_hindexed(count, array_of_blocklengths, array_of_displacements, oldtype, newtype))
 }
 
-func MPI_Intercomm_merge(intercomm C_MPI_Comm, high C_int, newintracomm *C_MPI_Comm) *MpiError {
+func MPI_Intercomm_merge(intercomm C_MPI_Comm, high C_int, newintracomm *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Intercomm_merge(intercomm, high, newintracomm))
 }
 
-func MPI_Type_create_hindexed_block(count C_int, blocklength C_int, array_of_displacements *C_MPI_Aint, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_create_hindexed_block(count C_int, blocklength C_int, array_of_displacements *C_MPI_Aint, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_create_hindexed_block(count, blocklength, array_of_displacements, oldtype, newtype))
 }
 
-func MPI_Iprobe(source C_int, tag C_int, comm C_MPI_Comm, flag *C_int, status *C_MPI_Status) *MpiError {
+func MPI_Iprobe(source C_int, tag C_int, comm C_MPI_Comm, flag *C_int, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Iprobe(source, tag, comm, flag, status))
 }
 
-func MPI_Type_create_hvector(count C_int, blocklength C_int, stride C_MPI_Aint, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_create_hvector(count C_int, blocklength C_int, stride C_MPI_Aint, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_create_hvector(count, blocklength, stride, oldtype, newtype))
 }
 
-func MPI_Irecv(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, source C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Irecv(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, source C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Irecv(buf, count, datatype, source, tag, comm, request))
 }
 
-func MPI_Type_create_indexed_block(count C_int, blocklength C_int, array_of_displacements *C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_create_indexed_block(count C_int, blocklength C_int, array_of_displacements *C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_create_indexed_block(count, blocklength, array_of_displacements, oldtype, newtype))
 }
 
-func MPI_Ireduce(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, root C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ireduce(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, root C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ireduce(sendbuf, recvbuf, count, datatype, op, root, comm, request))
 }
 
-func MPI_Type_create_keyval(type_copy_attr_fn *C_MPI_Type_copy_attr_function, type_delete_attr_fn *C_MPI_Type_delete_attr_function, type_keyval *C_int, extra_state unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Type_create_keyval(type_copy_attr_fn *C_MPI_Type_copy_attr_function, type_delete_attr_fn *C_MPI_Type_delete_attr_function, type_keyval *C_int, extra_state unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Type_create_keyval(type_copy_attr_fn, type_delete_attr_fn, type_keyval, extra_state))
 }
 
-func MPI_Ireduce_scatter(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ireduce_scatter(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ireduce_scatter(sendbuf, recvbuf, recvcounts, datatype, op, comm, request))
 }
 
-func MPI_Type_create_resized(oldtype C_MPI_Datatype, lb C_MPI_Aint, extent C_MPI_Aint, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_create_resized(oldtype C_MPI_Datatype, lb C_MPI_Aint, extent C_MPI_Aint, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_create_resized(oldtype, lb, extent, newtype))
 }
 
-func MPI_Ireduce_scatter_block(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Ireduce_scatter_block(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Ireduce_scatter_block(sendbuf, recvbuf, recvcount, datatype, op, comm, request))
 }
 
-func MPI_Type_create_struct(count C_int, array_of_blocklengths *C_int, array_of_displacements *C_MPI_Aint, array_of_types *C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_create_struct(count C_int, array_of_blocklengths *C_int, array_of_displacements *C_MPI_Aint, array_of_types *C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_create_struct(count, array_of_blocklengths, array_of_displacements, array_of_types, newtype))
 }
 
-func MPI_Irsend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Irsend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Irsend(buf, count, datatype, dest, tag, comm, request))
 }
 
-func MPI_Type_create_subarray(ndims C_int, array_of_sizes *C_int, array_of_subsizes *C_int, array_of_starts *C_int, order C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_create_subarray(ndims C_int, array_of_sizes *C_int, array_of_subsizes *C_int, array_of_starts *C_int, order C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_create_subarray(ndims, array_of_sizes, array_of_subsizes, array_of_starts, order, oldtype, newtype))
 }
 
-func MPI_Is_thread_main(flag *C_int) *MpiError {
+func MPI_Is_thread_main(flag *C_int) error {
 	return mpi_check(C.MPI_Is_thread_main(flag))
 }
 
-func MPI_Type_delete_attr(datatype C_MPI_Datatype, type_keyval C_int) *MpiError {
+func MPI_Type_delete_attr(datatype C_MPI_Datatype, type_keyval C_int) error {
 	return mpi_check(C.MPI_Type_delete_attr(datatype, type_keyval))
 }
 
-func MPI_Iscan(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Iscan(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Iscan(sendbuf, recvbuf, count, datatype, op, comm, request))
 }
 
-func MPI_Type_dup(oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_dup(oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_dup(oldtype, newtype))
 }
 
-func MPI_Iscatter(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Iscatter(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Iscatter(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, request))
 }
 
-func MPI_Type_extent(datatype C_MPI_Datatype, extent *C_MPI_Aint) *MpiError {
+func MPI_Type_extent(datatype C_MPI_Datatype, extent *C_MPI_Aint) error {
 	return mpi_check(C.MPI_Type_extent(datatype, extent))
 }
 
-func MPI_Iscatterv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, displs *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Iscatterv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, displs *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, root C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Iscatterv(sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm, request))
 }
 
-func MPI_Type_free(datatype *C_MPI_Datatype) *MpiError {
+func MPI_Type_free(datatype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_free(datatype))
 }
 
-func MPI_Isend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Isend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Isend(buf, count, datatype, dest, tag, comm, request))
 }
 
-func MPI_Type_free_keyval(type_keyval *C_int) *MpiError {
+func MPI_Type_free_keyval(type_keyval *C_int) error {
 	return mpi_check(C.MPI_Type_free_keyval(type_keyval))
 }
 
-func MPI_Issend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Issend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Issend(buf, count, datatype, dest, tag, comm, request))
 }
 
-func MPI_Type_get_attr(datatype C_MPI_Datatype, type_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/, flag *C_int) *MpiError {
+func MPI_Type_get_attr(datatype C_MPI_Datatype, type_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/, flag *C_int) error {
 	return mpi_check(C.MPI_Type_get_attr(datatype, type_keyval, attribute_val, flag))
 }
 
-func MPI_Type_get_contents(datatype C_MPI_Datatype, max_integers C_int, max_addresses C_int, max_datatypes C_int, array_of_integers *C_int, array_of_addresses *C_MPI_Aint, array_of_datatypes *C_MPI_Datatype) *MpiError {
+func MPI_Type_get_contents(datatype C_MPI_Datatype, max_integers C_int, max_addresses C_int, max_datatypes C_int, array_of_integers *C_int, array_of_addresses *C_MPI_Aint, array_of_datatypes *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_get_contents(datatype, max_integers, max_addresses, max_datatypes, array_of_integers, array_of_addresses, array_of_datatypes))
 }
 
-func MPI_Keyval_create(copy_fn *C_MPI_Copy_function, delete_fn *C_MPI_Delete_function, keyval *C_int, extra_state unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Keyval_create(copy_fn *C_MPI_Copy_function, delete_fn *C_MPI_Delete_function, keyval *C_int, extra_state unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Keyval_create(copy_fn, delete_fn, keyval, extra_state))
 }
 
-func MPI_Type_get_envelope(datatype C_MPI_Datatype, num_integers *C_int, num_addresses *C_int, num_datatypes *C_int, combiner *C_int) *MpiError {
+func MPI_Type_get_envelope(datatype C_MPI_Datatype, num_integers *C_int, num_addresses *C_int, num_datatypes *C_int, combiner *C_int) error {
 	return mpi_check(C.MPI_Type_get_envelope(datatype, num_integers, num_addresses, num_datatypes, combiner))
 }
 
-func MPI_Dims_create(nnodes C_int, ndims C_int, dims *C_int) *MpiError {
+func MPI_Dims_create(nnodes C_int, ndims C_int, dims *C_int) error {
 	return mpi_check(C.MPI_Dims_create(nnodes, ndims, dims))
 }
 
-func MPI_Keyval_free(keyval *C_int) *MpiError {
+func MPI_Keyval_free(keyval *C_int) error {
 	return mpi_check(C.MPI_Keyval_free(keyval))
 }
 
-func MPI_Type_get_extent(datatype C_MPI_Datatype, lb *C_MPI_Aint, extent *C_MPI_Aint) *MpiError {
+func MPI_Type_get_extent(datatype C_MPI_Datatype, lb *C_MPI_Aint, extent *C_MPI_Aint) error {
 	return mpi_check(C.MPI_Type_get_extent(datatype, lb, extent))
 }
 
-func MPI_Dist_graph_create(comm_old C_MPI_Comm, n C_int, sources *C_int, degrees *C_int, destinations *C_int, weights *C_int, info C_MPI_Info, reorder C_int, comm_dist_graph *C_MPI_Comm) *MpiError {
+func MPI_Dist_graph_create(comm_old C_MPI_Comm, n C_int, sources *C_int, degrees *C_int, destinations *C_int, weights *C_int, info C_MPI_Info, reorder C_int, comm_dist_graph *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Dist_graph_create(comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_dist_graph))
 }
 
-func MPI_Type_get_extent_x(datatype C_MPI_Datatype, lb *C_MPI_Count, extent *C_MPI_Count) *MpiError {
+func MPI_Type_get_extent_x(datatype C_MPI_Datatype, lb *C_MPI_Count, extent *C_MPI_Count) error {
 	return mpi_check(C.MPI_Type_get_extent_x(datatype, lb, extent))
 }
 
-func MPI_Dist_graph_create_adjacent(comm_old C_MPI_Comm, indegree C_int, sources *C_int, sourceweights *C_int, outdegree C_int, destinations *C_int, destweights *C_int, info C_MPI_Info, reorder C_int, comm_dist_graph *C_MPI_Comm) *MpiError {
+func MPI_Dist_graph_create_adjacent(comm_old C_MPI_Comm, indegree C_int, sources *C_int, sourceweights *C_int, outdegree C_int, destinations *C_int, destweights *C_int, info C_MPI_Info, reorder C_int, comm_dist_graph *C_MPI_Comm) error {
 	return mpi_check(C.MPI_Dist_graph_create_adjacent(comm_old, indegree, sources, sourceweights, outdegree, destinations, destweights, info, reorder, comm_dist_graph))
 }
 
-func MPI_Type_get_name(datatype C_MPI_Datatype, type_name *C_char, resultlen *C_int) *MpiError {
+func MPI_Type_get_name(datatype C_MPI_Datatype, type_name *C_char, resultlen *C_int) error {
 	return mpi_check(C.MPI_Type_get_name(datatype, type_name, resultlen))
 }
 
-func MPI_Dist_graph_neighbors(comm C_MPI_Comm, maxindegree C_int, sources *C_int, sourceweights *C_int, maxoutdegree C_int, destinations *C_int, destweights *C_int) *MpiError {
+func MPI_Dist_graph_neighbors(comm C_MPI_Comm, maxindegree C_int, sources *C_int, sourceweights *C_int, maxoutdegree C_int, destinations *C_int, destweights *C_int) error {
 	return mpi_check(C.MPI_Dist_graph_neighbors(comm, maxindegree, sources, sourceweights, maxoutdegree, destinations, destweights))
 }
 
-func MPI_Type_get_true_extent(datatype C_MPI_Datatype, true_lb *C_MPI_Aint, true_extent *C_MPI_Aint) *MpiError {
+func MPI_Type_get_true_extent(datatype C_MPI_Datatype, true_lb *C_MPI_Aint, true_extent *C_MPI_Aint) error {
 	return mpi_check(C.MPI_Type_get_true_extent(datatype, true_lb, true_extent))
 }
 
-func MPI_Dist_graph_neighbors_count(comm C_MPI_Comm, indegree *C_int, outdegree *C_int, weighted *C_int) *MpiError {
+func MPI_Dist_graph_neighbors_count(comm C_MPI_Comm, indegree *C_int, outdegree *C_int, weighted *C_int) error {
 	return mpi_check(C.MPI_Dist_graph_neighbors_count(comm, indegree, outdegree, weighted))
 }
 
-func MPI_Type_get_true_extent_x(datatype C_MPI_Datatype, true_lb *C_MPI_Count, true_extent *C_MPI_Count) *MpiError {
+func MPI_Type_get_true_extent_x(datatype C_MPI_Datatype, true_lb *C_MPI_Count, true_extent *C_MPI_Count) error {
 	return mpi_check(C.MPI_Type_get_true_extent_x(datatype, true_lb, true_extent))
 }
 
-func MPI_Type_hindexed(count C_int, array_of_blocklengths *C_int, array_of_displacements *C_MPI_Aint, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_hindexed(count C_int, array_of_blocklengths *C_int, array_of_displacements *C_MPI_Aint, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_hindexed(count, array_of_blocklengths, array_of_displacements, oldtype, newtype))
 }
 
-func MPI_Type_hvector(count C_int, blocklength C_int, stride C_MPI_Aint, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_hvector(count C_int, blocklength C_int, stride C_MPI_Aint, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_hvector(count, blocklength, stride, oldtype, newtype))
 }
 
-func MPI_Type_indexed(count C_int, array_of_blocklengths *C_int, array_of_displacements *C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_indexed(count C_int, array_of_blocklengths *C_int, array_of_displacements *C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_indexed(count, array_of_blocklengths, array_of_displacements, oldtype, newtype))
 }
 
-func MPI_Type_lb(datatype C_MPI_Datatype, displacement *C_MPI_Aint) *MpiError {
+func MPI_Type_lb(datatype C_MPI_Datatype, displacement *C_MPI_Aint) error {
 	return mpi_check(C.MPI_Type_lb(datatype, displacement))
 }
 
-func MPI_Type_match_size(typeclass C_int, size C_int, datatype *C_MPI_Datatype) *MpiError {
+func MPI_Type_match_size(typeclass C_int, size C_int, datatype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_match_size(typeclass, size, datatype))
 }
 
-func MPI_Type_set_attr(datatype C_MPI_Datatype, type_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Type_set_attr(datatype C_MPI_Datatype, type_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Type_set_attr(datatype, type_keyval, attribute_val))
 }
 
-func MPI_Type_set_name(datatype C_MPI_Datatype, type_name *C_char) *MpiError {
+func MPI_Type_set_name(datatype C_MPI_Datatype, type_name *C_char) error {
 	return mpi_check(C.MPI_Type_set_name(datatype, type_name))
 }
 
-func MPI_Type_size(datatype C_MPI_Datatype, size *C_int) *MpiError {
+func MPI_Type_size(datatype C_MPI_Datatype, size *C_int) error {
 	return mpi_check(C.MPI_Type_size(datatype, size))
 }
 
-func MPI_Type_size_x(datatype C_MPI_Datatype, size *C_MPI_Count) *MpiError {
+func MPI_Type_size_x(datatype C_MPI_Datatype, size *C_MPI_Count) error {
 	return mpi_check(C.MPI_Type_size_x(datatype, size))
 }
 
-func MPI_Type_struct(count C_int, array_of_blocklengths *C_int, array_of_displacements *C_MPI_Aint, array_of_types *C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_struct(count C_int, array_of_blocklengths *C_int, array_of_displacements *C_MPI_Aint, array_of_types *C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_struct(count, array_of_blocklengths, array_of_displacements, array_of_types, newtype))
 }
 
-func MPI_Lookup_name(service_name *C_char, info C_MPI_Info, port_name *C_char) *MpiError {
+func MPI_Lookup_name(service_name *C_char, info C_MPI_Info, port_name *C_char) error {
 	return mpi_check(C.MPI_Lookup_name(service_name, info, port_name))
 }
 
-func MPI_Type_ub(datatype C_MPI_Datatype, displacement *C_MPI_Aint) *MpiError {
+func MPI_Type_ub(datatype C_MPI_Datatype, displacement *C_MPI_Aint) error {
 	return mpi_check(C.MPI_Type_ub(datatype, displacement))
 }
 
-func MPI_Type_vector(count C_int, blocklength C_int, stride C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) *MpiError {
+func MPI_Type_vector(count C_int, blocklength C_int, stride C_int, oldtype C_MPI_Datatype, newtype *C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Type_vector(count, blocklength, stride, oldtype, newtype))
 }
 
-func MPI_Unpack(inbuf unsafe.Pointer /*(void *)*/, insize C_int, position *C_int, outbuf unsafe.Pointer /*(void *)*/, outcount C_int, datatype C_MPI_Datatype, comm C_MPI_Comm) *MpiError {
+func MPI_Unpack(inbuf unsafe.Pointer /*(void *)*/, insize C_int, position *C_int, outbuf unsafe.Pointer /*(void *)*/, outcount C_int, datatype C_MPI_Datatype, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Unpack(inbuf, insize, position, outbuf, outcount, datatype, comm))
 }
 
-func MPI_Unpack_external(datarep *C_char, inbuf unsafe.Pointer /*(void *)*/, insize C_MPI_Aint, position *C_MPI_Aint, outbuf unsafe.Pointer /*(void *)*/, outcount C_int, datatype C_MPI_Datatype) *MpiError {
+func MPI_Unpack_external(datarep *C_char, inbuf unsafe.Pointer /*(void *)*/, insize C_MPI_Aint, position *C_MPI_Aint, outbuf unsafe.Pointer /*(void *)*/, outcount C_int, datatype C_MPI_Datatype) error {
 	return mpi_check(C.MPI_Unpack_external(datarep, inbuf, insize, position, outbuf, outcount, datatype))
 }
 
-func MPI_Unpublish_name(service_name *C_char, info C_MPI_Info, port_name *C_char) *MpiError {
+func MPI_Unpublish_name(service_name *C_char, info C_MPI_Info, port_name *C_char) error {
 	return mpi_check(C.MPI_Unpublish_name(service_name, info, port_name))
 }
 
-func MPI_Mprobe(source C_int, tag C_int, comm C_MPI_Comm, message *C_MPI_Message, status *C_MPI_Status) *MpiError {
+func MPI_Mprobe(source C_int, tag C_int, comm C_MPI_Comm, message *C_MPI_Message, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Mprobe(source, tag, comm, message, status))
 }
 
-func MPI_Mrecv(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, message *C_MPI_Message, status *C_MPI_Status) *MpiError {
+func MPI_Mrecv(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, message *C_MPI_Message, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Mrecv(buf, count, datatype, message, status))
 }
 
-func MPI_Neighbor_allgather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) *MpiError {
+func MPI_Neighbor_allgather(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Neighbor_allgather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm))
 }
 
-func MPI_Neighbor_allgatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) *MpiError {
+func MPI_Neighbor_allgatherv(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, displs *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Neighbor_allgatherv(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm))
 }
 
-func MPI_Neighbor_alltoall(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) *MpiError {
+func MPI_Neighbor_alltoall(sendbuf unsafe.Pointer /*(void *)*/, sendcount C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Neighbor_alltoall(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm))
 }
 
-func MPI_Neighbor_alltoallv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) *MpiError {
+func MPI_Neighbor_alltoallv(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_int, sendtype C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_int, recvtype C_MPI_Datatype, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Neighbor_alltoallv(sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm))
 }
 
-func MPI_Neighbor_alltoallw(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_MPI_Aint, sendtypes *C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_MPI_Aint, recvtypes *C_MPI_Datatype, comm C_MPI_Comm) *MpiError {
+func MPI_Neighbor_alltoallw(sendbuf unsafe.Pointer /*(void *)*/, sendcounts *C_int, sdispls *C_MPI_Aint, sendtypes *C_MPI_Datatype, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, rdispls *C_MPI_Aint, recvtypes *C_MPI_Datatype, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Neighbor_alltoallw(sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm))
 }
 
-func MPI_Wait(request *C_MPI_Request, status *C_MPI_Status) *MpiError {
+func MPI_Wait(request *C_MPI_Request, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Wait(request, status))
 }
 
-func MPI_Waitall(count C_int, array_of_requests *C_MPI_Request, array_of_statuses *C_MPI_Status) *MpiError {
+func MPI_Waitall(count C_int, array_of_requests *C_MPI_Request, array_of_statuses *C_MPI_Status) error {
 	return mpi_check(C.MPI_Waitall(count, array_of_requests, array_of_statuses))
 }
 
-func MPI_Op_commutative(op C_MPI_Op, commute *C_int) *MpiError {
+func MPI_Op_commutative(op C_MPI_Op, commute *C_int) error {
 	return mpi_check(C.MPI_Op_commutative(op, commute))
 }
 
-func MPI_Waitany(count C_int, array_of_requests *C_MPI_Request, indx *C_int, status *C_MPI_Status) *MpiError {
+func MPI_Waitany(count C_int, array_of_requests *C_MPI_Request, indx *C_int, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Waitany(count, array_of_requests, indx, status))
 }
 
-func MPI_Op_create(user_fn *C_MPI_User_function, commute C_int, op *C_MPI_Op) *MpiError {
+func MPI_Op_create(user_fn *C_MPI_User_function, commute C_int, op *C_MPI_Op) error {
 	return mpi_check(C.MPI_Op_create(user_fn, commute, op))
 }
 
-func MPI_Waitsome(incount C_int, array_of_requests *C_MPI_Request, outcount *C_int, array_of_indices *C_int, array_of_statuses *C_MPI_Status) *MpiError {
+func MPI_Waitsome(incount C_int, array_of_requests *C_MPI_Request, outcount *C_int, array_of_indices *C_int, array_of_statuses *C_MPI_Status) error {
 	return mpi_check(C.MPI_Waitsome(incount, array_of_requests, outcount, array_of_indices, array_of_statuses))
 }
 
-func MPI_Op_free(op *C_MPI_Op) *MpiError {
+func MPI_Op_free(op *C_MPI_Op) error {
 	return mpi_check(C.MPI_Op_free(op))
 }
 
-func MPI_Win_allocate(size C_MPI_Aint, disp_unit C_int, info C_MPI_Info, comm C_MPI_Comm, baseptr unsafe.Pointer /*(void *)*/, win *C_MPI_Win) *MpiError {
+func MPI_Win_allocate(size C_MPI_Aint, disp_unit C_int, info C_MPI_Info, comm C_MPI_Comm, baseptr unsafe.Pointer /*(void *)*/, win *C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_allocate(size, disp_unit, info, comm, baseptr, win))
 }
 
-func MPI_Open_port(info C_MPI_Info, port_name *C_char) *MpiError {
+func MPI_Open_port(info C_MPI_Info, port_name *C_char) error {
 	return mpi_check(C.MPI_Open_port(info, port_name))
 }
 
-func MPI_Win_allocate_shared(size C_MPI_Aint, disp_unit C_int, info C_MPI_Info, comm C_MPI_Comm, baseptr unsafe.Pointer /*(void *)*/, win *C_MPI_Win) *MpiError {
+func MPI_Win_allocate_shared(size C_MPI_Aint, disp_unit C_int, info C_MPI_Info, comm C_MPI_Comm, baseptr unsafe.Pointer /*(void *)*/, win *C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_allocate_shared(size, disp_unit, info, comm, baseptr, win))
 }
 
-func MPI_Win_attach(win C_MPI_Win, base unsafe.Pointer /*(void *)*/, size C_MPI_Aint) *MpiError {
+func MPI_Win_attach(win C_MPI_Win, base unsafe.Pointer /*(void *)*/, size C_MPI_Aint) error {
 	return mpi_check(C.MPI_Win_attach(win, base, size))
 }
 
-func MPI_Win_call_errhandler(win C_MPI_Win, errorcode C_int) *MpiError {
+func MPI_Win_call_errhandler(win C_MPI_Win, errorcode C_int) error {
 	return mpi_check(C.MPI_Win_call_errhandler(win, errorcode))
 }
 
-func MPI_Win_complete(win C_MPI_Win) *MpiError {
+func MPI_Win_complete(win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_complete(win))
 }
 
-func MPI_Pack(inbuf unsafe.Pointer /*(void *)*/, incount C_int, datatype C_MPI_Datatype, outbuf unsafe.Pointer /*(void *)*/, outsize C_int, position *C_int, comm C_MPI_Comm) *MpiError {
+func MPI_Pack(inbuf unsafe.Pointer /*(void *)*/, incount C_int, datatype C_MPI_Datatype, outbuf unsafe.Pointer /*(void *)*/, outsize C_int, position *C_int, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Pack(inbuf, incount, datatype, outbuf, outsize, position, comm))
 }
 
-func MPI_Win_create(base unsafe.Pointer /*(void *)*/, size C_MPI_Aint, disp_unit C_int, info C_MPI_Info, comm C_MPI_Comm, win *C_MPI_Win) *MpiError {
+func MPI_Win_create(base unsafe.Pointer /*(void *)*/, size C_MPI_Aint, disp_unit C_int, info C_MPI_Info, comm C_MPI_Comm, win *C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_create(base, size, disp_unit, info, comm, win))
 }
 
-func MPI_Pack_external(datarep *C_char, inbuf unsafe.Pointer /*(void *)*/, incount C_int, datatype C_MPI_Datatype, outbuf unsafe.Pointer /*(void *)*/, outsize C_MPI_Aint, position *C_MPI_Aint) *MpiError {
+func MPI_Pack_external(datarep *C_char, inbuf unsafe.Pointer /*(void *)*/, incount C_int, datatype C_MPI_Datatype, outbuf unsafe.Pointer /*(void *)*/, outsize C_MPI_Aint, position *C_MPI_Aint) error {
 	return mpi_check(C.MPI_Pack_external(datarep, inbuf, incount, datatype, outbuf, outsize, position))
 }
 
-func MPI_Win_create_dynamic(info C_MPI_Info, comm C_MPI_Comm, win *C_MPI_Win) *MpiError {
+func MPI_Win_create_dynamic(info C_MPI_Info, comm C_MPI_Comm, win *C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_create_dynamic(info, comm, win))
 }
 
-func MPI_Pack_external_size(datarep *C_char, incount C_int, datatype C_MPI_Datatype, size *C_MPI_Aint) *MpiError {
+func MPI_Pack_external_size(datarep *C_char, incount C_int, datatype C_MPI_Datatype, size *C_MPI_Aint) error {
 	return mpi_check(C.MPI_Pack_external_size(datarep, incount, datatype, size))
 }
 
-func MPI_Win_create_errhandler(win_errhandler_fn *C_MPI_Win_errhandler_function, errhandler *C_MPI_Errhandler) *MpiError {
+func MPI_Win_create_errhandler(win_errhandler_fn *C_MPI_Win_errhandler_function, errhandler *C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_Win_create_errhandler(win_errhandler_fn, errhandler))
 }
 
-func MPI_Pack_size(incount C_int, datatype C_MPI_Datatype, comm C_MPI_Comm, size *C_int) *MpiError {
+func MPI_Pack_size(incount C_int, datatype C_MPI_Datatype, comm C_MPI_Comm, size *C_int) error {
 	return mpi_check(C.MPI_Pack_size(incount, datatype, comm, size))
 }
 
-func MPI_Win_create_keyval(win_copy_attr_fn *C_MPI_Win_copy_attr_function, win_delete_attr_fn *C_MPI_Win_delete_attr_function, win_keyval *C_int, extra_state unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Win_create_keyval(win_copy_attr_fn *C_MPI_Win_copy_attr_function, win_delete_attr_fn *C_MPI_Win_delete_attr_function, win_keyval *C_int, extra_state unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Win_create_keyval(win_copy_attr_fn, win_delete_attr_fn, win_keyval, extra_state))
 }
 
-func MPI_Errhandler_create(function *C_MPI_Handler_function, errhandler *C_MPI_Errhandler) *MpiError {
+func MPI_Errhandler_create(function *C_MPI_Handler_function, errhandler *C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_Errhandler_create(function, errhandler))
 }
 
-func MPI_Win_delete_attr(win C_MPI_Win, win_keyval C_int) *MpiError {
+func MPI_Win_delete_attr(win C_MPI_Win, win_keyval C_int) error {
 	return mpi_check(C.MPI_Win_delete_attr(win, win_keyval))
 }
 
-func MPI_Errhandler_free(errhandler *C_MPI_Errhandler) *MpiError {
+func MPI_Errhandler_free(errhandler *C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_Errhandler_free(errhandler))
 }
 
-func MPI_Probe(source C_int, tag C_int, comm C_MPI_Comm, status *C_MPI_Status) *MpiError {
+func MPI_Probe(source C_int, tag C_int, comm C_MPI_Comm, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Probe(source, tag, comm, status))
 }
 
-func MPI_Win_detach(win C_MPI_Win, base unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Win_detach(win C_MPI_Win, base unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Win_detach(win, base))
 }
 
-func MPI_Errhandler_get(comm C_MPI_Comm, errhandler *C_MPI_Errhandler) *MpiError {
+func MPI_Errhandler_get(comm C_MPI_Comm, errhandler *C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_Errhandler_get(comm, errhandler))
 }
 
-func MPI_Publish_name(service_name *C_char, info C_MPI_Info, port_name *C_char) *MpiError {
+func MPI_Publish_name(service_name *C_char, info C_MPI_Info, port_name *C_char) error {
 	return mpi_check(C.MPI_Publish_name(service_name, info, port_name))
 }
 
-func MPI_Win_fence(assert C_int, win C_MPI_Win) *MpiError {
+func MPI_Win_fence(assert C_int, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_fence(assert, win))
 }
 
-func MPI_Errhandler_set(comm C_MPI_Comm, errhandler C_MPI_Errhandler) *MpiError {
+func MPI_Errhandler_set(comm C_MPI_Comm, errhandler C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_Errhandler_set(comm, errhandler))
 }
 
-func MPI_Put(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, win C_MPI_Win) *MpiError {
+func MPI_Put(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Put(origin_addr, origin_count, origin_datatype, target_rank, target_disp, target_count, target_datatype, win))
 }
 
-func MPI_Win_flush(rank C_int, win C_MPI_Win) *MpiError {
+func MPI_Win_flush(rank C_int, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_flush(rank, win))
 }
 
-func MPI_Error_class(errorcode C_int, errorclass *C_int) *MpiError {
+func MPI_Error_class(errorcode C_int, errorclass *C_int) error {
 	return mpi_check(C.MPI_Error_class(errorcode, errorclass))
 }
 
-func MPI_Query_thread(provided *C_int) *MpiError {
+func MPI_Query_thread(provided *C_int) error {
 	return mpi_check(C.MPI_Query_thread(provided))
 }
 
-func MPI_Win_flush_all(win C_MPI_Win) *MpiError {
+func MPI_Win_flush_all(win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_flush_all(win))
 }
 
-func MPI_Error_string(errorcode C_int, string *C_char, resultlen *C_int) *MpiError {
+func MPI_Error_string(errorcode C_int, string *C_char, resultlen *C_int) error {
 	return mpi_check(C.MPI_Error_string(errorcode, string, resultlen))
 }
 
-func MPI_Win_flush_local(rank C_int, win C_MPI_Win) *MpiError {
+func MPI_Win_flush_local(rank C_int, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_flush_local(rank, win))
 }
 
-func MPI_Exscan(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm) *MpiError {
+func MPI_Exscan(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Exscan(sendbuf, recvbuf, count, datatype, op, comm))
 }
 
-func MPI_Win_flush_local_all(win C_MPI_Win) *MpiError {
+func MPI_Win_flush_local_all(win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_flush_local_all(win))
 }
 
-func MPI_Win_free(win *C_MPI_Win) *MpiError {
+func MPI_Win_free(win *C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_free(win))
 }
 
-func MPI_Win_free_keyval(win_keyval *C_int) *MpiError {
+func MPI_Win_free_keyval(win_keyval *C_int) error {
 	return mpi_check(C.MPI_Win_free_keyval(win_keyval))
 }
 
-func MPI_Win_get_attr(win C_MPI_Win, win_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/, flag *C_int) *MpiError {
+func MPI_Win_get_attr(win C_MPI_Win, win_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/, flag *C_int) error {
 	return mpi_check(C.MPI_Win_get_attr(win, win_keyval, attribute_val, flag))
 }
 
-func MPI_Fetch_and_op(origin_addr unsafe.Pointer /*(void *)*/, result_addr unsafe.Pointer /*(void *)*/, datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, op C_MPI_Op, win C_MPI_Win) *MpiError {
+func MPI_Fetch_and_op(origin_addr unsafe.Pointer /*(void *)*/, result_addr unsafe.Pointer /*(void *)*/, datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, op C_MPI_Op, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Fetch_and_op(origin_addr, result_addr, datatype, target_rank, target_disp, op, win))
 }
 
-func MPI_Raccumulate(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, op C_MPI_Op, win C_MPI_Win, request *C_MPI_Request) *MpiError {
+func MPI_Raccumulate(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, op C_MPI_Op, win C_MPI_Win, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Raccumulate(origin_addr, origin_count, origin_datatype, target_rank, target_disp, target_count, target_datatype, op, win, request))
 }
 
-func MPI_Win_get_errhandler(win C_MPI_Win, errhandler *C_MPI_Errhandler) *MpiError {
+func MPI_Win_get_errhandler(win C_MPI_Win, errhandler *C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_Win_get_errhandler(win, errhandler))
 }
 
@@ -2012,59 +2012,59 @@ func MPI_File_c2f(fh C_MPI_File) C_MPI_Fint {
 	return C.MPI_File_c2f(fh)
 }
 
-func MPI_Recv(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, source C_int, tag C_int, comm C_MPI_Comm, status *C_MPI_Status) *MpiError {
+func MPI_Recv(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, source C_int, tag C_int, comm C_MPI_Comm, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Recv(buf, count, datatype, source, tag, comm, status))
 }
 
-func MPI_Win_get_group(win C_MPI_Win, group *C_MPI_Group) *MpiError {
+func MPI_Win_get_group(win C_MPI_Win, group *C_MPI_Group) error {
 	return mpi_check(C.MPI_Win_get_group(win, group))
 }
 
-func MPI_File_call_errhandler(fh C_MPI_File, errorcode C_int) *MpiError {
+func MPI_File_call_errhandler(fh C_MPI_File, errorcode C_int) error {
 	return mpi_check(C.MPI_File_call_errhandler(fh, errorcode))
 }
 
-func MPI_Recv_init(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, source C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Recv_init(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, source C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Recv_init(buf, count, datatype, source, tag, comm, request))
 }
 
-func MPI_Win_get_info(win C_MPI_Win, info_used *C_MPI_Info) *MpiError {
+func MPI_Win_get_info(win C_MPI_Win, info_used *C_MPI_Info) error {
 	return mpi_check(C.MPI_Win_get_info(win, info_used))
 }
 
-func MPI_File_close(fh *C_MPI_File) *MpiError {
+func MPI_File_close(fh *C_MPI_File) error {
 	return mpi_check(C.MPI_File_close(fh))
 }
 
-func MPI_Reduce(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, root C_int, comm C_MPI_Comm) *MpiError {
+func MPI_Reduce(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op, root C_int, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Reduce(sendbuf, recvbuf, count, datatype, op, root, comm))
 }
 
-func MPI_Win_get_name(win C_MPI_Win, win_name *C_char, resultlen *C_int) *MpiError {
+func MPI_Win_get_name(win C_MPI_Win, win_name *C_char, resultlen *C_int) error {
 	return mpi_check(C.MPI_Win_get_name(win, win_name, resultlen))
 }
 
-func MPI_File_create_errhandler(file_errhandler_fn *C_MPI_File_errhandler_function, errhandler *C_MPI_Errhandler) *MpiError {
+func MPI_File_create_errhandler(file_errhandler_fn *C_MPI_File_errhandler_function, errhandler *C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_File_create_errhandler(file_errhandler_fn, errhandler))
 }
 
-func MPI_Reduce_local(inbuf unsafe.Pointer /*(void *)*/, inoutbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op) *MpiError {
+func MPI_Reduce_local(inbuf unsafe.Pointer /*(void *)*/, inoutbuf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, op C_MPI_Op) error {
 	return mpi_check(C.MPI_Reduce_local(inbuf, inoutbuf, count, datatype, op))
 }
 
-func MPI_Win_lock(lock_type C_int, rank C_int, assert C_int, win C_MPI_Win) *MpiError {
+func MPI_Win_lock(lock_type C_int, rank C_int, assert C_int, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_lock(lock_type, rank, assert, win))
 }
 
-func MPI_File_delete(filename *C_char, info C_MPI_Info) *MpiError {
+func MPI_File_delete(filename *C_char, info C_MPI_Info) error {
 	return mpi_check(C.MPI_File_delete(filename, info))
 }
 
-func MPI_Reduce_scatter(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm) *MpiError {
+func MPI_Reduce_scatter(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, recvcounts *C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Reduce_scatter(sendbuf, recvbuf, recvcounts, datatype, op, comm))
 }
 
-func MPI_Win_lock_all(assert C_int, win C_MPI_Win) *MpiError {
+func MPI_Win_lock_all(assert C_int, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_lock_all(assert, win))
 }
 
@@ -2072,135 +2072,135 @@ func MPI_File_f2c(fh C_MPI_Fint) C_MPI_File {
 	return C.MPI_File_f2c(fh)
 }
 
-func MPI_Reduce_scatter_block(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm) *MpiError {
+func MPI_Reduce_scatter_block(sendbuf unsafe.Pointer /*(void *)*/, recvbuf unsafe.Pointer /*(void *)*/, recvcount C_int, datatype C_MPI_Datatype, op C_MPI_Op, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Reduce_scatter_block(sendbuf, recvbuf, recvcount, datatype, op, comm))
 }
 
-func MPI_Win_post(group C_MPI_Group, assert C_int, win C_MPI_Win) *MpiError {
+func MPI_Win_post(group C_MPI_Group, assert C_int, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_post(group, assert, win))
 }
 
-func MPI_File_get_amode(fh C_MPI_File, amode *C_int) *MpiError {
+func MPI_File_get_amode(fh C_MPI_File, amode *C_int) error {
 	return mpi_check(C.MPI_File_get_amode(fh, amode))
 }
 
-func MPI_Register_datarep(datarep *C_char, read_conversion_fn *C_MPI_Datarep_conversion_function, write_conversion_fn *C_MPI_Datarep_conversion_function, dtype_file_extent_fn *C_MPI_Datarep_extent_function, extra_state unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Register_datarep(datarep *C_char, read_conversion_fn *C_MPI_Datarep_conversion_function, write_conversion_fn *C_MPI_Datarep_conversion_function, dtype_file_extent_fn *C_MPI_Datarep_extent_function, extra_state unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Register_datarep(datarep, read_conversion_fn, write_conversion_fn, dtype_file_extent_fn, extra_state))
 }
 
-func MPI_Win_set_attr(win C_MPI_Win, win_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Win_set_attr(win C_MPI_Win, win_keyval C_int, attribute_val unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Win_set_attr(win, win_keyval, attribute_val))
 }
 
-func MPI_File_get_atomicity(fh C_MPI_File, flag *C_int) *MpiError {
+func MPI_File_get_atomicity(fh C_MPI_File, flag *C_int) error {
 	return mpi_check(C.MPI_File_get_atomicity(fh, flag))
 }
 
-func MPI_Request_free(request *C_MPI_Request) *MpiError {
+func MPI_Request_free(request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Request_free(request))
 }
 
-func MPI_Win_set_errhandler(win C_MPI_Win, errhandler C_MPI_Errhandler) *MpiError {
+func MPI_Win_set_errhandler(win C_MPI_Win, errhandler C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_Win_set_errhandler(win, errhandler))
 }
 
-func MPI_File_get_byte_offset(fh C_MPI_File, offset C_MPI_Offset, disp *C_MPI_Offset) *MpiError {
+func MPI_File_get_byte_offset(fh C_MPI_File, offset C_MPI_Offset, disp *C_MPI_Offset) error {
 	return mpi_check(C.MPI_File_get_byte_offset(fh, offset, disp))
 }
 
-func MPI_Request_get_status(request C_MPI_Request, flag *C_int, status *C_MPI_Status) *MpiError {
+func MPI_Request_get_status(request C_MPI_Request, flag *C_int, status *C_MPI_Status) error {
 	return mpi_check(C.MPI_Request_get_status(request, flag, status))
 }
 
-func MPI_Win_set_info(win C_MPI_Win, info C_MPI_Info) *MpiError {
+func MPI_Win_set_info(win C_MPI_Win, info C_MPI_Info) error {
 	return mpi_check(C.MPI_Win_set_info(win, info))
 }
 
-func MPI_File_get_errhandler(file C_MPI_File, errhandler *C_MPI_Errhandler) *MpiError {
+func MPI_File_get_errhandler(file C_MPI_File, errhandler *C_MPI_Errhandler) error {
 	return mpi_check(C.MPI_File_get_errhandler(file, errhandler))
 }
 
-func MPI_Rget(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, win C_MPI_Win, request *C_MPI_Request) *MpiError {
+func MPI_Rget(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, win C_MPI_Win, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Rget(origin_addr, origin_count, origin_datatype, target_rank, target_disp, target_count, target_datatype, win, request))
 }
 
-func MPI_Win_set_name(win C_MPI_Win, win_name *C_char) *MpiError {
+func MPI_Win_set_name(win C_MPI_Win, win_name *C_char) error {
 	return mpi_check(C.MPI_Win_set_name(win, win_name))
 }
 
-func MPI_File_get_group(fh C_MPI_File, group *C_MPI_Group) *MpiError {
+func MPI_File_get_group(fh C_MPI_File, group *C_MPI_Group) error {
 	return mpi_check(C.MPI_File_get_group(fh, group))
 }
 
-func MPI_Rget_accumulate(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, result_addr unsafe.Pointer /*(void *)*/, result_count C_int, result_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, op C_MPI_Op, win C_MPI_Win, request *C_MPI_Request) *MpiError {
+func MPI_Rget_accumulate(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, result_addr unsafe.Pointer /*(void *)*/, result_count C_int, result_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, op C_MPI_Op, win C_MPI_Win, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Rget_accumulate(origin_addr, origin_count, origin_datatype, result_addr, result_count, result_datatype, target_rank, target_disp, target_count, target_datatype, op, win, request))
 }
 
-func MPI_Win_shared_query(win C_MPI_Win, rank C_int, size *C_MPI_Aint, disp_unit *C_int, baseptr unsafe.Pointer /*(void *)*/) *MpiError {
+func MPI_Win_shared_query(win C_MPI_Win, rank C_int, size *C_MPI_Aint, disp_unit *C_int, baseptr unsafe.Pointer /*(void *)*/) error {
 	return mpi_check(C.MPI_Win_shared_query(win, rank, size, disp_unit, baseptr))
 }
 
-func MPI_File_get_info(fh C_MPI_File, info_used *C_MPI_Info) *MpiError {
+func MPI_File_get_info(fh C_MPI_File, info_used *C_MPI_Info) error {
 	return mpi_check(C.MPI_File_get_info(fh, info_used))
 }
 
-func MPI_Rput(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, win C_MPI_Win, request *C_MPI_Request) *MpiError {
+func MPI_Rput(origin_addr unsafe.Pointer /*(void *)*/, origin_count C_int, origin_datatype C_MPI_Datatype, target_rank C_int, target_disp C_MPI_Aint, target_count C_int, target_datatype C_MPI_Datatype, win C_MPI_Win, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Rput(origin_addr, origin_count, origin_datatype, target_rank, target_disp, target_count, target_datatype, win, request))
 }
 
-func MPI_Win_start(group C_MPI_Group, assert C_int, win C_MPI_Win) *MpiError {
+func MPI_Win_start(group C_MPI_Group, assert C_int, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_start(group, assert, win))
 }
 
-func MPI_File_get_position(fh C_MPI_File, offset *C_MPI_Offset) *MpiError {
+func MPI_File_get_position(fh C_MPI_File, offset *C_MPI_Offset) error {
 	return mpi_check(C.MPI_File_get_position(fh, offset))
 }
 
-func MPI_Rsend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm) *MpiError {
+func MPI_Rsend(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm) error {
 	return mpi_check(C.MPI_Rsend(buf, count, datatype, dest, tag, comm))
 }
 
-func MPI_Win_sync(win C_MPI_Win) *MpiError {
+func MPI_Win_sync(win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_sync(win))
 }
 
-func MPI_File_get_position_shared(fh C_MPI_File, offset *C_MPI_Offset) *MpiError {
+func MPI_File_get_position_shared(fh C_MPI_File, offset *C_MPI_Offset) error {
 	return mpi_check(C.MPI_File_get_position_shared(fh, offset))
 }
 
-func MPI_Rsend_init(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) *MpiError {
+func MPI_Rsend_init(buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, dest C_int, tag C_int, comm C_MPI_Comm, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_Rsend_init(buf, count, datatype, dest, tag, comm, request))
 }
 
-func MPI_Win_test(win C_MPI_Win, flag *C_int) *MpiError {
+func MPI_Win_test(win C_MPI_Win, flag *C_int) error {
 	return mpi_check(C.MPI_Win_test(win, flag))
 }
 
-func MPI_File_get_size(fh C_MPI_File, size *C_MPI_Offset) *MpiError {
+func MPI_File_get_size(fh C_MPI_File, size *C_MPI_Offset) error {
 	return mpi_check(C.MPI_File_get_size(fh, size))
 }
 
-func MPI_Win_unlock(rank C_int, win C_MPI_Win) *MpiError {
+func MPI_Win_unlock(rank C_int, win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_unlock(rank, win))
 }
 
-func MPI_File_get_type_extent(fh C_MPI_File, datatype C_MPI_Datatype, extent *C_MPI_Aint) *MpiError {
+func MPI_File_get_type_extent(fh C_MPI_File, datatype C_MPI_Datatype, extent *C_MPI_Aint) error {
 	return mpi_check(C.MPI_File_get_type_extent(fh, datatype, extent))
 }
 
-func MPI_Win_unlock_all(win C_MPI_Win) *MpiError {
+func MPI_Win_unlock_all(win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_unlock_all(win))
 }
 
-func MPI_File_get_view(fh C_MPI_File, disp *C_MPI_Offset, etype *C_MPI_Datatype, filetype *C_MPI_Datatype, datarep *C_char) *MpiError {
+func MPI_File_get_view(fh C_MPI_File, disp *C_MPI_Offset, etype *C_MPI_Datatype, filetype *C_MPI_Datatype, datarep *C_char) error {
 	return mpi_check(C.MPI_File_get_view(fh, disp, etype, filetype, datarep))
 }
 
-func MPI_Win_wait(win C_MPI_Win) *MpiError {
+func MPI_Win_wait(win C_MPI_Win) error {
 	return mpi_check(C.MPI_Win_wait(win))
 }
 
-func MPI_File_iread(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) *MpiError {
+func MPI_File_iread(fh C_MPI_File, buf unsafe.Pointer /*(void *)*/, count C_int, datatype C_MPI_Datatype, request *C_MPI_Request) error {
 	return mpi_check(C.MPI_File_iread(fh, buf, count, datatype, request))
 }
 
