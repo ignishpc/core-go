@@ -69,7 +69,11 @@ func (this *IPartitionGroup[T]) Set(index int, value IPartition[T]) {
 }
 
 func (this *IPartitionGroup[T]) SetBase(index int, value IPartitionBase) {
-	this.partitions[index] = value.(IPartition[T])
+	if value == nil {
+		this.partitions[index] = nil
+	} else {
+		this.partitions[index] = value.(IPartition[T])
+	}
 }
 
 func (this *IPartitionGroup[T]) Get(index int) IPartition[T] {

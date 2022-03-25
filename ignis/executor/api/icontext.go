@@ -5,7 +5,7 @@ import (
 )
 
 type IContext interface {
-	Cores() int
+	Threads() int
 	ThreadId() int
 	Executors() int
 	ExecutorId() int

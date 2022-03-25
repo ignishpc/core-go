@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"github.com/apache/thrift/lib/go/thrift"
 	"ignis/executor/api/ipair"
 	"ignis/executor/api/iterator"
@@ -67,8 +66,7 @@ func (this *IMemoryPartition[T]) Read(transport thrift.TTransport) error {
 			this.elems = constructor((this.elems).Cap())
 		}
 	}
-	this.elems.Merge(elems)
-	if err != nil {
+	if err = this.elems.Merge(elems); err != nil {
 		return ierror.Raise(err)
 	}
 	return nil
@@ -96,13 +94,15 @@ func (this *IMemoryPartition[T]) WriteWithNative(transport thrift.TTransport, co
 }
 
 func (this *IMemoryPartition[T]) Clone() (IPartitionBase, error) {
-	other := NewIMemoryPartition[T](this.Size(), this.native)
-	return other, this.CopyTo(other)
+	return &IMemoryPartition[T]{
+		this.elems.Copy(),
+		this.native,
+	}, nil
 }
 
 func (this *IMemoryPartition[T]) CopyFrom(source IPartitionBase) error {
 	if men, ok := source.(*IMemoryPartition[T]); ok {
-		this.elems.Merge(men.elems.Array())
+		return this.elems.Merge(men.elems.Array())
 	} else {
 		other := source.(IPartition[T])
 		it, err := other.ReadIterator()
@@ -332,9 +332,9 @@ func (this *IListImpl[T]) Cap() int {
 
 func (this *IListImpl[T]) Copy() IList {
 	other := NewIList[T](this.pos)
+	other.Resize(this.pos, false)
 	copy(other.(*IListImpl[T]).array, this.array)
-
-	return nil
+	return other
 }
 
 func (this *IListImpl[T]) Resize(sz int, shrink bool) {
@@ -397,8 +397,12 @@ func (this *IListImpl[T]) Merge(array any) error {
 			this.pos++
 		}
 	} else {
-		return ierror.RaiseMsg(fmt.Sprintf("Arrays merge error, src is %s and dest is %s",
-			reflect.TypeOf(this.array), reflect.TypeOf(array)))
+		src := reflect.ValueOf(array)
+		this.Reserve(len(this.array) + src.Len())
+		for i := 0; i < src.Len(); i++ {
+			this.array[this.pos] = src.Index(i).Interface().(T)
+			this.pos++
+		}
 	}
 	return nil
 }

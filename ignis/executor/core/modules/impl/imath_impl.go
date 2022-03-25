@@ -37,7 +37,7 @@ func Sample[T any](this *IMathImpl, withReplacement bool, num []int64, seed int3
 
 	logger.Info("Math: sample ", +input.Size(), " partitions")
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
-		id := ithreads.ThreadId()
+		id := rctx.ThreadId()
 		dist := rand.New(rand.NewSource(int64(int(seed) + id)))
 		return rctx.For().Dynamic().Run(input.Size(), func(p int) error {
 			writer, err := output.Get(p).WriteIterator()
@@ -233,7 +233,7 @@ func CountByKey[T any, K comparable](this *IMathImpl) error {
 	logger.Info("Math: counting local keys ", input.Size(), " partitions")
 
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
-		id := ithreads.ThreadId()
+		id := rctx.ThreadId()
 		if err := rctx.For().Dynamic().Run(input.Size(), func(p int) error {
 			reader, err := input.Get(p).ReadIterator()
 			if err != nil {
@@ -284,7 +284,7 @@ func CountByValue[T comparable, K any](this *IMathImpl) error {
 	logger.Info("Math: counting local keys ", input.Size(), " partitions")
 
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
-		id := ithreads.ThreadId()
+		id := rctx.ThreadId()
 		if err := rctx.For().Dynamic().Run(input.Size(), func(p int) error {
 			reader, err := input.Get(p).ReadIterator()
 			if err != nil {

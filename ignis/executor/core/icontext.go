@@ -13,6 +13,15 @@ type iContextImpl struct {
 	mpiThreadGroup []impi.C_MPI_Comm
 }
 
+type iThreadContextImpl struct {
+	*iContextImpl
+	threadId int
+}
+
+func newIThreadContext(ctx *iContextImpl, thread int) api.IContext {
+	return &iThreadContextImpl{ctx, thread}
+}
+
 func NewIContext() api.IContext {
 	return &iContextImpl{
 		properties:     make(map[string]string),
@@ -21,7 +30,7 @@ func NewIContext() api.IContext {
 	}
 }
 
-func (this *iContextImpl) Cores() int {
+func (this *iContextImpl) Threads() int {
 	return ithreads.DefaultCores()
 }
 
@@ -38,10 +47,18 @@ func (this *iContextImpl) ExecutorId() int {
 }
 
 func (this *iContextImpl) ThreadId() int {
-	return ithreads.ThreadId()
+	return 0
+}
+
+func (this *iThreadContextImpl) ThreadId() int {
+	return this.threadId
 }
 
 func (this *iContextImpl) MpiGroup() impi.C_MPI_Comm {
+	return this.mpiThreadGroup[0]
+}
+
+func (this *iThreadContextImpl) MpiGroup() impi.C_MPI_Comm {
 	if len(this.mpiThreadGroup) == 1 {
 		return this.mpiThreadGroup[0]
 	}

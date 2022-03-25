@@ -111,41 +111,23 @@ func exchangeSync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *s
 		partsTargets = aux
 	}
 
-	for i := 0; i < block; i++ {
-		for j := 0; j < executors; j++ {
-			if j < remainder {
-				partsTargets = append(partsTargets, *ipair.New(int64(block*j+i+j), int64(j)))
-			} else {
-				partsTargets = append(partsTargets, *ipair.New(int64(block*j+i+remainder), int64(j)))
-			}
-		}
-	}
-
-	if block > 0 {
-		for j := 0; j < remainder; j++ {
-			partsTargets = append(partsTargets, *ipair.New(int64(block*j+block), int64(j)))
-		}
-	} else {
-		for j := 0; j < remainder; j++ {
-			partsTargets = append(partsTargets, *ipair.New(int64(j), int64(j)))
-		}
-	}
-
 	if err := this.executorData.EnableMpiCores(); err != nil {
 		return ierror.Raise(err)
 	}
 	mpiCores := this.executorData.GetMpiCores()
 
 	if err := ithreads.ParallelT(mpiCores, func(rctx ithreads.IRuntimeContext) error {
+		mpi := core.NewIMpi(this.executorData.GetProperties(),
+			this.executorData.GetPartitionTools(),
+			this.executorData.GetThreadContext(rctx.ThreadId()))
+
 		return rctx.For().Static().Run(numPartitions, func(i int) error {
 			p := partsTargets[i].First
 			target := partsTargets[i].Second
-
-			if err := core.Gather(this.executorData.Mpi(), in.Get(int(p)), int(target)); err != nil {
+			if err := core.Gather(mpi, in.Get(int(p)), int(target)); err != nil {
 				return ierror.Raise(err)
 			}
-
-			if this.executorData.Mpi().IsRoot(int(target)) {
+			if mpi.IsRoot(int(target)) {
 				if err := in.Get(int(p)).Fit(); err != nil {
 					return ierror.Raise(err)
 				}
@@ -159,7 +141,7 @@ func exchangeSync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *s
 	}
 
 	for i := 0; i < numPartitions; i++ {
-		if !in.Get(i).Empty() {
+		if in.Get(i) != nil {
 			out.Add(in.Get(i))
 		}
 	}
@@ -191,7 +173,7 @@ func exchangeAsync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *
 	m := utils.Ternary(executors%2 == 0, executors, executors+1)
 	id := 0
 	id2 := m*m - 2
-	for i := 0; i < executors; i++ {
+	for i := 0; i < m-1; i++ {
 		if rank == id%(m-1) {
 			queue = append(queue, int64(m-1))
 		}
@@ -219,6 +201,10 @@ func exchangeAsync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *
 	ignores := make([]bool, len(queue))
 
 	if err := ithreads.ParallelT(mpiCores, func(rctx ithreads.IRuntimeContext) error {
+		mpi := core.NewIMpi(this.executorData.GetProperties(),
+			this.executorData.GetPartitionTools(),
+			this.executorData.GetThreadContext(rctx.ThreadId()))
+
 		err := rctx.For().Static().Run(len(queue), func(i int) error {
 			other := queue[i]
 			ignore := impi.C_int8(1)
@@ -230,7 +216,7 @@ func exchangeAsync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *
 				ignore = utils.Ternary[impi.C_int8](ignore != 0 && in.Get(int(j)).Empty(), 1, 0)
 			}
 			if err := impi.MPI_Sendrecv(impi.P(&ignore), 1, impi.MPI_C_BOOL, impi.C_int(other), 0, impi.P(&ignoreOther), 1,
-				impi.MPI_C_BOOL, impi.C_int(other), 0, this.executorData.Mpi().Native(), impi.MPI_STATUS_IGNORE); err != nil {
+				impi.MPI_C_BOOL, impi.C_int(other), 0, mpi.Native(), impi.MPI_STATUS_IGNORE); err != nil {
 				return ierror.Raise(err)
 			}
 
@@ -262,18 +248,18 @@ func exchangeAsync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *
 				otherPart := ranges[other].First + int64(j)
 				if otherPart >= otherEnd || mepart >= meEnd {
 					if otherPart >= otherEnd {
-						if err := core.Recv(this.executorData.Mpi(), in.Get(int(mepart)), int(other), 0); err != nil {
+						if err := core.Recv(mpi, in.Get(int(mepart)), int(other), 0); err != nil {
 							return ierror.Raise(err)
 						}
 					} else if mepart >= meEnd {
-						if err := core.Send(this.executorData.Mpi(), in.Get(int(otherPart)), int(other), 0); err != nil {
+						if err := core.Send(mpi, in.Get(int(otherPart)), int(other), 0); err != nil {
 							return ierror.Raise(err)
 						}
 					} else {
 						return nil
 					}
 				} else {
-					if err := core.SendRcv(this.executorData.Mpi(), in.Get(int(otherPart)), in.Get(int(mepart)), int(other), 0); err != nil {
+					if err := core.SendRcv(mpi, in.Get(int(otherPart)), in.Get(int(mepart)), int(other), 0); err != nil {
 						return ierror.Raise(err)
 					}
 				}
@@ -290,7 +276,7 @@ func exchangeAsync[T any](this *IBaseImpl, in *storage.IPartitionGroup[T], out *
 	}
 
 	for i := 0; i < numPartitions; i++ {
-		if !in.Get(i).Empty() {
+		if in.Get(i) != nil {
 			out.Add(in.Get(i))
 		}
 	}

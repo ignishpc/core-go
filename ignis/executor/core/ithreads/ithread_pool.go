@@ -1,29 +1,13 @@
 package ithreads
 
-/*
-#include <threads.h>
-thread_local int thread_id = 0;
-thread_local int threads = 1;
-int getThreadId(){return thread_id;}
-void setThreadId(int id){thread_id = id;}
-int getThreads(){return threads;}
-void setThreads(int n){threads = n;}
-*/
 import "C"
 import (
 	"errors"
 	"fmt"
+	"ignis/executor/core/ierror"
 	"math"
 	"sync"
 )
-
-func ThreadId() int {
-	return int(C.getThreadId())
-}
-
-func Threads() int {
-	return int(C.getThreads())
-}
 
 var defaultCores = 1
 
@@ -35,20 +19,51 @@ func SetDefaultCores(n int) {
 }
 
 type IRuntimeContext interface {
+	Threads() int
+	ThreadId() int
 	Critical(f func() error) error
 	Master(f func() error) error
 	Barrier()
 	For() IForBuilder
 }
 
+type cyclicBarrier struct {
+	it      int
+	count   int
+	parties int
+	cond    *sync.Cond
+}
+
+func (this *cyclicBarrier) await() {
+	this.cond.L.Lock()
+	defer this.cond.L.Unlock()
+
+	this.count--
+	if this.count == 0 {
+		this.cond.Broadcast()
+		this.it++
+		this.count = this.parties
+	} else {
+		it := this.it
+		for it == this.it {
+			this.cond.Wait()
+		}
+	}
+}
+
+type iRuntimeContextData struct {
+	threads int
+	data    chan [2]int
+	loop    bool
+	error   chan error
+	f       func(rctx IRuntimeContext) error
+	mutex   sync.Mutex
+	barrier cyclicBarrier
+}
+
 type iRuntimeContextImpl struct {
-	threads  int
-	data     chan [2]int
-	error    chan error
-	f        func(rctx IRuntimeContext) error
-	mutex    sync.Mutex
-	barriers [2]sync.WaitGroup
-	ibarrier int
+	*iRuntimeContextData
+	threadId int
 }
 
 func Parallel(f func(rctx IRuntimeContext) error) error {
@@ -56,19 +71,23 @@ func Parallel(f func(rctx IRuntimeContext) error) error {
 }
 
 func ParallelT(threads int, f func(rctx IRuntimeContext) error) (r error) {
-	rctx := &iRuntimeContextImpl{
-		threads:  threads,
-		data:     nil,
-		error:    make(chan error),
-		f:        f,
-		ibarrier: 0,
+	rctx := &iRuntimeContextData{
+		threads: threads,
+		data:    nil,
+		loop:    false,
+		error:   make(chan error, threads),
+		f:       f,
+		barrier: cyclicBarrier{
+			it:      0,
+			count:   threads,
+			parties: threads,
+		},
 	}
-	rctx.barriers[0].Add(threads)
-	rctx.barriers[1].Add(threads)
+	rctx.barrier.cond = sync.NewCond(&rctx.mutex)
 	for i := 1; i < threads; i++ {
-		go worker(i, rctx)
+		go worker(&iRuntimeContextImpl{rctx, i})
 	}
-	worker(0, rctx)
+	worker(&iRuntimeContextImpl{rctx, 0})
 
 	for i := 0; i < threads; i++ {
 		if err := <-rctx.error; err != nil {
@@ -78,20 +97,26 @@ func ParallelT(threads int, f func(rctx IRuntimeContext) error) (r error) {
 	return
 }
 
-func worker(id int, rctx *iRuntimeContextImpl) {
-	C.setThreadId(C.int(id))
-	C.setThreads(C.int(rctx.threads))
+func worker(rctx *iRuntimeContextImpl) {
 	defer func() {
 		if r := recover(); r != nil {
 			if err, ok := r.(error); ok {
 				rctx.error <- err
 			} else {
-				rctx.error <- errors.New(fmt.Sprint(err))
+				rctx.error <- errors.New(fmt.Sprint(r))
 			}
 		}
 	}()
 
 	rctx.error <- rctx.f(rctx)
+}
+
+func (this *iRuntimeContextImpl) Threads() int {
+	return this.threads
+}
+
+func (this *iRuntimeContextImpl) ThreadId() int {
+	return this.threadId
 }
 
 func (this *iRuntimeContextImpl) Critical(f func() error) error {
@@ -101,26 +126,14 @@ func (this *iRuntimeContextImpl) Critical(f func() error) error {
 }
 
 func (this *iRuntimeContextImpl) Master(f func() error) error {
-	if ThreadId() == 0 {
+	if this.ThreadId() == 0 {
 		return f()
 	}
 	return nil
 }
 
 func (this *iRuntimeContextImpl) Barrier() {
-	i := this.ibarrier
-	i2 := (this.ibarrier + 1) % 2
-	this.barriers[i].Done()
-	this.barriers[i].Wait()
-	this.ibarrier = i2
-	if ThreadId() == 0 {
-		this.barriers[i].Add(this.threads)
-	}
-}
-
-func (this *iRuntimeContextImpl) fail() {
-	this.barriers[0].Add(-(this.threads + 1))
-	this.barriers[1].Add(-(this.threads + 1))
+	this.barrier.await()
 }
 
 func (this *iRuntimeContextImpl) For() IForBuilder {
@@ -177,7 +190,10 @@ func (this *iForBuilderImpl) Start(n int) IForBuilder {
 	return this
 }
 
-func (this *iForBuilderImpl) Run(end int, f func(i int) error) error {
+func (this *iForBuilderImpl) Run(end int, f func(i int) error) (_err error) {
+	if this.rctx.loop {
+		return ierror.RaiseMsg("parallel loop in parallel loop error")
+	}
 	if this.chunk == -1 {
 		if this.static {
 			this.chunk = int(math.Ceil(float64(end-this.start) / float64(this.threads)))
@@ -187,9 +203,9 @@ func (this *iForBuilderImpl) Run(end int, f func(i int) error) error {
 	}
 
 	data := this.rctx.data
-	threadId := ThreadId()
+	threadId := this.rctx.ThreadId()
 	if threadId == 0 || this.static {
-		data = make(chan [2]int)
+		data = make(chan [2]int, (end-this.start)/this.chunk+1)
 		if !this.static {
 			this.rctx.data = data
 		}
@@ -199,7 +215,11 @@ func (this *iForBuilderImpl) Run(end int, f func(i int) error) error {
 		for {
 			next := i + this.chunk
 			if next > end {
-				break
+				if i < end {
+					next = end
+				} else {
+					break
+				}
 			}
 			if !this.static || threadId == id {
 				data <- [2]int{i, next}
@@ -211,16 +231,21 @@ func (this *iForBuilderImpl) Run(end int, f func(i int) error) error {
 		close(data)
 	}
 	this.rctx.Barrier()
-	data = this.rctx.data
+	this.rctx.loop = true
+	if !this.static {
+		data = this.rctx.data
+	}
 
 	for chunk := range data {
 		for i := chunk[0]; i < chunk[1]; i++ {
 			if err := f(i); err != nil {
-				this.rctx.fail()
+				this.rctx.Barrier()
+				this.rctx.loop = false
 				return err
 			}
 		}
 	}
 	this.rctx.Barrier()
+	this.rctx.loop = false
 	return nil
 }

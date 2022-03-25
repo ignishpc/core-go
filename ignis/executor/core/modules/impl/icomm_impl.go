@@ -345,7 +345,7 @@ func ImportData[T any](this *ICommImpl, group string, source bool, threads int64
 	tp := shared.Get(0).Type()
 	var opt *core.MsgOpt
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
-		id := ithreads.ThreadId()
+		id := rctx.ThreadId()
 		comm := threads_comm[id]
 		for i := 0; i < len(queue); i++ {
 			other := queue[i]

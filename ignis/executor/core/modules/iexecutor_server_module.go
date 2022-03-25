@@ -57,11 +57,18 @@ func (this *IExecutorServerModule) Start(ctx context.Context, properties map[str
 	for key, value := range properties {
 		this.executorData.GetContext().Vars()[key] = value
 	}
-	this.executorData.SetCores(this.executorData.GetCores())
-	for key, value := range env {
-		os.Setenv(key, value)
+	cores, err := this.executorData.GetProperties().Cores()
+	if err != nil {
+		return ierror.Raise(err)
 	}
-	var err error
+
+	this.executorData.SetCores(int(cores))
+	for key, value := range env {
+		if err = os.Setenv(key, value); err != nil {
+			return ierror.Raise(err)
+		}
+	}
+
 	if _, present := os.LookupEnv("MPI_THREAD_MULTIPLE"); present {
 		err = impi.MPI_Init_thread(nil, nil, impi.MPI_THREAD_MULTIPLE, nil)
 		logger.Info("ServerModule: Mpi started in thread mode")

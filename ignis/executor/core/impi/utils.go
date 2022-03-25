@@ -33,6 +33,15 @@ func P[T any](ptr *T) unsafe.Pointer {
 	return unsafe.Pointer(ptr)
 }
 
+var none C_int
+
+func PS[T any](ptr *[]T) unsafe.Pointer {
+	if len(*ptr) > 0 {
+		return unsafe.Pointer(&((*ptr)[0]))
+	}
+	return unsafe.Pointer(&none)
+}
+
 func P_NIL() unsafe.Pointer { return unsafe.Pointer(nil) }
 
 func Memcpy(dest unsafe.Pointer, src unsafe.Pointer, size int) {

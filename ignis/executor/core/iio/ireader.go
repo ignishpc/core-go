@@ -298,6 +298,9 @@ func init() {
 			return nil, ierror.Raise(err)
 		}
 		if info.sz == 0 {
+			if id == I_VOID {
+				return make([]any, 0), nil
+			}
 			info.elem = info.reader.Empty()
 		} else {
 			if info.elem, err = info.reader.Read(protocol); err != nil {
@@ -344,6 +347,9 @@ func init() {
 			return nil, ierror.Raise(err)
 		}
 		if info.sz == 0 {
+			if firstId == I_VOID || secondId == I_VOID {
+				return make([]any, 0), nil
+			}
 			info.first = info.firstReader.Empty()
 			info.second = info.secondReader.Empty()
 		} else {
@@ -419,6 +425,9 @@ func init() {
 		}
 
 		if info.sz == 0 {
+			if keyId == I_VOID || valueId == I_VOID {
+				return make(map[any]any), nil
+			}
 			info.key = info.keyReader.Empty()
 			info.val = info.valReader.Empty()
 		} else {
@@ -468,6 +477,9 @@ func init() {
 			return nil, ierror.Raise(err)
 		}
 		if info.sz == 0 {
+			if id == I_VOID {
+				return make(map[any]bool), nil
+			}
 			info.elem = info.reader.Empty()
 		} else {
 			if info.elem, err = info.reader.Read(protocol); err != nil {

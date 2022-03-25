@@ -105,6 +105,7 @@ func Map[T any, R any](this *IPipeImpl, f function.IFunction[T, R]) error {
 
 	logger.Info("General: map ", +input.Size(), " partitions")
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		context := this.executorData.GetThreadContext(rctx.ThreadId())
 		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
 			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
@@ -155,6 +156,7 @@ func Filter[T any](this *IPipeImpl, f function.IFunction[T, bool]) error {
 
 	logger.Info("General: filter ", +input.Size(), " partitions")
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		context := this.executorData.GetThreadContext(rctx.ThreadId())
 		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
 			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
@@ -207,6 +209,7 @@ func Flatmap[T any, R any](this *IPipeImpl, f function.IFunction[T, []R]) error 
 
 	logger.Info("General: flatmap ", +input.Size(), " partitions")
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		context := this.executorData.GetThreadContext(rctx.ThreadId())
 		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
 			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
@@ -259,6 +262,7 @@ func KeyBy[T any, R comparable](this *IPipeImpl, f function.IFunction[T, R]) err
 
 	logger.Info("General: keyBy ", +input.Size(), " partitions")
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		context := this.executorData.GetThreadContext(rctx.ThreadId())
 		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
 			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
@@ -309,6 +313,7 @@ func MapPartitions[T any, R any](this *IPipeImpl, f function.IFunction[iterator.
 
 	logger.Info("General: mapPartitions ", +input.Size(), " partitions")
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		context := this.executorData.GetThreadContext(rctx.ThreadId())
 		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
 			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
@@ -359,6 +364,7 @@ func MapPartitionsWithIndex[T, R any](this *IPipeImpl, f function.IFunction2[int
 
 	logger.Info("General: mapPartitionsWithIndex ", +input.Size(), " partitions")
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		context := this.executorData.GetThreadContext(rctx.ThreadId())
 		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
 			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
@@ -568,6 +574,7 @@ func Foreach[T any](this *IPipeImpl, f function.IVoidFunction[T]) error {
 
 	logger.Info("General: foreach ", +input.Size(), " partitions")
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		context := this.executorData.GetThreadContext(rctx.ThreadId())
 		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
 			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
@@ -605,6 +612,7 @@ func ForeachPartition[T any](this *IPipeImpl, f function.IVoidFunction[iterator.
 
 	logger.Info("General: foreachPartition ", +input.Size(), " partitions")
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		context := this.executorData.GetThreadContext(rctx.ThreadId())
 		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
 			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
@@ -822,6 +830,7 @@ func MapValues[K any, T any, R any](this *IPipeImpl, f function.IFunction[T, R])
 
 	logger.Info("General: mapValues ", +input.Size(), " partitions")
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		context := this.executorData.GetThreadContext(rctx.ThreadId())
 		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
 			reader, err := input.Get(i).ReadIterator()
 			if err != nil {
@@ -872,6 +881,7 @@ func FlatMapValues[K any, T any, R any](this *IPipeImpl, f function.IFunction[T,
 
 	logger.Info("General: flatMapValues ", +input.Size(), " partitions")
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		context := this.executorData.GetThreadContext(rctx.ThreadId())
 		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
 			reader, err := input.Get(i).ReadIterator()
 			if err != nil {

@@ -72,6 +72,20 @@ func init() {
 			return array
 		},
 	)
+	addMpiTest[any](
+		"IMpiAnyAnyTest",
+		func() storage.IPartition[any] {
+			return storage.NewIMemoryPartition[any](100, false)
+		},
+		func(n int, seed int) []any {
+			array := make([]any, n)
+			rand.Seed(int64(seed))
+			for i := 0; i < n; i++ {
+				array[i] = strconv.Itoa(int(rand.Int63() % int64(n)))
+			}
+			return array
+		},
+	)
 }
 
 type IMpiTestAbs interface {
@@ -162,20 +176,20 @@ func TestSyncExchange(t *testing.T) {
 	executeTest(t, (IMpiTestAbs).TestSyncExchange)
 }
 
-func TestSyncExchangeCores(t *testing.T) {
-	executeTest(t, (IMpiTestAbs).TestSyncExchangeCores)
-}
-
 func TestAsyncExchange(t *testing.T) {
 	executeTest(t, (IMpiTestAbs).TestAsyncExchange)
 }
 
-func TestAsyncExchangeCores(t *testing.T) {
-	executeTest(t, (IMpiTestAbs).TestAsyncExchangeCores)
-}
-
 func TestAutoExchange(t *testing.T) {
 	executeTest(t, (IMpiTestAbs).TestAutoExchange)
+}
+
+func TestSyncExchangeCores(t *testing.T) {
+	executeTest(t, (IMpiTestAbs).TestSyncExchangeCores)
+}
+
+func TestAsyncExchangeCores(t *testing.T) {
+	executeTest(t, (IMpiTestAbs).TestAsyncExchangeCores)
 }
 
 type IMpiTest[T any] struct {
@@ -303,31 +317,33 @@ func (this *IMpiTest[T]) TestDriverScatter(t *testing.T) {
 func (this *IMpiTest[T]) TestSyncExchange(t *testing.T) {
 	this.executorData.GetContext().Props()["ignis.modules.exchange.type"] = "sync"
 	this.executorData.GetContext().Props()["ignis.transport.cores"] = "0"
-	//this.exchange(t)TODO
+	this.exchange(t)
 }
 
 func (this *IMpiTest[T]) TestSyncExchangeCores(t *testing.T) {
 	this.executorData.GetContext().Props()["ignis.modules.exchange.type"] = "sync"
 	this.executorData.GetContext().Props()["ignis.transport.cores"] = "1"
-	//this.exchange(t)TODO
+	this.executorData.SetCores(2)
+	this.exchange(t)
 }
 
 func (this *IMpiTest[T]) TestAsyncExchange(t *testing.T) {
 	this.executorData.GetContext().Props()["ignis.modules.exchange.type"] = "async"
 	this.executorData.GetContext().Props()["ignis.transport.cores"] = "0"
-	//this.exchange(t)TODO
+	this.exchange(t)
 }
 
 func (this *IMpiTest[T]) TestAsyncExchangeCores(t *testing.T) {
 	this.executorData.GetContext().Props()["ignis.modules.exchange.type"] = "async"
 	this.executorData.GetContext().Props()["ignis.transport.cores"] = "1"
-	//this.exchange(t)TODO
+	this.executorData.SetCores(2)
+	this.exchange(t)
 }
 
 func (this *IMpiTest[T]) TestAutoExchange(t *testing.T) {
 	this.executorData.GetContext().Props()["ignis.modules.exchange.type"] = "auto"
 	this.executorData.GetContext().Props()["ignis.transport.cores"] = "0"
-	//this.exchange(t)TODO
+	this.exchange(t)
 }
 
 func (this *IMpiTest[T]) insert(t *testing.T, array []T, part storage.IPartition[T]) {
@@ -398,7 +414,7 @@ func (this *IMpiTest[T]) exchange(t *testing.T) {
 	for i := 0; i < executors*np; i++ {
 		part := this.create()
 		parts = append(parts, part)
-		view := elems[n*i : n+(i+1)]
+		view := elems[n*i : n*(i+1)]
 		this.insert(t, view, part)
 		if i%executors == rank {
 			other, err := part.Clone()
@@ -416,7 +432,7 @@ func (this *IMpiTest[T]) exchange(t *testing.T) {
 	for i := 0; i < np; i++ {
 		a := this.get(t, result.Get(i))
 		b := this.get(t, refParts[i])
-		require.Equal(t, a, b)
+		require.Equal(t, b, a)
 	}
 
 	require.Nil(t, this.executorData.Mpi().Barrier())

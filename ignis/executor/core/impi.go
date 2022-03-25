@@ -20,6 +20,14 @@ type IMpi struct {
 	context        api.IContext
 }
 
+func NewIMpi(propertyParser *IPropertyParser, partitionTools *IPartitionTools, context api.IContext) *IMpi {
+	return &IMpi{
+		propertyParser,
+		partitionTools,
+		context,
+	}
+}
+
 func Gather[T any](this *IMpi, part storage.IPartition[T], root int) error {
 	if this.Executors() == 1 {
 		return nil
@@ -42,7 +50,7 @@ func Bcast[T any](this *IMpi, part storage.IPartition[T], root int) error {
 			}
 			array := list.Array().([]T)
 			bytes := C_int(int(sz) * int(iio.TypeObj[T]().Size()))
-			if err := MPI_Bcast(P(&array[0]), bytes, MPI_BYTE, C_int(root), this.Native()); err != nil {
+			if err := MPI_Bcast(PS(&array), bytes, MPI_BYTE, C_int(root), this.Native()); err != nil {
 				return ierror.Raise(err)
 			}
 		} else {
@@ -330,7 +338,7 @@ func DriverScatter[T any](this *IMpi, group C_MPI_Comm, partGroup *storage.IPart
 				}
 			}
 			array := partGroup.Get(0).Inner().(storage.IList).Array().([]T)
-			src = P(&array[0])
+			src = PS(&array)
 		} else {
 			cmp, err := this.propertyParser.MsgCompression()
 			if err != nil {
@@ -408,7 +416,8 @@ func DriverScatter[T any](this *IMpi, group C_MPI_Comm, partGroup *storage.IPart
 				}
 				list := part.Inner().(storage.IList)
 				list.Resize(int(l)/int(iio.TypeObj[T]().Size()), true)
-				Memcpy(P(&list.Array().([]T)[0]), unsafe.Add(src, offset), int(l))
+				array := list.Array().([]T)
+				Memcpy(PS(&array), unsafe.Add(src, offset), int(l))
 				offset += int(l)
 				partGroup.Add(part)
 			}
@@ -558,10 +567,10 @@ func SendRcv[T any](this *IMpi, sendp storage.IPartition[T], rcvp storage.IParti
 			return ierror.Raise(err)
 		}
 	} else {
-		if err := Recv(this, sendp, other, tag); err != nil {
+		if err := Recv(this, rcvp, other, tag); err != nil {
 			return ierror.Raise(err)
 		}
-		if err := Send(this, rcvp, other, tag); err != nil {
+		if err := Send(this, sendp, other, tag); err != nil {
 			return ierror.Raise(err)
 		}
 	}
@@ -600,12 +609,12 @@ func gatherImpl[T any](this *IMpi, group C_MPI_Comm, part storage.IPartition[T],
 				array := list.Array().([]T)
 				//Use same buffer to rcv elements
 				move[T](array, int(szv[rank])/elemSz, int(displs[rank])/elemSz)
-				if err := MPI_Gatherv(MPI_IN_PLACE, C_int(sz), MPI_BYTE, P(&array[0]), &szv[0], &displs[0], MPI_BYTE, C_int(root), group); err != nil {
+				if err := MPI_Gatherv(MPI_IN_PLACE, C_int(sz), MPI_BYTE, PS(&array), &szv[0], &displs[0], MPI_BYTE, C_int(root), group); err != nil {
 					return ierror.Raise(err)
 				}
 			} else {
 				array := list.Array().([]T)
-				if err := MPI_Gatherv(P(&array[0]), C_int(sz), MPI_BYTE, P_NIL(), nil, nil, MPI_BYTE, C_int(root), group); err != nil {
+				if err := MPI_Gatherv(PS(&array), C_int(sz), MPI_BYTE, P_NIL(), nil, nil, MPI_BYTE, C_int(root), group); err != nil {
 					return ierror.Raise(err)
 				}
 			}
@@ -786,7 +795,7 @@ func sendRecvImpl[T any](this *IMpi, group C_MPI_Comm, part storage.IPartition[T
 					return ierror.Raise(err)
 				}
 				array := list.Array().([]T)
-				if err := MPI_Send(P(&array[0]), C_int(int(sz)*elemSz), MPI_BYTE, C_int(dest),
+				if err := MPI_Send(PS(&array), C_int(int(sz)*elemSz), MPI_BYTE, C_int(dest),
 					C_int(tag), group); err != nil {
 					return ierror.Raise(err)
 				}
@@ -797,7 +806,7 @@ func sendRecvImpl[T any](this *IMpi, group C_MPI_Comm, part storage.IPartition[T
 				}
 				list.Resize(int(init)+int(sz), false)
 				array := list.Array().([]T)
-				if err := MPI_Recv(P(&array[0]), C_int(int(sz)*elemSz), MPI_BYTE, C_int(source), C_int(tag), group,
+				if err := MPI_Recv(PS(&array), C_int(int(sz)*elemSz), MPI_BYTE, C_int(source), C_int(tag), group,
 					MPI_STATUS_IGNORE); err != nil {
 					return ierror.Raise(err)
 				}

@@ -8,6 +8,7 @@ import (
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/impi"
 	"ignis/executor/core/iprotocol"
+	"ignis/executor/core/ithreads"
 	"ignis/executor/core/itransport"
 	"ignis/executor/core/logger"
 	"ignis/executor/core/storage"
@@ -20,7 +21,6 @@ import (
 )
 
 type IExecutorData struct {
-	cores          int
 	partitions     storage.IPartitionGroupBase
 	convPartitions storage.IPartitionGroupBase
 	variables      map[string]any
@@ -156,6 +156,10 @@ func (this *IExecutorData) GetContext() api.IContext {
 	return this.context
 }
 
+func (this *IExecutorData) GetThreadContext(thread int) api.IContext {
+	return newIThreadContext(this.context, thread)
+}
+
 func (this *IExecutorData) GetProperties() *IPropertyParser {
 	return &this.properties
 }
@@ -169,11 +173,11 @@ func (this *IExecutorData) Mpi() *IMpi {
 }
 
 func (this *IExecutorData) SetCores(n int) {
-	this.cores = n
+	ithreads.SetDefaultCores(n)
 }
 
 func (this *IExecutorData) GetCores() int {
-	return this.cores
+	return ithreads.DefaultCores()
 }
 
 func (this *IExecutorData) GetMpiCores() int {
@@ -213,9 +217,9 @@ func (this *IExecutorData) Duplicate(comm impi.C_MPI_Comm, threads int) ([]impi.
 		return nil, ierror.Raise(err)
 	}
 	logger.Info("Duplicating mpi group for ", threads, " threads")
-	for i := 0; i < threads; i++ {
+	for i := 1; i < threads; i++ {
 		var dup impi.C_MPI_Comm
-		if err := impi.MPI_Comm_dup(result[i-1], &dup); err != nil {
+		if err := impi.MPI_Comm_dup(result[len(result)-1], &dup); err != nil {
 			return nil, ierror.Raise(err)
 		}
 		result = append(result, dup)
