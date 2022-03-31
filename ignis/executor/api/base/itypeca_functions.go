@@ -17,6 +17,11 @@ type iTypeCA[T1 comparable, T2 any] struct {
 	iTypeA[ipair.IPair[T1, T2]]
 }
 
+func (this *iTypeCA[T1, T2]) LoadType() {
+	registerTypeCA[T1, T2]()
+	this.iTypeA.LoadType()
+}
+
 func typeCAError() error {
 	return ierror.RaiseMsg("TypeAC functions only implement pair functions with comparable keys.")
 }

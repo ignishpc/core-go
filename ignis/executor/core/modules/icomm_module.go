@@ -89,7 +89,7 @@ func (this *ICommModule) GetPartitions2(ctx context.Context, protocol int8, minP
 
 func (this *ICommModule) SetPartitions(ctx context.Context, partitions [][]byte) (_err error) {
 	defer this.moduleRecover(&_err)
-	base, err := this.TypeFromDefault()
+	base, err := this.TypeFromDefault(false)
 	if err != nil {
 		return this.PackError(err)
 	}
@@ -139,7 +139,7 @@ func (this *ICommModule) DriverScatter(ctx context.Context, group string, partit
 	if this.executorData.HasPartitions() {
 		base, _err = this.TypeFromPartition()
 	} else {
-		base, _err = this.TypeFromDefault()
+		base, _err = this.TypeFromDefault(false)
 	}
 	if _err != nil {
 		return this.PackError(_err)
@@ -167,7 +167,7 @@ func (this *ICommModule) ImportData(ctx context.Context, group string, source bo
 	if this.executorData.HasPartitions() {
 		base, _err = this.TypeFromPartition()
 	} else {
-		base, _err = this.TypeFromDefault()
+		base, _err = this.TypeFromDefault(false)
 	}
 	if _err != nil {
 		return this.PackError(_err)

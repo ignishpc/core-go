@@ -5,7 +5,9 @@ import (
 	"github.com/apache/thrift/lib/go/thrift"
 	"ignis/executor/api/ipair"
 	"ignis/executor/core/ierror"
+	"ignis/executor/core/utils"
 	"reflect"
+	"strings"
 )
 
 func ReadTypeAux(protocol thrift.TProtocol) (int8, error) {
@@ -14,6 +16,22 @@ func ReadTypeAux(protocol thrift.TProtocol) (int8, error) {
 
 func ReadSizeAux(protocol thrift.TProtocol) (int64, error) {
 	return protocol.ReadI64(ctx)
+}
+
+var pairName = strings.Replace(utils.TypeName[ipair.IPair[any, any]](), utils.TypeName[any](), "%s", -1)
+
+func GetNamePair(first any, second any) string {
+	return fmt.Sprintf(pairName, GetName(first), GetName(second))
+}
+
+var mapName = strings.Replace(utils.TypeName[map[any]any](), "any", "%s", -1)
+
+func GetNameMap(key any, value any) string {
+	return fmt.Sprintf(mapName, GetName(key), GetName(value))
+}
+
+func GetName(obj any) string {
+	return reflect.TypeOf(obj).String()
 }
 
 type IReader interface {
@@ -43,6 +61,7 @@ func GetReader(key int8) (IReader, error) {
 }
 
 func GetGenericReader(key int8, id string) IGenericReader {
+	id = NameFix(id)
 	reader, present := readers[key].(*IReaderType).readers[id]
 	if !present {
 		return readers[key].(*IReaderType).def
@@ -51,6 +70,7 @@ func GetGenericReader(key int8, id string) IGenericReader {
 }
 
 func SetGenericReader(key int8, id string, gr IGenericReader) {
+	id = NameFix(id)
 	if gr == nil {
 		delete(readers[key].(*IReaderType).readers, id)
 	} else {
@@ -93,7 +113,7 @@ func (this *IReaderType) Empty() any {
 	return this.empty
 }
 
-func NewIReaderType(f IReaderF, empty any) IReader {
+func NewIReader(f IReaderF, empty any) IReader {
 	return &IReaderType{
 		map[string]IGenericReader{},
 		nil,
@@ -258,32 +278,58 @@ func setReaderR(key int8, value IReader) *IReaderType {
 	return value.(*IReaderType)
 }
 
+func SetIntAsDefault(flag bool) {
+	if reflect.TypeOf(int(0)).Size() == 4 {
+		if flag {
+			SetReader(I_I32, NewIReader(func(protocol thrift.TProtocol) (any, error) {
+				val, err := protocol.ReadI32(ctx)
+				return int(val), err
+			}, 0))
+		} else {
+			SetReader(I_I32, NewIReader(func(protocol thrift.TProtocol) (any, error) {
+				return protocol.ReadI32(ctx)
+			}, 0))
+		}
+	} else {
+		if flag {
+			SetReader(I_I64, NewIReader(func(protocol thrift.TProtocol) (any, error) {
+				val, err := protocol.ReadI64(ctx)
+				return int(val), err
+			}, 0))
+		} else {
+			SetReader(I_I64, NewIReader(func(protocol thrift.TProtocol) (any, error) {
+				return protocol.ReadI64(ctx)
+			}, 0))
+		}
+	}
+}
+
 func init() {
-	SetReader(I_VOID, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	SetReader(I_VOID, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		return nil, nil
 	}, nil))
-	SetReader(I_BOOL, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	SetReader(I_BOOL, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		return protocol.ReadBool(ctx)
 	}, true))
-	SetReader(I_I08, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	SetReader(I_I08, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		return protocol.ReadByte(ctx)
 	}, 0))
-	SetReader(I_I16, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	SetReader(I_I16, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		return protocol.ReadI16(ctx)
 	}, 0))
-	SetReader(I_I32, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	SetReader(I_I32, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		return protocol.ReadI32(ctx)
 	}, 0))
-	SetReader(I_I64, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	SetReader(I_I64, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		return protocol.ReadI64(ctx)
 	}, 0))
-	SetReader(I_DOUBLE, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	SetReader(I_DOUBLE, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		return protocol.ReadDouble(ctx)
 	}, 0))
-	SetReader(I_STRING, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	SetReader(I_STRING, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		return protocol.ReadString(ctx)
 	}, 0))
-	setReaderR(I_LIST, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	setReaderR(I_LIST, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		var err error
 		info := new(IArrayReaderInfo)
 
@@ -325,7 +371,7 @@ func init() {
 
 		return l.Interface(), nil
 	})
-	setReaderR(I_PAIR_LIST, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	setReaderR(I_PAIR_LIST, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		var err error
 		info := new(IPairArrayReaderInfo)
 
@@ -365,7 +411,7 @@ func init() {
 	}, []ipair.IPair[any, any]{})).def = NewIGenericReaderImpl(func(protocol thrift.TProtocol, info any) (any, error) {
 		arrayInfo := info.(*IPairArrayReaderInfo)
 
-		l := reflect.MakeSlice(reflect.TypeOf(ipair.IPair[any, any]{arrayInfo.first, arrayInfo.second}), int(arrayInfo.sz), int(arrayInfo.sz))
+		l := reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(ipair.IPair[any, any]{arrayInfo.first, arrayInfo.second})), int(arrayInfo.sz), int(arrayInfo.sz))
 		if arrayInfo.sz > 0 {
 			l.Index(0).Set(reflect.ValueOf(ipair.IPair[any, any]{arrayInfo.first, arrayInfo.second}))
 		}
@@ -383,7 +429,7 @@ func init() {
 
 		return l.Interface(), nil
 	})
-	setReaderR(I_BINARY, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	setReaderR(I_BINARY, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		sz, err := ReadSizeAux(protocol)
 		if err != nil {
 			return nil, ierror.Raise(err)
@@ -401,7 +447,7 @@ func init() {
 
 		return array, nil
 	}, []byte{}))
-	setReaderR(I_MAP, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	setReaderR(I_MAP, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		var err error
 		info := new(IMapReaderInfo)
 
@@ -444,7 +490,7 @@ func init() {
 	}, map[any]any{})).def = NewIGenericReaderImpl(func(protocol thrift.TProtocol, info any) (any, error) {
 		mapInfo := info.(*IMapReaderInfo)
 
-		m := reflect.MakeChan(reflect.MapOf(reflect.TypeOf(mapInfo.key), reflect.TypeOf(mapInfo.val)), int(mapInfo.sz))
+		m := reflect.MakeMapWithSize(reflect.MapOf(reflect.TypeOf(mapInfo.key), reflect.TypeOf(mapInfo.val)), int(mapInfo.sz))
 		if mapInfo.sz > 0 {
 			m.SetMapIndex(reflect.ValueOf(mapInfo.key), reflect.ValueOf(mapInfo.val))
 		}
@@ -462,7 +508,7 @@ func init() {
 		}
 		return m.Interface(), nil
 	})
-	setReaderR(I_SET, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	setReaderR(I_SET, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		var err error
 		info := new(ISetReaderInfo)
 
@@ -507,7 +553,7 @@ func init() {
 		}
 		return m.Interface(), nil
 	})
-	setReaderR(I_PAIR, NewIReaderType(func(protocol thrift.TProtocol) (any, error) {
+	setReaderR(I_PAIR, NewIReader(func(protocol thrift.TProtocol) (any, error) {
 		var err error
 		info := new(IPairReaderInfo)
 

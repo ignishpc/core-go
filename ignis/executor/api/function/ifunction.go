@@ -47,3 +47,20 @@ type IVoidFunction2[T1 any, T2 any] interface {
 	Call(v1 T1, v2 T2, context api.IContext) error
 	After(context api.IContext) error
 }
+
+type IBeforeNone struct{}
+
+type IAfterNone struct{}
+
+type IOnlyCall struct {
+	IBeforeNone
+	IAfterNone
+}
+
+func (this *IBeforeNone) Before(context api.IContext) error {
+	return nil
+}
+
+func (this *IAfterNone) After(context api.IContext) error {
+	return nil
+}

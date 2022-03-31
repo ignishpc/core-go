@@ -11,7 +11,6 @@ import (
 	"ignis/executor/core/storage"
 	"ignis/executor/core/utils"
 	"math/rand"
-	"reflect"
 )
 
 type IMathImpl struct {
@@ -345,7 +344,7 @@ func countByReduce[K comparable](this *IMathImpl, acum map[K]int64) error {
 		}
 		writers[i] = wit
 	}
-	hasher := utils.GetHasher(reflect.TypeOf(*new(K)))
+	hasher := utils.GetHasher(utils.TypeObj[K]())
 	for key, value := range acum {
 		if err := writers[utils.Hash(key, hasher)%uint64(executors)].Write(*ipair.New(key, value)); err != nil {
 			return ierror.Raise(err)

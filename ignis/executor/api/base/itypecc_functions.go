@@ -2,23 +2,16 @@ package base
 
 import (
 	"ignis/executor/api/ipair"
-	"ignis/executor/core/iio"
 	"ignis/executor/core/modules/impl"
 )
-
-func registerTypeCC[T1 comparable, T2 comparable]() {
-	registerTypeA[T1]()
-	registerTypeA[T2]()
-	iio.AddKeyType[T1, T2]()
-}
 
 type iTypeCC[T1 comparable, T2 comparable] struct {
 	iTypeC[ipair.IPair[T1, T2]]
 }
 
 func (this *iTypeCC[T1, T2]) LoadType() {
+	registerTypeCA[T1, T2]()
 	this.iTypeA.LoadType()
-	registerTypeCC[T1, T2]()
 }
 
 /*ICommImpl*/

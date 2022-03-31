@@ -16,8 +16,8 @@ type iTypeAA[T1 any, T2 any] struct {
 }
 
 func (this *iTypeAA[T1, T2]) LoadType() {
-	this.iTypeA.LoadType()
 	registerTypeAA[T1, T2]()
+	this.iTypeA.LoadType()
 }
 
 func typeAAError() error {

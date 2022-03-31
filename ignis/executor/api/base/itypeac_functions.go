@@ -16,8 +16,8 @@ type iTypeAC[T1 any, T2 comparable] struct {
 }
 
 func (this *iTypeAC[T1, T2]) LoadType() {
-	this.iTypeA.LoadType()
 	registerTypeAC[T1, T2]()
+	this.iTypeA.LoadType()
 }
 
 func typeACError() error {

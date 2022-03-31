@@ -5,6 +5,7 @@ import (
 	"ignis/executor/core/iio"
 	"ignis/executor/core/modules/impl"
 	"ignis/executor/core/storage"
+	"ignis/executor/core/utils"
 )
 
 func registerTypeA[T any]() {
@@ -16,7 +17,7 @@ type iTypeA[T any] struct {
 }
 
 func (this *iTypeA[T]) Name() string {
-	return iio.TypeName[T]()
+	return utils.TypeName[T]()
 }
 
 func (this *iTypeA[T]) LoadType() {

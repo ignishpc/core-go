@@ -45,6 +45,7 @@ type IPartitionGroupBase interface {
 	ShadowCopyBase() IPartitionGroupBase
 	Cache() bool
 	SetCache(e bool)
+	First() any
 	Type() reflect.Type
 	NewGroup() IPartitionGroupBase
 	AddMemoryPartition(sz int64)
@@ -146,6 +147,15 @@ func (this *IPartitionGroup[T]) Cache() bool {
 
 func (this *IPartitionGroup[T]) SetCache(e bool) {
 	this._cache = e
+}
+
+func (this *IPartitionGroup[T]) First() any {
+	for _, part := range this.partitions {
+		if !part.Empty() {
+			return part.First()
+		}
+	}
+	return nil
 }
 
 func (this *IPartitionGroup[T]) Type() reflect.Type {

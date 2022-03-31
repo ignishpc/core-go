@@ -8,7 +8,7 @@ import (
 )
 
 func memhash(p unsafe.Pointer, sz int) uint64 {
-	return xxHash64.Checksum(C.GoBytes(p, C.int(sz)), 0)
+	return xxHash64.Checksum(unsafe.Slice((*byte)(p), sz), 0)
 }
 
 type Hasher interface {
@@ -64,6 +64,28 @@ func (this *arrayHasher) Hash(p unsafe.Pointer) uint64 {
 	return uint64(memhash(unsafe.Pointer(&(*s)[0]), this.sz))
 }
 
+type anyHasher struct {
+}
+
+func (this *anyHasher) Hash(p unsafe.Pointer) uint64 {
+	var kindDirectIface uint8 = 1 << 5
+	info := (*iface)(p)
+	var data unsafe.Pointer
+	if info.tab.kind&kindDirectIface != 0 {
+		data = unsafe.Pointer(&info.data)
+	} else {
+		data = info.data
+	}
+	if info.tab.kind <= uint8(reflect.Array) {
+		return uint64(memhash(data, int(info.tab.size)))
+	} else if info.tab.kind == uint8(reflect.String) {
+		s := (*stringStruct)(data)
+		return uint64(memhash(s.str, s.len))
+	} else {
+		panic("type is not hashable")
+	}
+}
+
 type errorHasher struct {
 }
 
@@ -115,11 +137,11 @@ func GetHasher(p reflect.Type) Hasher {
 		return &stringHasher{}
 	case reflect.Array:
 		return &arrayHasher{int(p.Size() * p.Elem().Size())}
+	case reflect.Interface:
+		return &anyHasher{}
 	case reflect.Chan:
 		fallthrough
 	case reflect.Func:
-		fallthrough
-	case reflect.Interface:
 		fallthrough
 	case reflect.Map:
 		fallthrough

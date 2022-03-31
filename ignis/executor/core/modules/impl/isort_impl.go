@@ -7,7 +7,6 @@ import (
 	"ignis/executor/api/iterator"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
-	"ignis/executor/core/iio"
 	"ignis/executor/core/impi"
 	"ignis/executor/core/ithreads"
 	"ignis/executor/core/logger"
@@ -184,16 +183,16 @@ func SortByKeyWithPartitions[T any, K any](this *ISortImpl, ascending bool, part
 	if err != nil {
 		return ierror.Raise(err)
 	}
-	if _, ok := this.executorData.GetPartitionFirst().(*ipair.IPair[K, T]); ok {
+	if _, ok := this.executorData.GetPartitionsAny().First().(ipair.IPair[K, T]); ok {
 		pf := func(a, b ipair.IPair[K, T]) bool {
 			return f(a.First, b.First)
 		}
 		return sortImpl[ipair.IPair[K, T]](this, pf, ascending, partitions, true)
 	} else {
-		pf := func(a, b any) bool {
-			return f(a.(ipair.IAbstractPair).GetFirst().(K), b.(ipair.IAbstractPair).GetFirst().(K))
+		pf := func(a, b ipair.IPair[any, any]) bool {
+			return f(a.GetFirst().(K), b.GetFirst().(K))
 		}
-		return sortImpl[any](this, pf, ascending, partitions, true)
+		return sortImpl[ipair.IPair[any, any]](this, pf, ascending, partitions, true)
 	}
 }
 
@@ -206,7 +205,7 @@ func SortByKeyByWithPartitions[T any, K any](this *ISortImpl, f function.IFuncti
 	if err := f.Before(context); err != nil {
 		return ierror.Raise(err)
 	}
-	if _, ok := this.executorData.GetPartitionFirst().(*ipair.IPair[K, T]); ok {
+	if _, ok := this.executorData.GetPartitionsAny().First().(*ipair.IPair[K, T]); ok {
 		pf := func(a, b ipair.IPair[K, T]) bool {
 			less, err := f.Call(a.First, b.First, context)
 			if err != nil {
@@ -291,7 +290,7 @@ func sortImpl[T any](this *ISortImpl, f func(T, T) bool, ascending bool, partiti
 		for _, part := range input.Iter() {
 			send[1] += impi.C_int64(part.Size())
 		}
-		if err := impi.MPI_Allreduce(impi.P(&send[0]), impi.P(&rcv[0]), 1, impi.MPI_LONG_LONG_INT,
+		if err := impi.MPI_Allreduce(impi.P(&send[0]), impi.P(&rcv[0]), 2, impi.MPI_LONG_LONG_INT,
 			impi.MPI_SUM, this.executorData.Mpi().Native()); err != nil {
 			return ierror.Raise(err)
 		}
@@ -482,18 +481,20 @@ func selectMemoryPivots[T any](this *ISortImpl, f func(T, T) bool, group *storag
 	}
 
 	threadPivots := make([]storage.IPartition[T], this.executorData.GetCores())
+	for i := 0; i < this.executorData.GetCores(); i++ {
+		part, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), samples)
+		if err != nil {
+			return nil, ierror.Raise(err)
+		}
+		threadPivots[i] = part
+	}
 
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
 		return rctx.For().Dynamic().Run(group.Size(), func(p int) error {
-			part, err := core.NewMemoryPartition[T](this.executorData.GetPartitionTools(), samples)
-			if err != nil {
-				return ierror.Raise(err)
-			}
-			threadPivots[p] = part
 			if group.Get(p).Size() < samples {
-				return ierror.Raise(group.Get(p).CopyTo(part))
+				return ierror.Raise(group.Get(p).CopyTo(threadPivots[rctx.ThreadId()]))
 			}
-			writer, err := part.WriteIterator()
+			writer, err := threadPivots[rctx.ThreadId()].WriteIterator()
 			if err != nil {
 				return ierror.Raise(err)
 			}
@@ -501,7 +502,7 @@ func selectMemoryPivots[T any](this *ISortImpl, f func(T, T) bool, group *storag
 			skip := (group.Get(p).Size() - samples) / (samples + 1)
 			rem := (group.Get(p).Size() - samples) % (samples + 1)
 			pos := skip + int64(utils.Ternary(rem > 0, 1, 0))
-			list := part.Inner().(storage.IList)
+			list := group.Get(p).Inner().(storage.IList)
 			if array, ok := list.Array().([]T); ok {
 				for n := int64(0); n < samples; n++ {
 					if err = writer.Write(array[pos]); err != nil {
@@ -710,15 +711,8 @@ func generateMemoryRanges[T any](this *ISortImpl, f func(T, T) bool, group *stor
 			if part.Empty() {
 				return nil
 			}
-			var elemsStack []ipair.IPair[int64, int64]
-			var rangesStack []ipair.IPair[int64, int64]
-
-			for i := int64(0); i < part.Size(); i++ {
-				elemsStack = append(elemsStack, *ipair.New(int64(0), int64(part.Size()-1)))
-			}
-			for i := int64(0); i < part.Size(); i++ {
-				rangesStack = append(rangesStack, *ipair.New(int64(0), pivots.Size()))
-			}
+			elemsStack := []ipair.IPair[int64, int64]{*ipair.New(int64(0), part.Size()-1)}
+			rangesStack := []ipair.IPair[int64, int64]{*ipair.New(int64(0), pivots.Size())}
 
 			for len(elemsStack) > 0 {
 				back := len(elemsStack) - 1
@@ -771,7 +765,7 @@ func generateMemoryRanges[T any](this *ISortImpl, f func(T, T) bool, group *stor
 							}
 						}
 					}
-				} else if start < mid {
+				} else if mid < end {
 					elemsStack = append(elemsStack, *ipair.New(mid+1, end))
 					rangesStack = append(rangesStack, *ipair.New(r, last))
 				}
@@ -931,7 +925,7 @@ func maxImpl[T any](this *ISortImpl, f func(T, T) bool, ascending bool) error {
 	}
 
 	logger.Info("Sort: max/min")
-	first := this.executorData.GetPartitionFirst()
+	first := this.executorData.GetPartitionsAny().First()
 	if first == nil {
 		core.SetPartitions(this.executorData, ouput)
 		return nil
@@ -1029,7 +1023,7 @@ func defaultCmp[T any]() (func(T, T) bool, error) {
 	case api.Sortable[T]:
 		f = v.Less
 	default:
-		return nil, ierror.RaiseMsg(iio.TypeName[T]() + " is not [int, int8 , int16, int32 , int64, uint , uint8, uint16, " +
+		return nil, ierror.RaiseMsg(utils.TypeName[T]() + " is not [int, int8 , int16, int32 , int64, uint , uint8, uint16, " +
 			"uint32, uint64 , float32, float64, string] o implement api.Sortable")
 	}
 	return f.(func(T, T) bool), nil

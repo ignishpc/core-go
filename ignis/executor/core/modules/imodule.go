@@ -3,12 +3,14 @@ package modules
 import (
 	"fmt"
 	"ignis/executor/api/base"
+	"ignis/executor/api/ipair"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
-	"ignis/executor/core/iio"
 	"ignis/executor/core/logger"
+	"ignis/executor/core/utils"
 	"ignis/rpc"
 	"reflect"
+	"strings"
 )
 
 type IModule struct {
@@ -38,40 +40,36 @@ func (this *IModule) PackError(err error) error {
 	return ex
 }
 
-func (this *IModule) TypeFromDefault() (base.ITypeFunctions, error) {
-	return base.NewTypeCC[any, any](), nil
+func (this *IModule) TypeFromDefault(pair bool) (base.ITypeFunctions, error) {
+	if pair {
+		return base.NewTypeCC[any, any](), nil
+	}
+	return base.NewTypeC[any](), nil
 }
 
 func (this *IModule) TypeFromPartition() (base.ITypeFunctions, error) {
 	this.executorData.LoadContextType()
-	group, err := core.GetPartitions[any](this.executorData)
-	if err != nil {
-		return nil, ierror.Raise(err)
+	group := this.executorData.GetPartitionsAny()
+	if elem := group.First(); elem != nil {
+		return this.TypeFromName(reflect.TypeOf(elem).String())
 	}
 
-	for _, part := range group.Iter() {
-		it, err := part.ReadIterator()
-		if err != nil {
-			return nil, ierror.Raise(err)
-		}
-		for it.HasNext() {
-			elem, err := it.Next()
-			if err != nil {
-				return nil, ierror.Raise(err)
-			}
-			return this.TypeFromName(iio.GetName(elem))
-		}
-	}
-
-	return nil, ierror.RaiseMsg("Type not found in partition")
+	return this.TypeFromDefault(false)
 }
 
 func (this *IModule) TypeFromName(name string) (base.ITypeFunctions, error) {
 	this.executorData.LoadContextType()
 	typeBase := this.executorData.GetType(name)
 	if typeBase == nil {
-		logger.Warn("Type '", name, "' not found, using 'any' as default")
-		return this.TypeFromDefault()
+		pairName := utils.TypeName[ipair.IPair[any, any]]()
+		pairName = pairName[:strings.Index(pairName, "[")]
+		if strings.HasPrefix(name, pairName) {
+			logger.Warn("Type '", name, "' not found, using 'ipair.Pair[any, any]' as default")
+			return this.TypeFromDefault(true)
+		} else {
+			logger.Warn("Type '", name, "' not found, using 'any' as default")
+			return this.TypeFromDefault(false)
+		}
 	}
 	return typeBase.(base.ITypeFunctions), nil
 }

@@ -255,10 +255,6 @@ func (this *IExecutorData) loadLibrary(src *rpc.ISource, withBackup bool, fast b
 			return nil, ierror.Raise(err)
 		}
 
-		types := baseFunction.(api.ITypeBase).Types()
-		for _, tp := range types {
-			this.RegisterType(tp)
-		}
 		this.RegisterFunction(baseFunction)
 
 		if withBackup {
@@ -329,7 +325,11 @@ func (this *IExecutorData) ReloadLibraries() error {
 }
 
 func (this *IExecutorData) RegisterFunction(f function.IBaseFunction) {
-	this.functions[reflect.TypeOf(f).String()] = f
+	types := f.(api.ITypeBase).Types()
+	for _, tp := range types {
+		this.RegisterType(tp)
+	}
+	this.functions[reflect.TypeOf(f).Elem().Name()] = f
 }
 
 func (this *IExecutorData) RegisterType(tp api.IContextType) {
@@ -358,15 +358,6 @@ func (this *IExecutorData) LoadParameters(src *rpc.ISource) error {
 			return ierror.Raise(err)
 		} else {
 			this.context.Vars()[key] = v
-		}
-	}
-	return nil
-}
-
-func (this *IExecutorData) GetPartitionFirst() any {
-	for i := 0; i < this.partitions.Size(); i++ {
-		if this.partitions.GetBase(i).Size() > 0 {
-			return this.partitions.GetBase(i).First()
 		}
 	}
 	return nil

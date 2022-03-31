@@ -12,7 +12,6 @@ import (
 	"ignis/executor/core/storage"
 	"ignis/executor/core/utils"
 	"math"
-	"reflect"
 )
 
 type IReduceImpl struct {
@@ -107,7 +106,10 @@ func Reduce[T any](this *IReduceImpl, f function.IFunction2[T, T, T]) error {
 	if err := finalReduce(this, f, elemPart); err != nil {
 		return ierror.Raise(err)
 	}
-	return ierror.Raise(f.After(context))
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
 }
 
 func TreeReduce[T any](this *IReduceImpl, f function.IFunction2[T, T, T]) error {
@@ -125,7 +127,10 @@ func TreeReduce[T any](this *IReduceImpl, f function.IFunction2[T, T, T]) error 
 	if err := finalTreeReduce(this, f, elemPart); err != nil {
 		return ierror.Raise(err)
 	}
-	return ierror.Raise(f.After(context))
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
 }
 
 func Zero[T any](this *IReduceImpl, f function.IFunction0[T]) error {
@@ -138,7 +143,10 @@ func Zero[T any](this *IReduceImpl, f function.IFunction0[T]) error {
 	} else {
 		core.SetVariable(this.executorData, "zero", zero)
 	}
-	return ierror.Raise(f.After(context))
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
 }
 
 func Aggregate[T any, T2 any](this *IReduceImpl, f function.IFunction2[T, T2, T]) error {
@@ -207,7 +215,10 @@ func Fold[T any](this *IReduceImpl, f function.IFunction2[T, T, T]) error {
 	if err := finalReduce[T](this, f, elemPart); err != nil {
 		return ierror.Raise(err)
 	}
-	return ierror.Raise(f.After(context))
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
 }
 
 func TreeFold[T any](this *IReduceImpl, f function.IFunction2[T, T, T]) error {
@@ -225,7 +236,10 @@ func TreeFold[T any](this *IReduceImpl, f function.IFunction2[T, T, T]) error {
 	if err := finalTreeReduce[T](this, f, elemPart); err != nil {
 		return ierror.Raise(err)
 	}
-	return ierror.Raise(f.After(context))
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
 }
 
 func GroupByKey[T any, K comparable](this *IReduceImpl, numPartitions int64) error {
@@ -302,7 +316,10 @@ func ReduceByKey[K comparable, T any](this *IReduceImpl, f function.IFunction2[T
 	if err := localReduceByKey[K](this, f); err != nil {
 		return ierror.Raise(err)
 	}
-	return ierror.Raise(f.After(context))
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
 }
 
 func AggregateByKey[K comparable, T any, T2 any](this *IReduceImpl, f function.IFunction2[T, T2, T], numPartitions int64, hashing bool) error {
@@ -322,7 +339,10 @@ func AggregateByKey[K comparable, T any, T2 any](this *IReduceImpl, f function.I
 	if err := localAggregateByKey[K](this, f); err != nil {
 		return ierror.Raise(err)
 	}
-	return ierror.Raise(f.After(context))
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
 }
 
 func FoldByKey[K comparable, T any](this *IReduceImpl, f function.IFunction2[T, T, T], numPartitions int64, localFold bool) error {
@@ -346,7 +366,11 @@ func FoldByKey[K comparable, T any](this *IReduceImpl, f function.IFunction2[T, 
 	if err := localReduceByKey[K](this, f); err != nil {
 		return ierror.Raise(err)
 	}
-	return ierror.Raise(f.After(context))
+	err := f.After(context)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	return nil
 }
 
 func Union[T any](this *IReduceImpl, other string, preserveOrder bool) error {
@@ -354,7 +378,7 @@ func Union[T any](this *IReduceImpl, other string, preserveOrder bool) error {
 	if err != nil {
 		return ierror.Raise(err)
 	}
-	core.SetPartitions(this.executorData, core.GetVariable[*storage.IPartitionGroup[T]](this.executorData, other))
+	this.executorData.SetPartitionsAny(core.GetVariable[storage.IPartitionGroupBase](this.executorData, other))
 	input2, err := core.GetPartitions[T](this.executorData)
 	if err != nil {
 		return ierror.Raise(err)
@@ -481,7 +505,7 @@ func Join[K comparable, T any](this *IReduceImpl, other string, numPartitions in
 	}
 
 	logger.Info("Reduce: preparing second partitions")
-	core.SetPartitions(this.executorData, core.GetVariable[*storage.IPartitionGroup[T]](this.executorData, other))
+	this.executorData.SetPartitionsAny(core.GetVariable[storage.IPartitionGroupBase](this.executorData, other))
 	if err := keyHashing[K, T](this, numPartitions); err != nil {
 		return ierror.Raise(err)
 	}
@@ -558,7 +582,7 @@ func Distinct[T comparable](this *IReduceImpl, numPartitions int64) error {
 		return ierror.Raise(err)
 	}
 	logger.Info("Reduce: creating ", numPartitions, " new partitions with hashing")
-	hasher := utils.GetHasher(reflect.TypeOf(*new(T)))
+	hasher := utils.GetHasher(utils.TypeObj[T]())
 	if err = ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
 		threadRanges, err := core.NewPartitionGroupWithSize[T](this.executorData.GetPartitionTools(), tmp.Size())
 		if err != nil {
@@ -614,7 +638,7 @@ func Distinct[T comparable](this *IReduceImpl, numPartitions int64) error {
 	if err = Exchange(this.Base(), tmp, output); err != nil {
 		return ierror.Raise(err)
 	}
-	if err = distinctFilter(this, tmp); err != nil {
+	if err = distinctFilter(this, output); err != nil {
 		return ierror.Raise(err)
 	}
 
@@ -910,7 +934,7 @@ func keyHashing[K comparable, T any](this *IReduceImpl, numPartitions int64) err
 	if err != nil {
 		return ierror.Raise(err)
 	}
-	hasher := utils.GetHasher(reflect.TypeOf(*new(K)))
+	hasher := utils.GetHasher(utils.TypeObj[K]())
 	logger.Info("Reduce: creating ", numPartitions, " new partitions with key hashing")
 
 	if err = ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
@@ -956,6 +980,7 @@ func keyHashing[K comparable, T any](this *IReduceImpl, numPartitions int64) err
 		return ierror.Raise(err)
 	}
 
+	core.SetPartitions(this.executorData, output)
 	return nil
 }
 

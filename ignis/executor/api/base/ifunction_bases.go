@@ -82,6 +82,14 @@ func (this *IKeyBy[T, R]) RunKeyBy(i *impl.IPipeImpl, f function.IBaseFunction) 
 	return impl.KeyBy[T, R](i, f.(function.IFunction[T, R]))
 }
 
+type IGroupBy[T any, R comparable] struct {
+	IKeyBy[T, R]
+}
+
+func (this *IGroupBy[T, R]) Types() []api.IContextType {
+	return []api.IContextType{NewTypeA[T](), NewTypeC[R](), NewTypeCA[R, T](), NewTypeCA[R, []T]()}
+}
+
 type IMapPartitionsAbs interface {
 	RunMapPartitions(i *impl.IPipeImpl, f function.IBaseFunction) error
 }
@@ -108,7 +116,7 @@ func (this *IMapPartitionsWithIndex[T, R]) Types() []api.IContextType {
 	return []api.IContextType{NewTypeA[T](), NewTypeA[R]()}
 }
 
-func (this *IMapPartitions[T, R]) RunMapPartitionsWithIndex(i *impl.IPipeImpl, f function.IBaseFunction, preservesPartitioning bool) error {
+func (this *IMapPartitionsWithIndex[T, R]) RunMapPartitionsWithIndex(i *impl.IPipeImpl, f function.IBaseFunction, preservesPartitioning bool) error {
 	return impl.MapPartitionsWithIndex[T, R](i, f.(function.IFunction2[int64, iterator.IReadIterator[T], []R]), preservesPartitioning)
 }
 

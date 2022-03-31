@@ -6,7 +6,6 @@ import (
 	"ignis/executor/api/ipair"
 	"ignis/executor/api/iterator"
 	"ignis/executor/core/ierror"
-	"ignis/executor/core/iio"
 	"ignis/executor/core/iprotocol"
 	"ignis/executor/core/itransport"
 	"ignis/executor/core/utils"
@@ -28,17 +27,25 @@ func NewIMemoryPartition[T any](sz int64, native bool) *IMemoryPartition[T] {
 }
 
 func ConvIMemoryPartition[T any](other IPartitionBase) IPartitionBase {
-	t := iio.TypeObj[T]()
+	t := utils.TypeObj[T]()
 	if ipair.IsPairType(t) {
 		part := NewIMemoryPartition[T](other.Size(), other.Native())
 		listA := other.Inner().(IList)
 		listB := part.Inner().(IList)
 		listB.Resize(int(other.Size()), false)
-		aux := (any)(new(T)).(ipair.IAbstractPair)
-		for i := 0; i < listA.Size(); i++ {
-			p := listA.GetAny(i).(ipair.IAbstractPair)
-			listB.SetAny(i, aux.New(p.SetFirst, p.SetSecond))
+		if t == utils.TypeObj[ipair.IPair[any, any]]() {
+			for i := 0; i < listA.Size(); i++ {
+				p := listA.GetAny(i).(ipair.IConvertPair).To()
+				listB.SetAny(i, *ipair.New(p.GetFirst(), p.GetSecond()))
+			}
+		} else {
+			aux := any(new(T)).(ipair.IAbstractPair)
+			for i := 0; i < listA.Size(); i++ {
+				p := listA.GetAny(i).(ipair.IConvertPair).To()
+				listB.SetAny(i, *(any(aux.New(p.GetFirst(), p.GetSecond())).(*T)))
+			}
 		}
+
 		return part
 	}
 	return &IMemoryPartition[T]{
@@ -398,8 +405,9 @@ func (this *IListImpl[T]) Merge(array any) error {
 		}
 	} else {
 		src := reflect.ValueOf(array)
-		this.Reserve(len(this.array) + src.Len())
-		for i := 0; i < src.Len(); i++ {
+		sz := src.Len()
+		this.Reserve(len(this.array) + sz)
+		for i := 0; i < sz; i++ {
 			this.array[this.pos] = src.Index(i).Interface().(T)
 			this.pos++
 		}

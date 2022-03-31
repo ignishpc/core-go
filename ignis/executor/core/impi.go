@@ -49,7 +49,7 @@ func Bcast[T any](this *IMpi, part storage.IPartition[T], root int) error {
 				list.Resize(int(sz), true)
 			}
 			array := list.Array().([]T)
-			bytes := C_int(int(sz) * int(iio.TypeObj[T]().Size()))
+			bytes := C_int(int(sz) * int(utils.TypeObj[T]().Size()))
 			if err := MPI_Bcast(PS(&array), bytes, MPI_BYTE, C_int(root), this.Native()); err != nil {
 				return ierror.Raise(err)
 			}
@@ -207,7 +207,7 @@ func DriverGather[T any](this *IMpi, group C_MPI_Comm, partGroup *storage.IParti
 	if storageS == storage.IMemoryPartitionType && sameProtocol {
 		var aux C_int8
 		if exec0 {
-			aux = C_int8(utils.Ternary(iio.TypeObj[T]() == iio.TypeObj[any](), 0, 1))
+			aux = C_int8(utils.Ternary(utils.TypeObj[T]() == utils.TypeObj[any](), 0, 1))
 		}
 		if err := MPI_Bcast(P(&aux), 1, MPI_C_BOOL, 1, group); err != nil {
 			return ierror.Raise(err)
@@ -295,7 +295,7 @@ func DriverScatter[T any](this *IMpi, group C_MPI_Comm, partGroup *storage.IPart
 	if sameProtocol {
 		var aux C_int8
 		if exec0 {
-			aux = C_int8(utils.Ternary(iio.TypeObj[T]() == iio.TypeObj[any](), 0, 1))
+			aux = C_int8(utils.Ternary(utils.TypeObj[T]() == utils.TypeObj[any](), 0, 1))
 		}
 		if err := MPI_Bcast(P(&aux), 1, MPI_C_BOOL, 1, group); err != nil {
 			return ierror.Raise(err)
@@ -319,10 +319,10 @@ func DriverScatter[T any](this *IMpi, group C_MPI_Comm, partGroup *storage.IPart
 			partsv = append(partsv, 0)
 		}
 		for i := 0; i < remainder; i++ {
-			partsv = append(partsv, C_int((execsElems+1)*int(iio.TypeObj[T]().Size())))
+			partsv = append(partsv, C_int((execsElems+1)*int(utils.TypeObj[T]().Size())))
 		}
 		for i := 0; i < partitions-remainder; i++ {
-			partsv = append(partsv, C_int(execsElems*int(iio.TypeObj[T]().Size())))
+			partsv = append(partsv, C_int(execsElems*int(utils.TypeObj[T]().Size())))
 		}
 		for i := 0; i < (len(partsv) - execsParts*(execs+1)); i++ {
 			partsv = append(partsv, 0)
@@ -356,7 +356,7 @@ func DriverScatter[T any](this *IMpi, group C_MPI_Comm, partGroup *storage.IPart
 			wrote := int64(0)
 			array := partGroup.Get(0).Inner().(storage.IList).Array().([]T)
 			for i := execsParts; i < len(partsv); i++ {
-				displ := partsv[i] / C_int(iio.TypeObj[T]().Size())
+				displ := partsv[i] / C_int(utils.TypeObj[T]().Size())
 				if err = proto.WriteObjectWithNative(array[offset:offset+displ], sameProtocol && native); err != nil {
 					return ierror.Raise(err)
 				}
@@ -415,7 +415,7 @@ func DriverScatter[T any](this *IMpi, group C_MPI_Comm, partGroup *storage.IPart
 					return ierror.Raise(err)
 				}
 				list := part.Inner().(storage.IList)
-				list.Resize(int(l)/int(iio.TypeObj[T]().Size()), true)
+				list.Resize(int(l)/int(utils.TypeObj[T]().Size()), true)
 				array := list.Array().([]T)
 				Memcpy(PS(&array), unsafe.Add(src, offset), int(l))
 				offset += int(l)
@@ -593,7 +593,7 @@ func gatherImpl[T any](this *IMpi, group C_MPI_Comm, part storage.IPartition[T],
 	}
 	if part.Type() == storage.IMemoryPartitionType {
 		if list, ok := part.Inner().(*storage.IListImpl[T]); ok && iio.IsContiguous[T]() && sameProtocol {
-			elemSz := int(iio.TypeObj[T]().Size())
+			elemSz := int(utils.TypeObj[T]().Size())
 			sz := C_int(int(part.Size()) * elemSz)
 			szv := []C_int{0}
 			displs := []C_int{0}
@@ -789,7 +789,7 @@ func sendRecvImpl[T any](this *IMpi, group C_MPI_Comm, part storage.IPartition[T
 	if part.Type() == storage.IMemoryPartitionType {
 		if list, ok := part.Inner().(*storage.IListImpl[T]); ok && iio.IsContiguous[T]() && sameProtocol {
 			sz := C_int(part.Size())
-			elemSz := int(iio.TypeObj[T]().Size())
+			elemSz := int(utils.TypeObj[T]().Size())
 			if id == source {
 				if err := MPI_Send(P(&sz), 1, MPI_INT, C_int(dest), C_int(tag), group); err != nil {
 					return ierror.Raise(err)

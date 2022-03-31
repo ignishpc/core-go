@@ -63,8 +63,8 @@ func (this *IGeneralModule) Filter(ctx context.Context, src *rpc.ISource) (_err 
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.IFilterAbs); ok {
-		return this.PackError(filterfun.RunFilter(this.pipeImpl, basefun))
+	if fun, ok := basefun.(base.IFilterAbs); ok {
+		return this.PackError(fun.RunFilter(this.pipeImpl, basefun))
 	} else if anyfun, ok := basefun.(function.IFunction[any, bool]); ok {
 		return this.PackError(impl.Filter(this.pipeImpl, anyfun))
 	}
@@ -77,8 +77,8 @@ func (this *IGeneralModule) Flatmap(ctx context.Context, src *rpc.ISource) (_err
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.IFlatmapAbs); ok {
-		return this.PackError(filterfun.RunFlatmap(this.pipeImpl, basefun))
+	if fun, ok := basefun.(base.IFlatmapAbs); ok {
+		return this.PackError(fun.RunFlatmap(this.pipeImpl, basefun))
 	} else if anyfun, ok := basefun.(function.IFunction[any, []any]); ok {
 		return this.PackError(impl.Flatmap(this.pipeImpl, anyfun))
 	}
@@ -91,8 +91,8 @@ func (this *IGeneralModule) KeyBy(ctx context.Context, src *rpc.ISource) (_err e
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.IKeyByAbs); ok {
-		return this.PackError(filterfun.RunKeyBy(this.pipeImpl, basefun))
+	if fun, ok := basefun.(base.IKeyByAbs); ok {
+		return this.PackError(fun.RunKeyBy(this.pipeImpl, basefun))
 	} else if anyfun, ok := basefun.(function.IFunction[any, any]); ok {
 		return this.PackError(impl.KeyBy(this.pipeImpl, anyfun))
 	}
@@ -105,8 +105,8 @@ func (this *IGeneralModule) MapPartitions(ctx context.Context, src *rpc.ISource)
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.IMapPartitionsAbs); ok {
-		return this.PackError(filterfun.RunMapPartitions(this.pipeImpl, basefun))
+	if fun, ok := basefun.(base.IMapPartitionsAbs); ok {
+		return this.PackError(fun.RunMapPartitions(this.pipeImpl, basefun))
 	} else if anyfun, ok := basefun.(function.IFunction[iterator.IReadIterator[any], []any]); ok {
 		return this.PackError(impl.MapPartitions(this.pipeImpl, anyfun))
 	}
@@ -119,8 +119,8 @@ func (this *IGeneralModule) MapPartitionsWithIndex(ctx context.Context, src *rpc
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.IMapPartitionsWithIndexAbs); ok {
-		return this.PackError(filterfun.RunMapPartitionsWithIndex(this.pipeImpl, basefun, preservesPartitioning))
+	if fun, ok := basefun.(base.IMapPartitionsWithIndexAbs); ok {
+		return this.PackError(fun.RunMapPartitionsWithIndex(this.pipeImpl, basefun, preservesPartitioning))
 	} else if anyfun, ok := basefun.(function.IFunction2[int64, iterator.IReadIterator[any], []any]); ok {
 		return this.PackError(impl.MapPartitionsWithIndex(this.pipeImpl, anyfun, preservesPartitioning))
 	}
@@ -133,8 +133,8 @@ func (this *IGeneralModule) MapExecutor(ctx context.Context, src *rpc.ISource) (
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.IMapExecutorAbs); ok {
-		return this.PackError(filterfun.RunMapExecutor(this.pipeImpl, basefun))
+	if fun, ok := basefun.(base.IMapExecutorAbs); ok {
+		return this.PackError(fun.RunMapExecutor(this.pipeImpl, basefun))
 	} else if anyfun, ok := basefun.(function.IVoidFunction[[][]any]); ok {
 		return this.PackError(impl.MapExecutor(this.pipeImpl, anyfun))
 	}
@@ -147,8 +147,8 @@ func (this *IGeneralModule) MapExecutorTo(ctx context.Context, src *rpc.ISource)
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.IMapExecutorToAbs); ok {
-		return this.PackError(filterfun.RunMapExecutorTo(this.pipeImpl, basefun))
+	if fun, ok := basefun.(base.IMapExecutorToAbs); ok {
+		return this.PackError(fun.RunMapExecutorTo(this.pipeImpl, basefun))
 	} else if anyfun, ok := basefun.(function.IFunction[[][]any, [][]any]); ok {
 		return this.PackError(impl.MapExecutorTo(this.pipeImpl, anyfun))
 	}
@@ -161,8 +161,8 @@ func (this *IGeneralModule) GroupBy(ctx context.Context, src *rpc.ISource, numPa
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.IKeyByAbs); ok {
-		err = filterfun.RunKeyBy(this.pipeImpl, basefun)
+	if fun, ok := basefun.(base.IKeyByAbs); ok {
+		err = fun.RunKeyBy(this.pipeImpl, basefun)
 	} else if anyfun, ok := basefun.(function.IFunction[any, any]); ok {
 		err = impl.KeyBy(this.pipeImpl, anyfun)
 	} else {
@@ -202,8 +202,8 @@ func (this *IGeneralModule) SortBy(ctx context.Context, src *rpc.ISource, ascend
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.ISortByAbs); ok {
-		return this.PackError(filterfun.RunSortBy(this.sortImpl, basefun, ascending))
+	if fun, ok := basefun.(base.ISortByAbs); ok {
+		return this.PackError(fun.RunSortBy(this.sortImpl, basefun, ascending))
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.SortBy(this.sortImpl, anyfun, ascending))
 	}
@@ -216,8 +216,8 @@ func (this *IGeneralModule) SortBy3(ctx context.Context, src *rpc.ISource, ascen
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.ISortByAbs); ok {
-		return this.PackError(filterfun.RunSortByWithPartitions(this.sortImpl, basefun, ascending, numPartitions))
+	if fun, ok := basefun.(base.ISortByAbs); ok {
+		return this.PackError(fun.RunSortByWithPartitions(this.sortImpl, basefun, ascending, numPartitions))
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.SortByWithPartitions(this.sortImpl, anyfun, ascending, numPartitions))
 	}
@@ -425,7 +425,7 @@ func (this *IGeneralModule) AggregateByKey4(ctx context.Context, zero *rpc.ISour
 		return this.PackError(err)
 	}
 	if fun, ok := seqfun.(base.IAggregateByKeyAbs); ok {
-		err = fun.RunAggregateByKey(this.reduceImpl, zerofun, numPartitions, false)
+		err = fun.RunAggregateByKey(this.reduceImpl, seqfun, numPartitions, false)
 	} else if anyfun, ok := seqfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.AggregateByKey[any](this.reduceImpl, anyfun, numPartitions, false)
 	} else {
@@ -439,7 +439,7 @@ func (this *IGeneralModule) AggregateByKey4(ctx context.Context, zero *rpc.ISour
 		return this.PackError(err)
 	}
 	if fun, ok := combfun.(base.IReduceByKeyAbs); ok {
-		err = fun.RunReduceByKey(this.reduceImpl, zerofun, numPartitions, false)
+		err = fun.RunReduceByKey(this.reduceImpl, combfun, numPartitions, false)
 	} else if anyfun, ok := combfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.ReduceByKey[any](this.reduceImpl, anyfun, numPartitions, false)
 	} else {
@@ -472,7 +472,7 @@ func (this *IGeneralModule) FoldByKey(ctx context.Context, zero *rpc.ISource, sr
 		return this.PackError(err)
 	}
 	if fun, ok := seqfun.(base.IFoldByKeyAbs); ok {
-		err = fun.RunFoldByKey(this.reduceImpl, zerofun, numPartitions, localFold)
+		err = fun.RunFoldByKey(this.reduceImpl, seqfun, numPartitions, localFold)
 	} else if anyfun, ok := seqfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.FoldByKey[any](this.reduceImpl, anyfun, numPartitions, localFold)
 	} else {
@@ -508,8 +508,8 @@ func (this *IGeneralModule) SortByKey2b(ctx context.Context, src *rpc.ISource, a
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.ISortByKeyAbs); ok {
-		return this.PackError(filterfun.RunSortByKey(this.sortImpl, basefun, ascending))
+	if fun, ok := basefun.(base.ISortByKeyAbs); ok {
+		return this.PackError(fun.RunSortByKey(this.sortImpl, basefun, ascending))
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.SortByKeyBy[any, any](this.sortImpl, anyfun, ascending))
 	}
@@ -522,8 +522,8 @@ func (this *IGeneralModule) SortByKey3(ctx context.Context, src *rpc.ISource, as
 	if err != nil {
 		return this.PackError(err)
 	}
-	if filterfun, ok := basefun.(base.ISortByKeyAbs); ok {
-		return this.PackError(filterfun.RunSortByKeyWithPartitions(this.sortImpl, basefun, ascending, numPartitions))
+	if fun, ok := basefun.(base.ISortByKeyAbs); ok {
+		return this.PackError(fun.RunSortByKeyWithPartitions(this.sortImpl, basefun, ascending, numPartitions))
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.SortByKeyByWithPartitions[any, any](this.sortImpl, anyfun, ascending, numPartitions))
 	}

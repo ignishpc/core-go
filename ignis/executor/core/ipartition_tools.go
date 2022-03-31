@@ -154,9 +154,9 @@ func ConvertGroupPartitionTo[T any](this *IPartitionTools, other storage.IPartit
 		return nil, ierror.Raise(err)
 	}
 
-	if !group.Type().ConvertibleTo(other.Type()) {
+	if !group.Type().AssignableTo(other.Type()) && !other.Type().AssignableTo(group.Type()) {
 		pt := reflect.TypeOf(ipair.IPair[any, any]{})
-		if (group.Type() == pt && ipair.IsPairType(other.Type())) || (other.Type() == pt && ipair.IsPairType(group.Type())) {
+		if ipair.IsPairType(group.Type()) && ipair.IsPairType(other.Type()) && (group.Type() == pt || other.Type() == pt) {
 			if this.IsMemoryGroup(other) {
 				logger.Warn(other.Type().String() + " will be convert to " + group.Type().String())
 			}
