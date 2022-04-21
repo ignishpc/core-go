@@ -14,16 +14,18 @@ import (
 
 func _init_(args []string) error {
 	logger.Init()
-	if len(os.Args) < 3 {
-		return ierror.RaiseMsg("Executor need a server port and compression as argument")
+	if len(os.Args) < 4 {
+		return ierror.RaiseMsg("Executor need a server port, compression and server mode as argument")
 	}
 
 	port, err := strconv.Atoi(os.Args[1])
 	compression, err2 := strconv.Atoi(os.Args[2])
+	mode, err3 := strconv.Atoi(os.Args[3])
 
-	if err != nil || err2 != nil {
-		return ierror.RaiseMsg("Executor need a valid server port and compression as argument")
+	if err != nil || err2 != nil || err3 != nil {
+		return ierror.RaiseMsg("Executor arguments are not valid")
 	}
+	localMode := mode == 1
 
 	executorData := core.NewIExecutorData()
 
@@ -45,8 +47,8 @@ func _init_(args []string) error {
 
 	}
 
-	server := modules.NewIExecutorServerModule(executorData)
-	return server.Serve("IExecutorServer", port, compression, services)
+	server := modules.NewIExecutorServerModule(executorData, services)
+	return server.Serve("IExecutorServer", port, compression, localMode)
 }
 
 func main() {

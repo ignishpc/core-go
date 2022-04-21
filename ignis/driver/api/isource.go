@@ -2,6 +2,8 @@ package api
 
 import (
 	"github.com/apache/thrift/lib/go/thrift"
+	"ignis/driver/api/derror"
+	"ignis/executor/core/iio"
 	"ignis/executor/core/iprotocol"
 	"ignis/rpc"
 )
@@ -25,12 +27,15 @@ func NewISourceNative(name string, native bool) *ISource {
 	}
 }
 
-func (this *ISource) addParam(key string, value interface{}) *ISource {
+func AddParam[T any](this *ISource, key string, value T) (*ISource, error) {
+	iio.AddBasicType[T]()
 	buffer := thrift.NewTMemoryBuffer()
 	proto := iprotocol.NewIObjectProtocol(buffer)
-	proto.WriteObjectWithNative(value, this.native)
+	if err := proto.WriteObjectWithNative(value, this.native); err != nil {
+		return this, derror.NewGenericIDriverError(err)
+	}
 	this.inner.Params[key] = buffer.Bytes()
-	return this
+	return this, nil
 }
 
 func (this *ISource) rpc() *rpc.ISource {

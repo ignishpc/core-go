@@ -21,6 +21,10 @@ func NewIModule(executorData *core.IExecutorData) IModule { //Only for IDriverCo
 	return IModule{executorData}
 }
 
+func (this *IModule) GetExecutorData() *core.IExecutorData {
+	return this.executorData
+}
+
 func (this *IModule) PackError(err error) error {
 	if err == nil {
 		return nil

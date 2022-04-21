@@ -18,7 +18,7 @@ type _Ignis struct {
 var mu sync.Mutex
 var Ignis _Ignis
 
-func (this _Ignis) Start() error {
+func (this *_Ignis) Start() error {
 	mu.Lock()
 	defer mu.Unlock()
 	if this.cmd == nil {
@@ -31,13 +31,13 @@ func (this _Ignis) Start() error {
 		return derror.NewGenericIDriverError(err)
 	}
 	_ = input
-	output, err2 := this.cmd.StdoutPipe()
-	if err2 != nil {
-		return derror.NewGenericIDriverError(err2)
+	output, err := this.cmd.StdoutPipe()
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
-	err3 := this.cmd.Start()
-	if err3 != nil {
-		return derror.NewGenericIDriverError(err3)
+	err = this.cmd.Start()
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
 	var backendPort, backendCompression, callbackPort, callbackCompression int
 	fmt.Fscanf(output, "%d\n%d\n%d\n%d\n", &backendPort, &backendCompression, &callbackPort, &callbackCompression)
@@ -50,7 +50,7 @@ func (this _Ignis) Start() error {
 	return nil
 }
 
-func (this _Ignis) Stop() {
+func (this *_Ignis) Stop() {
 	mu.Lock()
 	defer mu.Unlock()
 	if this.cmd != nil {

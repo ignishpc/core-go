@@ -15,9 +15,9 @@ func NewIProperties() (*IProperties, error) {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetPropertiesService().NewInstance_(context.Background())
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	id, err := client.Services().GetPropertiesService().NewInstance_(context.Background())
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
 	return &IProperties{
 		id,
@@ -30,9 +30,9 @@ func NewIPropertiesCopy(props *IProperties) (*IProperties, error) {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetPropertiesService().NewInstance2_(context.Background(), props.id)
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	id, err := client.Services().GetPropertiesService().NewInstance2_(context.Background(), props.id)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
 	return &IProperties{
 		id,
@@ -45,9 +45,9 @@ func (this *IProperties) Set(key string, value string) (string, error) {
 		return "", err
 	}
 	defer client.Free()
-	old, err2 := client.Services().GetPropertiesService().SetProperty(context.Background(), this.id, key, value)
-	if err2 != nil {
-		return "", derror.NewGenericIDriverError(err2)
+	old, err := client.Services().GetPropertiesService().SetProperty(context.Background(), this.id, key, value)
+	if err != nil {
+		return "", derror.NewGenericIDriverError(err)
 	}
 	return old, nil
 }
@@ -58,9 +58,9 @@ func (this *IProperties) Get(key string) (string, error) {
 		return "", err
 	}
 	defer client.Free()
-	value, err2 := client.Services().GetPropertiesService().GetProperty(context.Background(), this.id, key)
-	if err2 != nil {
-		return "", derror.NewGenericIDriverError(err2)
+	value, err := client.Services().GetPropertiesService().GetProperty(context.Background(), this.id, key)
+	if err != nil {
+		return "", derror.NewGenericIDriverError(err)
 	}
 	return value, nil
 }
@@ -71,9 +71,9 @@ func (this *IProperties) Rm(key string) (string, error) {
 		return "", err
 	}
 	defer client.Free()
-	value, err2 := client.Services().GetPropertiesService().RmProperty(context.Background(), this.id, key)
-	if err2 != nil {
-		return "", derror.NewGenericIDriverError(err2)
+	value, err := client.Services().GetPropertiesService().RmProperty(context.Background(), this.id, key)
+	if err != nil {
+		return "", derror.NewGenericIDriverError(err)
 	}
 	return value, nil
 }
@@ -84,9 +84,9 @@ func (this *IProperties) Contains(key string) (bool, error) {
 		return false, err
 	}
 	defer client.Free()
-	found, err2 := client.Services().GetPropertiesService().Contains(context.Background(), this.id, key)
-	if err2 != nil {
-		return false, derror.NewGenericIDriverError(err2)
+	found, err := client.Services().GetPropertiesService().Contains(context.Background(), this.id, key)
+	if err != nil {
+		return false, derror.NewGenericIDriverError(err)
 	}
 	return found, nil
 }
@@ -97,9 +97,9 @@ func (this *IProperties) ToMap(defaults bool) (map[string]string, error) {
 		return nil, err
 	}
 	defer client.Free()
-	m, err2 := client.Services().GetPropertiesService().ToMap(context.Background(), this.id, defaults)
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	m, err := client.Services().GetPropertiesService().ToMap(context.Background(), this.id, defaults)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
 	return m, nil
 }
@@ -110,9 +110,9 @@ func (this *IProperties) FromMap(m map[string]string) error {
 		return err
 	}
 	defer client.Free()
-	err2 := client.Services().GetPropertiesService().FromMap(context.Background(), this.id, m)
-	if err2 != nil {
-		return derror.NewGenericIDriverError(err2)
+	err = client.Services().GetPropertiesService().FromMap(context.Background(), this.id, m)
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
 	return nil
 }
@@ -123,9 +123,9 @@ func (this *IProperties) Load(path string) error {
 		return err
 	}
 	defer client.Free()
-	err2 := client.Services().GetPropertiesService().Load(context.Background(), this.id, path)
-	if err2 != nil {
-		return derror.NewGenericIDriverError(err2)
+	err = client.Services().GetPropertiesService().Load(context.Background(), this.id, path)
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
 	return nil
 }
@@ -136,9 +136,9 @@ func (this *IProperties) Store(path string) error {
 		return err
 	}
 	defer client.Free()
-	err2 := client.Services().GetPropertiesService().Store(context.Background(), this.id, path)
-	if err2 != nil {
-		return derror.NewGenericIDriverError(err2)
+	err = client.Services().GetPropertiesService().Store(context.Background(), this.id, path)
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
 	return nil
 }
@@ -149,9 +149,9 @@ func (this *IProperties) Clear() error {
 		return err
 	}
 	defer client.Free()
-	err2 := client.Services().GetPropertiesService().Clear(context.Background(), this.id)
-	if err2 != nil {
-		return derror.NewGenericIDriverError(err2)
+	err = client.Services().GetPropertiesService().Clear(context.Background(), this.id)
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
 	return nil
 }

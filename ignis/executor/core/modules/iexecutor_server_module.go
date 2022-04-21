@@ -8,6 +8,7 @@ import (
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/impi"
 	"ignis/executor/core/logger"
+	"ignis/executor/core/utils"
 	"ignis/rpc/executor"
 	"os"
 )
@@ -16,24 +17,27 @@ type IExecutorServerModule struct {
 	IModule
 	server    *thrift.TSimpleServer
 	processor *thrift.TMultiplexedProcessor
+	services  IExecutorServerServices
 }
 
 type IExecutorServerServices func(processor *thrift.TMultiplexedProcessor)
 
-func NewIExecutorServerModule(executorData *core.IExecutorData) *IExecutorServerModule {
+func NewIExecutorServerModule(executorData *core.IExecutorData, services IExecutorServerServices) *IExecutorServerModule {
 	return &IExecutorServerModule{
 		IModule{executorData},
 		nil,
 		nil,
+		services,
 	}
 }
 
-func (this *IExecutorServerModule) Serve(name string, port int, compression int, services IExecutorServerServices) error {
+func (this *IExecutorServerModule) Serve(name string, port int, compression int, localMode bool) error {
 	if this.server != nil {
 		return nil
 	}
 	this.processor = thrift.NewTMultiplexedProcessor()
-	trans, err := thrift.NewTServerSocket(fmt.Sprintf("localhost:%d", port))
+	address := utils.Ternary(localMode, "127.0.0.1", "0.0.0.0")
+	trans, err := thrift.NewTServerSocket(fmt.Sprintf("%s:%d", address, port))
 	if err != nil {
 		return err
 	}
@@ -79,6 +83,7 @@ func (this *IExecutorServerModule) Start(ctx context.Context, properties map[str
 	if err != nil {
 		return err
 	}
+	this.services(this.processor)
 	logger.Info("ServerModule: go executor ready")
 	return nil
 }

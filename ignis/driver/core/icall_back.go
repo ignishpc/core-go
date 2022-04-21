@@ -26,8 +26,8 @@ func NewICallBack(port, compression int) (*ICallBack, error) {
 		processor.RegisterProcessor("IComm", executor.NewICommModuleProcessor(modules.NewICommModule(executorData)))
 	}
 
-	server := modules.NewIExecutorServerModule(executorData)
-	go server.Serve("IExecutorServer", port, compression, services)
+	server := modules.NewIExecutorServerModule(executorData, services)
+	go server.Serve("IExecutorServer", port, compression, true)
 	return &ICallBack{
 		server,
 		driverContext,

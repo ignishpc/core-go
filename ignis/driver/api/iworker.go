@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"ignis/driver/api/derror"
+	"ignis/driver/core"
 	"ignis/rpc/driver"
 )
 
@@ -17,9 +18,9 @@ func NewIWorkerDefault(cluster *ICluster, tp string) (*IWorker, error) {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().NewInstance_(context.Background(), cluster.id, tp)
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	id, err := client.Services().GetWorkerService().NewInstance_(context.Background(), cluster.id, tp)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
 	return &IWorker{cluster, id}, nil
 }
@@ -30,9 +31,9 @@ func NewIWorkerName(cluster *ICluster, tp, name string) (*IWorker, error) {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().NewInstance3_(context.Background(), cluster.id, tp, name)
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	id, err := client.Services().GetWorkerService().NewInstance3_(context.Background(), cluster.id, tp, name)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
 	return &IWorker{cluster, id}, nil
 }
@@ -43,9 +44,9 @@ func NewIWorkerCores(cluster *ICluster, tp string, cores int, instances int) (*I
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().NewInstance4_(context.Background(), cluster.id, tp, int32(cores), int32(instances))
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	id, err := client.Services().GetWorkerService().NewInstance4_(context.Background(), cluster.id, tp, int32(cores), int32(instances))
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
 	return &IWorker{cluster, id}, nil
 }
@@ -56,9 +57,9 @@ func NewIWorker(cluster *ICluster, tp, name string, cores int, instances int) (*
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().NewInstance5_(context.Background(), cluster.id, tp, name, int32(cores), int32(instances))
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	id, err := client.Services().GetWorkerService().NewInstance5_(context.Background(), cluster.id, tp, name, int32(cores), int32(instances))
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
 	return &IWorker{cluster, id}, nil
 }
@@ -69,9 +70,9 @@ func (this *IWorker) Start() error {
 		return err
 	}
 	defer client.Free()
-	err2 := client.Services().GetWorkerService().Start(context.Background(), this.id)
-	if err2 != nil {
-		return derror.NewGenericIDriverError(err2)
+	err = client.Services().GetWorkerService().Start(context.Background(), this.id)
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
 	return nil
 }
@@ -82,9 +83,9 @@ func (this *IWorker) Destroy() error {
 		return err
 	}
 	defer client.Free()
-	err2 := client.Services().GetWorkerService().Destroy(context.Background(), this.id)
-	if err2 != nil {
-		return derror.NewGenericIDriverError(err2)
+	err = client.Services().GetWorkerService().Destroy(context.Background(), this.id)
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
 	return nil
 }
@@ -99,15 +100,15 @@ func (this *IWorker) SetName(name string) error {
 		return err
 	}
 	defer client.Free()
-	err2 := client.Services().GetWorkerService().SetName(context.Background(), this.id, name)
-	if err2 != nil {
-		return derror.NewGenericIDriverError(err2)
+	err = client.Services().GetWorkerService().SetName(context.Background(), this.id, name)
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
 	return nil
 }
 
-func (this *IWorker) Parallelize(data interface{}, partitions int64, src *ISource, native bool) (*IDataFrame, error) {
-	id, err := Ignis.callback.DriverContext().Parallelize(data, native)
+func Parallelize[T any](this *IWorker, data []T, partitions int64, src *ISource, native bool) (*IDataFrame[T], error) {
+	id, err := core.Parallelize(Ignis.callback.DriverContext(), data, native)
 	if err != nil {
 		return nil, err
 	}
@@ -116,147 +117,143 @@ func (this *IWorker) Parallelize(data interface{}, partitions int64, src *ISourc
 		return nil, err
 	}
 	defer client.Free()
-	var err2 error
 	var dataId *driver.IDataFrameId
 	if src == nil {
-		dataId, err2 = client.Services().GetWorkerService().Parallelize(context.Background(), this.id, id, partitions)
+		dataId, err = client.Services().GetWorkerService().Parallelize(context.Background(), this.id, id, partitions)
 	} else {
-		dataId, err2 = client.Services().GetWorkerService().Parallelize4(context.Background(), this.id, id, partitions, src.rpc())
+		dataId, err = client.Services().GetWorkerService().Parallelize4(context.Background(), this.id, id, partitions, src.rpc())
 	}
-	if err2 != nil {
+	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame{
+	return &IDataFrame[T]{
 		this,
 		dataId,
 	}, nil
 }
 
-func (this *IWorker) ImportDataFrame(data *IDataFrame, src *ISource) (*IDataFrame, error) {
+func ImportDataFrame[T any](this *IWorker, data *IDataFrame, src *ISource) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	var err2 error
 	var id *driver.IDataFrameId
 	if src == nil {
-		id, err2 = client.Services().GetWorkerService().ImportDataFrame(context.Background(), this.id, data.id)
+		id, err = client.Services().GetWorkerService().ImportDataFrame(context.Background(), this.id, data.id)
 	} else {
-		id, err2 = client.Services().GetWorkerService().ImportDataFrame3(context.Background(), this.id, data.id, src.rpc())
+		id, err = client.Services().GetWorkerService().ImportDataFrame3(context.Background(), this.id, data.id, src.rpc())
 	}
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame{
+	return &IDataFrame[T]{
 		this,
 		id,
 	}, nil
 }
 
-func (this *IWorker) TextFileDefault(path string) (*IDataFrame, error) {
+func TextFileDefault[T any](this *IWorker, path string) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().TextFile(context.Background(), this.id, path)
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	id, err := client.Services().GetWorkerService().TextFile(context.Background(), this.id, path)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame{
+	return &IDataFrame[T]{
 		this,
 		id,
 	}, nil
 }
 
-func (this *IWorker) TextFile(path string, minPartitions int64) (*IDataFrame, error) {
+func (this *IWorker) TextFile(path string, minPartitions int64) (*IDataFrame[string], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().TextFile3(context.Background(), this.id, path, minPartitions)
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	id, err := client.Services().GetWorkerService().TextFile3(context.Background(), this.id, path, minPartitions)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame{
+	return &IDataFrame[string]{
 		this,
 		id,
 	}, nil
 }
 
-func (this *IWorker) PartitionObjectFile(path string, src *ISource) (*IDataFrame, error) {
+func PartitionObjectFile[T any](this *IWorker, path string, src *ISource) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	var err2 error
 	var id *driver.IDataFrameId
 	if src == nil {
-		id, err2 = client.Services().GetWorkerService().PartitionObjectFile(context.Background(), this.id, path)
+		id, err = client.Services().GetWorkerService().PartitionObjectFile(context.Background(), this.id, path)
 	} else {
-		id, err2 = client.Services().GetWorkerService().PartitionObjectFile3(context.Background(), this.id, path, src.rpc())
+		id, err = client.Services().GetWorkerService().PartitionObjectFile3(context.Background(), this.id, path, src.rpc())
 	}
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame{
+	return &IDataFrame[T]{
 		this,
 		id,
 	}, nil
 }
 
-func (this *IWorker) PartitionTextFile(path string) (*IDataFrame, error) {
+func (this *IWorker) PartitionTextFile(path string) (*IDataFrame[string], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().PartitionTextFile(context.Background(), this.id, path)
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	id, err := client.Services().GetWorkerService().PartitionTextFile(context.Background(), this.id, path)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame{
+	return &IDataFrame[string]{
 		this,
 		id,
 	}, nil
 }
 
-func (this *IWorker) PartitionJsonFileDefault(path string) (*IDataFrame, error) {
+func PartitionJsonFileDefault[T any](this *IWorker, path string) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().PartitionJsonFile3a(context.Background(), this.id, path, false)
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	id, err := client.Services().GetWorkerService().PartitionJsonFile3a(context.Background(), this.id, path, false)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame{
+	return &IDataFrame[T]{
 		this,
 		id,
 	}, nil
 }
 
-func (this *IWorker) PartitionJsonFile(path string, src *ISource, objectMapping bool) (*IDataFrame, error) {
+func PartitionJsonFile[T any](this *IWorker, path string, src *ISource, objectMapping bool) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	var err2 error
 	var id *driver.IDataFrameId
 	if src == nil {
-		id, err2 = client.Services().GetWorkerService().PartitionJsonFile3a(context.Background(), this.id, path, objectMapping)
+		id, err = client.Services().GetWorkerService().PartitionJsonFile3a(context.Background(), this.id, path, objectMapping)
 	} else {
-		id, err2 = client.Services().GetWorkerService().PartitionJsonFile3b(context.Background(), this.id, path, src.rpc())
+		id, err = client.Services().GetWorkerService().PartitionJsonFile3b(context.Background(), this.id, path, src.rpc())
 	}
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame{
+	return &IDataFrame[T]{
 		this,
 		id,
 	}, nil
@@ -268,9 +265,9 @@ func (this *IWorker) LoadLibrary(path string) error {
 		return err
 	}
 	defer client.Free()
-	err2 := client.Services().GetWorkerService().LoadLibrary(context.Background(), this.id, path)
-	if err2 != nil {
-		return derror.NewGenericIDriverError(err2)
+	err = client.Services().GetWorkerService().LoadLibrary(context.Background(), this.id, path)
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
 	return nil
 }
@@ -281,24 +278,24 @@ func (this *IWorker) Execute(src *ISource) error {
 		return nil
 	}
 	defer client.Free()
-	err2 := client.Services().GetWorkerService().Execute(context.Background(), this.id, src.rpc())
-	if err2 != nil {
-		return derror.NewGenericIDriverError(err2)
+	err = client.Services().GetWorkerService().Execute(context.Background(), this.id, src.rpc())
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
 	return nil
 }
 
-func (this *IWorker) ExecuteTo(src *ISource) (*IDataFrame, error) {
+func ExecuteTo[T any](this *IWorker, src *ISource) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	id, err2 := client.Services().GetWorkerService().ExecuteTo(context.Background(), this.id, src.rpc())
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	id, err := client.Services().GetWorkerService().ExecuteTo(context.Background(), this.id, src.rpc())
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame{
+	return &IDataFrame[T]{
 		this,
 		id,
 	}, nil
@@ -310,35 +307,33 @@ func (this *IWorker) VoidCall(src *ISource, data *IDataFrame) error {
 		return err
 	}
 	defer client.Free()
-	var err2 error
 	if data == nil {
-		err2 = client.Services().GetWorkerService().VoidCall(context.Background(), this.id, src.rpc())
+		err = client.Services().GetWorkerService().VoidCall(context.Background(), this.id, src.rpc())
 	} else {
-		err2 = client.Services().GetWorkerService().VoidCall3(context.Background(), this.id, data.id, src.rpc())
+		err = client.Services().GetWorkerService().VoidCall3(context.Background(), this.id, data.id, src.rpc())
 	}
-	if err2 != nil {
-		return derror.NewGenericIDriverError(err2)
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
 	}
 	return nil
 }
 
-func (this *IWorker) Call(src *ISource, data *IDataFrame) (*IDataFrame, error) {
+func Call[T any](this *IWorker, src *ISource, data *IDataFrame) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	var err2 error
 	var id *driver.IDataFrameId
-	if src == nil {
-		id, err2 = client.Services().GetWorkerService().Call(context.Background(), this.id, src.rpc())
+	if data == nil {
+		id, err = client.Services().GetWorkerService().Call(context.Background(), this.id, src.rpc())
 	} else {
-		id, err2 = client.Services().GetWorkerService().Call3(context.Background(), this.id, data.id, src.rpc())
+		id, err = client.Services().GetWorkerService().Call3(context.Background(), this.id, data.id, src.rpc())
 	}
-	if err2 != nil {
-		return nil, derror.NewGenericIDriverError(err2)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame{
+	return &IDataFrame[T]{
 		this,
 		id,
 	}, nil
