@@ -347,8 +347,7 @@ func MapPartitions[T any, R any](this *IPipeImpl, f function.IFunction[iterator.
 	return nil
 }
 
-func MapPartitionsWithIndex[T, R any](this *IPipeImpl, f function.IFunction2[int64, iterator.IReadIterator[T], []R],
-	preservesPartitioning bool) error {
+func MapPartitionsWithIndex[T, R any](this *IPipeImpl, f function.IFunction2[int64, iterator.IReadIterator[T], []R]) error {
 	context := this.executorData.GetContext()
 	input, err := core.GetAndDeletePartitions[T](this.executorData)
 	if err != nil {

@@ -65,9 +65,19 @@ func (this *IIOModule) PartitionApproxSize(ctx context.Context) (_r int64, _err 
 	return
 }
 
+func (this *IIOModule) PlainFile(ctx context.Context, path string, delim int8) (_err error) {
+	defer this.moduleRecover(&_err)
+	return this.PackError(this.ioImpl.PlainFile(path, 1, delim))
+}
+
+func (this *IIOModule) PlainFile3(ctx context.Context, path string, minPartitions int64, delim int8) (_err error) {
+	defer this.moduleRecover(&_err)
+	return this.PackError(this.ioImpl.PlainFile(path, minPartitions, delim))
+}
+
 func (this *IIOModule) TextFile(ctx context.Context, path string) (_err error) {
 	defer this.moduleRecover(&_err)
-	return this.PackError(this.ioImpl.TextFile(path, 0))
+	return this.PackError(this.ioImpl.TextFile(path, 1))
 }
 
 func (this *IIOModule) TextFile2(ctx context.Context, path string, minPartitions int64) (_err error) {

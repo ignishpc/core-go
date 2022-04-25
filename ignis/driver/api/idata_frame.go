@@ -164,13 +164,26 @@ func (this *IDataFrame[T]) Partitions() (int64, error) {
 	return n, nil
 }
 
-func (this *IDataFrame[T]) SaveAsObjectFileDefault(path string) error {
+func (this *IDataFrame[T]) SaveAsObjectFile(path string) error {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return err
 	}
 	defer client.Free()
 	err = client.Services().GetDataframeService().SaveAsObjectFile(context.Background(), this.id, path, 6)
+	if err != nil {
+		return derror.NewGenericIDriverError(err)
+	}
+	return nil
+}
+
+func (this *IDataFrame[T]) SaveAsObjectFileComp(path string, compression int8) error {
+	client, err := Ignis.pool.GetClient()
+	if err != nil {
+		return err
+	}
+	defer client.Free()
+	err = client.Services().GetDataframeService().SaveAsObjectFile(context.Background(), this.id, path, compression)
 	if err != nil {
 		return derror.NewGenericIDriverError(err)
 	}
@@ -190,7 +203,7 @@ func (this *IDataFrame[T]) SaveAsTextFile(path string) error {
 	return nil
 }
 
-func (this *IDataFrame[T]) SaveAsJsonFileDefault(path string) error {
+func (this *IDataFrame[T]) SaveAsJsonFile(path string) error {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return err
@@ -203,7 +216,7 @@ func (this *IDataFrame[T]) SaveAsJsonFileDefault(path string) error {
 	return nil
 }
 
-func (this *IDataFrame[T]) SaveAsJsonFile(path string, pretty bool) error {
+func (this *IDataFrame[T]) SaveAsJsonFilePretty(path string, pretty bool) error {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return err
@@ -286,7 +299,7 @@ func MapPartitions[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame
 		return nil, err
 	}
 	defer client.Free()
-	id, err := client.Services().GetDataframeService().MapPartitions(context.Background(), this.id, src.rpc(), true)
+	id, err := client.Services().GetDataframeService().MapPartitions(context.Background(), this.id, src.rpc())
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
@@ -296,17 +309,17 @@ func MapPartitions[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame
 	}, nil
 }
 
-func MapPartitionsWithIndexDefault[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame, error) {
+func MapPartitionsWithIndex[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	id, err := client.Services().GetDataframeService().MapPartitionsWithIndex(context.Background(), this.id, src.rpc(), true)
+	id, err := client.Services().GetDataframeService().MapPartitionsWithIndex(context.Background(), this.id, src.rpc())
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame{
+	return &IDataFrame[T]{
 		this.worker,
 		id,
 	}, nil
@@ -508,13 +521,13 @@ func (this *IDataFrame[T]) DistinctN(numPartitions int64, src *ISource) (*IDataF
 func (this *IDataFrame[T]) Reduce(src *ISource) (T, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
-		return nil, err
+		return *new(T), err
 	}
 	defer client.Free()
 	tp := core.RegisterType[T](Ignis.callback.DriverContext())
 	id, err := client.Services().GetDataframeService().Reduce(context.Background(), this.id, src.rpc(), tp)
 	if err != nil {
-		return nil, derror.NewGenericIDriverError(err)
+		return *new(T), derror.NewGenericIDriverError(err)
 	}
 	return core.Collect1[T](Ignis.callback.DriverContext(), id)
 }
@@ -522,13 +535,13 @@ func (this *IDataFrame[T]) Reduce(src *ISource) (T, error) {
 func (this *IDataFrame[T]) TreeReduce(src *ISource) (T, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
-		return nil, err
+		return *new(T), err
 	}
 	defer client.Free()
 	tp := core.RegisterType[T](Ignis.callback.DriverContext())
 	id, err := client.Services().GetDataframeService().TreeReduce(context.Background(), this.id, src.rpc(), tp)
 	if err != nil {
-		return nil, derror.NewGenericIDriverError(err)
+		return *new(T), derror.NewGenericIDriverError(err)
 	}
 	return core.Collect1[T](Ignis.callback.DriverContext(), id)
 }
@@ -550,13 +563,13 @@ func (this *IDataFrame[T]) Collect() ([]T, error) {
 func Aggregate[T any, R any](this *IDataFrame[T], zero, seqOp, combOp *ISource) (R, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
-		return nil, err
+		return *new(R), err
 	}
 	defer client.Free()
 	tp := core.RegisterType[R](Ignis.callback.DriverContext())
 	id, err := client.Services().GetDataframeService().Aggregate(context.Background(), this.id, zero.rpc(), seqOp.rpc(), combOp.rpc(), tp)
 	if err != nil {
-		return nil, derror.NewGenericIDriverError(err)
+		return *new(R), derror.NewGenericIDriverError(err)
 	}
 	return core.Collect1[R](Ignis.callback.DriverContext(), id)
 }
@@ -564,13 +577,13 @@ func Aggregate[T any, R any](this *IDataFrame[T], zero, seqOp, combOp *ISource) 
 func TreeAggregate[T any, R any](this *IDataFrame[T], zero, seqOp, combOp *ISource) (R, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
-		return nil, err
+		return *new(R), err
 	}
 	defer client.Free()
 	tp := core.RegisterType[R](Ignis.callback.DriverContext())
 	id, err := client.Services().GetDataframeService().TreeAggregate(context.Background(), this.id, zero.rpc(), seqOp.rpc(), combOp.rpc(), tp)
 	if err != nil {
-		return nil, derror.NewGenericIDriverError(err)
+		return *new(R), derror.NewGenericIDriverError(err)
 	}
 	return core.Collect1[R](Ignis.callback.DriverContext(), id)
 }
@@ -762,7 +775,7 @@ func (this *IDataFrame[T]) Max(cmp *ISource) (T, error) {
 func (this *IDataFrame[T]) MaxCmp(cmp *ISource) (T, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
-		return nil, err
+		return *new(T), err
 	}
 	defer client.Free()
 	var id int64
@@ -773,7 +786,7 @@ func (this *IDataFrame[T]) MaxCmp(cmp *ISource) (T, error) {
 		id, err = client.Services().GetDataframeService().Max(context.Background(), this.id, tp)
 	}
 	if err != nil {
-		return nil, derror.NewGenericIDriverError(err)
+		return *new(T), derror.NewGenericIDriverError(err)
 	}
 	return core.Collect1[T](Ignis.callback.DriverContext(), id)
 }
@@ -785,7 +798,7 @@ func (this *IDataFrame[T]) Min() (T, error) {
 func (this *IDataFrame[T]) MinCmp(cmp *ISource) (T, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
-		return nil, err
+		return *new(T), err
 	}
 	defer client.Free()
 	var id int64
@@ -796,19 +809,26 @@ func (this *IDataFrame[T]) MinCmp(cmp *ISource) (T, error) {
 		id, err = client.Services().GetDataframeService().Min(context.Background(), this.id, tp)
 	}
 	if err != nil {
-		return nil, derror.NewGenericIDriverError(err)
+		return *new(T), derror.NewGenericIDriverError(err)
 	}
 	return core.Collect1[T](Ignis.callback.DriverContext(), id)
 }
 
-func ToPair[Key any, Value any](this *IDataFrame[ipair.IPair[Key, Value]]) *IPairDataFrame {
-	return &IPairDataFrame{
+func ToPair[Key any, Value any](this *IDataFrame[ipair.IPair[Key, Value]]) *IPairDataFrame[Key, Value] {
+	return &IPairDataFrame[Key, Value]{
 		this.worker,
 		this.id,
 	}
 }
 
-type IPairDataFrame[Key any, Value any] IDataFrame
+type IPairDataFrame[Key any, Value any] IDataFrame[ipair.IPair[Key, Value]]
+
+func (this *IPairDataFrame[Key, Value]) FromPair() *IDataFrame[ipair.IPair[Key, Value]] {
+	return &IDataFrame[ipair.IPair[Key, Value]]{
+		this.worker,
+		this.id,
+	}
+}
 
 func (this *IPairDataFrame[Key, Value]) Join(other *IPairDataFrame[Key, Value], src *ISource) (*IPairDataFrame[Key, Value], error) {
 	client, err := Ignis.pool.GetClient()
@@ -884,7 +904,7 @@ func MapValues[Key any, Value any, R any](this *IPairDataFrame[Key, Value], src 
 	}, nil
 }
 
-func (this *IPairDataFrame[Key, Value]) GroupByKey(src *ISource) (*IPairDataFrame[Key, []Value], error) {
+func GroupByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value], src *ISource) (*IPairDataFrame[Key, []Value], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
@@ -905,7 +925,7 @@ func (this *IPairDataFrame[Key, Value]) GroupByKey(src *ISource) (*IPairDataFram
 	}, nil
 }
 
-func (this *IPairDataFrame[Key, Value]) GroupByKeyN(numPartitions int64, src *ISource) (*IPairDataFrame[Key, []Value], error) {
+func GroupByKeyN[Key comparable, Value any](this *IPairDataFrame[Key, Value], numPartitions int64, src *ISource) (*IPairDataFrame[Key, []Value], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
@@ -1112,7 +1132,7 @@ func (this *IPairDataFrame[Key, Value]) Values() ([]Value, error) {
 	return core.Collect[Value](Ignis.callback.DriverContext(), id)
 }
 
-func SampleByKey[Key comparable, Value any](this *IDataFrame[Key, Value], withReplacement bool, fraction map[Key]float64, seed int) (*IPairDataFrame, error) {
+func SampleByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value], withReplacement bool, fraction map[Key]float64, seed int) (*IPairDataFrame[Key, Value], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
@@ -1127,13 +1147,13 @@ func SampleByKey[Key comparable, Value any](this *IDataFrame[Key, Value], withRe
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame{
+	return &IPairDataFrame[Key, Value]{
 		this.worker,
 		id,
 	}, nil
 }
 
-func CountByKey[Key comparable, Value any](this *IDataFrame[Key, Value]) (map[Key]int64, error) {
+func CountByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value]) (map[Key]int64, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
@@ -1166,13 +1186,13 @@ func CountByKey[Key comparable, Value any](this *IDataFrame[Key, Value]) (map[Ke
 	return result, nil
 }
 
-func CountByValue[Key any, Value comparable](this *IDataFrame[Key, Value]) (map[Value]int64, error) {
+func CountByValue[Key any, Value comparable](this *IPairDataFrame[Key, Value]) (map[Value]int64, error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	iio.AddKeyType[Key, int64]()
+	iio.AddKeyType[Value, int64]()
 	tp := core.RegisterType[map[Value]int64](Ignis.callback.DriverContext())
 	id, err := client.Services().GetDataframeService().CountByKey(context.Background(), this.id, tp)
 	if err != nil {

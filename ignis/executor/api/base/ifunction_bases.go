@@ -106,7 +106,7 @@ func (this *IMapPartitions[T, R]) RunMapPartitions(i *impl.IPipeImpl, f function
 }
 
 type IMapPartitionsWithIndexAbs interface {
-	RunMapPartitionsWithIndex(i *impl.IPipeImpl, f function.IBaseFunction, preservesPartitioning bool) error
+	RunMapPartitionsWithIndex(i *impl.IPipeImpl, f function.IBaseFunction) error
 }
 
 type IMapPartitionsWithIndex[T any, R any] struct {
@@ -116,8 +116,8 @@ func (this *IMapPartitionsWithIndex[T, R]) Types() []api.IContextType {
 	return []api.IContextType{NewTypeA[T](), NewTypeA[R]()}
 }
 
-func (this *IMapPartitionsWithIndex[T, R]) RunMapPartitionsWithIndex(i *impl.IPipeImpl, f function.IBaseFunction, preservesPartitioning bool) error {
-	return impl.MapPartitionsWithIndex[T, R](i, f.(function.IFunction2[int64, iterator.IReadIterator[T], []R]), preservesPartitioning)
+func (this *IMapPartitionsWithIndex[T, R]) RunMapPartitionsWithIndex(i *impl.IPipeImpl, f function.IBaseFunction) error {
+	return impl.MapPartitionsWithIndex[T, R](i, f.(function.IFunction2[int64, iterator.IReadIterator[T], []R]))
 }
 
 type IMapExecutorAbs interface {

@@ -113,16 +113,16 @@ func (this *IGeneralModule) MapPartitions(ctx context.Context, src *rpc.ISource)
 	return this.CompatibilyError(reflect.TypeOf(basefun), "mapPartitions")
 }
 
-func (this *IGeneralModule) MapPartitionsWithIndex(ctx context.Context, src *rpc.ISource, preservesPartitioning bool) (_err error) {
+func (this *IGeneralModule) MapPartitionsWithIndex(ctx context.Context, src *rpc.ISource) (_err error) {
 	defer this.moduleRecover(&_err)
 	basefun, err := this.executorData.LoadLibrary(src)
 	if err != nil {
 		return this.PackError(err)
 	}
 	if fun, ok := basefun.(base.IMapPartitionsWithIndexAbs); ok {
-		return this.PackError(fun.RunMapPartitionsWithIndex(this.pipeImpl, basefun, preservesPartitioning))
+		return this.PackError(fun.RunMapPartitionsWithIndex(this.pipeImpl, basefun))
 	} else if anyfun, ok := basefun.(function.IFunction2[int64, iterator.IReadIterator[any], []any]); ok {
-		return this.PackError(impl.MapPartitionsWithIndex(this.pipeImpl, anyfun, preservesPartitioning))
+		return this.PackError(impl.MapPartitionsWithIndex(this.pipeImpl, anyfun))
 	}
 	return this.CompatibilyError(reflect.TypeOf(basefun), "mapPartitionsWithIndex")
 }

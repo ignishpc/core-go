@@ -61,8 +61,17 @@ func PartitionApproxSize[T any](this *IIOImpl) (int64, error) {
 	return size, nil
 }
 
+func (this *IIOImpl) PlainFile(path string, minPartitions int64, delim int8) error {
+	logger.Info("IO: reading plain file")
+	return this.plainOrTextFile(path, minPartitions, byte(delim))
+}
+
 func (this *IIOImpl) TextFile(path string, minPartitions int64) error {
 	logger.Info("IO: reading text file")
+	return this.plainOrTextFile(path, minPartitions, '\n')
+}
+
+func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byte) error {
 	size := int64(0)
 	if info, err := os.Stat(path); err != nil {
 		return ierror.Raise(err)
@@ -112,7 +121,7 @@ func (this *IIOImpl) TextFile(path string, minPartitions int64) error {
 					break
 				} else {
 					for i := 0; i < n; i++ {
-						if value[i] == '\n' {
+						if value[i] == delim {
 							break
 						}
 						exChunkInit++
@@ -161,7 +170,7 @@ func (this *IIOImpl) TextFile(path string, minPartitions int64) error {
 				threadGroup[id].Add(partition)
 				partitionInit = filepos
 			}
-			line, err := reader.ReadBytes('\n')
+			line, err := reader.ReadBytes(delim)
 			eof := err == io.EOF
 			if err != nil && err != io.EOF {
 				return ierror.Raise(err)

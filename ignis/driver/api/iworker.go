@@ -132,7 +132,7 @@ func Parallelize[T any](this *IWorker, data []T, partitions int64, src *ISource,
 	}, nil
 }
 
-func ImportDataFrame[T any](this *IWorker, data *IDataFrame, src *ISource) (*IDataFrame[T], error) {
+func ImportDataFrame[T any](this *IWorker, data *IDataFrame[T], src *ISource) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
@@ -153,7 +153,7 @@ func ImportDataFrame[T any](this *IWorker, data *IDataFrame, src *ISource) (*IDa
 	}, nil
 }
 
-func TextFileDefault[T any](this *IWorker, path string) (*IDataFrame[T], error) {
+func TextFile[T any](this *IWorker, path string) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
@@ -169,13 +169,45 @@ func TextFileDefault[T any](this *IWorker, path string) (*IDataFrame[T], error) 
 	}, nil
 }
 
-func (this *IWorker) TextFile(path string, minPartitions int64) (*IDataFrame[string], error) {
+func (this *IWorker) TextFileN(path string, minPartitions int64) (*IDataFrame[string], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
 	id, err := client.Services().GetWorkerService().TextFile3(context.Background(), this.id, path, minPartitions)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
+	}
+	return &IDataFrame[string]{
+		this,
+		id,
+	}, nil
+}
+
+func (this *IWorker) PlainFile(path string, delim int8) (*IDataFrame[string], error) {
+	client, err := Ignis.pool.GetClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Free()
+	id, err := client.Services().GetWorkerService().PlainFile(context.Background(), this.id, path, delim)
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
+	}
+	return &IDataFrame[string]{
+		this,
+		id,
+	}, nil
+}
+
+func (this *IWorker) PlainFileN(path string, minPartitions int64, delim int8) (*IDataFrame[string], error) {
+	client, err := Ignis.pool.GetClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Free()
+	id, err := client.Services().GetWorkerService().PlainFile4(context.Background(), this.id, path, minPartitions, delim)
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
@@ -222,7 +254,7 @@ func (this *IWorker) PartitionTextFile(path string) (*IDataFrame[string], error)
 	}, nil
 }
 
-func PartitionJsonFileDefault[T any](this *IWorker, path string) (*IDataFrame[T], error) {
+func PartitionJsonFile[T any](this *IWorker, path string) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
@@ -238,7 +270,7 @@ func PartitionJsonFileDefault[T any](this *IWorker, path string) (*IDataFrame[T]
 	}, nil
 }
 
-func PartitionJsonFile[T any](this *IWorker, path string, src *ISource, objectMapping bool) (*IDataFrame[T], error) {
+func PartitionJsonFileMapping[T any](this *IWorker, path string, src *ISource, objectMapping bool) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
@@ -301,7 +333,7 @@ func ExecuteTo[T any](this *IWorker, src *ISource) (*IDataFrame[T], error) {
 	}, nil
 }
 
-func (this *IWorker) VoidCall(src *ISource, data *IDataFrame) error {
+func VoidCall[T any](this *IWorker, src *ISource, data *IDataFrame[T]) error {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return err
@@ -318,7 +350,7 @@ func (this *IWorker) VoidCall(src *ISource, data *IDataFrame) error {
 	return nil
 }
 
-func Call[T any](this *IWorker, src *ISource, data *IDataFrame) (*IDataFrame[T], error) {
+func Call[T any](this *IWorker, src *ISource, data *IDataFrame[T]) (*IDataFrame[T], error) {
 	client, err := Ignis.pool.GetClient()
 	if err != nil {
 		return nil, err
