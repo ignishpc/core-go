@@ -23,7 +23,7 @@ type IDataFrame[T any] struct {
 }
 
 func (this *IDataFrame[T]) SetName(name string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func (this *IDataFrame[T]) SetName(name string) error {
 }
 
 func (this *IDataFrame[T]) Persist(cacheLevel int8) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (this *IDataFrame[T]) Persist(cacheLevel int8) error {
 }
 
 func (this *IDataFrame[T]) Cache(cacheLevel int8) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (this *IDataFrame[T]) Cache(cacheLevel int8) error {
 }
 
 func (this *IDataFrame[T]) Unpersist(cacheLevel int8) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (this *IDataFrame[T]) Unpersist(cacheLevel int8) error {
 }
 
 func (this *IDataFrame[T]) Uncache(cacheLevel int8) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (this *IDataFrame[T]) Uncache(cacheLevel int8) error {
 }
 
 func (this *IDataFrame[T]) Repartition(numPartitions int64, preserveOrdering bool, global bool) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (this *IDataFrame[T]) Repartition(numPartitions int64, preserveOrdering boo
 }
 
 func (this *IDataFrame[T]) PartitionByRandom(numPartitions int64) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (this *IDataFrame[T]) PartitionByRandom(numPartitions int64) (*IDataFrame[T
 }
 
 func (this *IDataFrame[T]) PartitionByHash(numPartitions int64) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (this *IDataFrame[T]) PartitionByHash(numPartitions int64) (*IDataFrame[T],
 }
 
 func (this *IDataFrame[T]) PartitionBy(src *ISource, numPartitions int64) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func (this *IDataFrame[T]) PartitionBy(src *ISource, numPartitions int64) (*IDat
 }
 
 func (this *IDataFrame[T]) Partitions() (int64, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return -1, err
 	}
@@ -165,7 +165,7 @@ func (this *IDataFrame[T]) Partitions() (int64, error) {
 }
 
 func (this *IDataFrame[T]) SaveAsObjectFile(path string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -178,7 +178,7 @@ func (this *IDataFrame[T]) SaveAsObjectFile(path string) error {
 }
 
 func (this *IDataFrame[T]) SaveAsObjectFileComp(path string, compression int8) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func (this *IDataFrame[T]) SaveAsObjectFileComp(path string, compression int8) e
 }
 
 func (this *IDataFrame[T]) SaveAsTextFile(path string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -204,7 +204,7 @@ func (this *IDataFrame[T]) SaveAsTextFile(path string) error {
 }
 
 func (this *IDataFrame[T]) SaveAsJsonFile(path string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func (this *IDataFrame[T]) SaveAsJsonFile(path string) error {
 }
 
 func (this *IDataFrame[T]) SaveAsJsonFilePretty(path string, pretty bool) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -230,7 +230,7 @@ func (this *IDataFrame[T]) SaveAsJsonFilePretty(path string, pretty bool) error 
 }
 
 func Map[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -246,7 +246,7 @@ func Map[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], error
 }
 
 func (this *IDataFrame[T]) Filter(src *ISource) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +262,7 @@ func (this *IDataFrame[T]) Filter(src *ISource) (*IDataFrame[T], error) {
 }
 
 func Flatmap[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -278,7 +278,7 @@ func Flatmap[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], e
 }
 
 func KeyBy[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +294,7 @@ func KeyBy[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], err
 }
 
 func MapPartitions[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -310,7 +310,7 @@ func MapPartitions[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame
 }
 
 func MapPartitionsWithIndex[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -326,7 +326,7 @@ func MapPartitionsWithIndex[T any, R any](this *IDataFrame[T], src *ISource) (*I
 }
 
 func (this *IDataFrame[T]) MapExecutor(src *ISource) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +342,7 @@ func (this *IDataFrame[T]) MapExecutor(src *ISource) (*IDataFrame[T], error) {
 }
 
 func MapExecutorTo[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -358,7 +358,7 @@ func MapExecutorTo[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame
 }
 
 func GroupBy[Key any, T any](this *IDataFrame[T], src *ISource) (*IPairDataFrame[Key, []T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -374,7 +374,7 @@ func GroupBy[Key any, T any](this *IDataFrame[T], src *ISource) (*IPairDataFrame
 }
 
 func GroupByN[Key any, T any](this *IDataFrame[T], src *ISource, numPartitions int64) (*IPairDataFrame[Key, []T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -390,7 +390,7 @@ func GroupByN[Key any, T any](this *IDataFrame[T], src *ISource, numPartitions i
 }
 
 func (this *IDataFrame[T]) Sort(ascending bool) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -406,7 +406,7 @@ func (this *IDataFrame[T]) Sort(ascending bool) (*IDataFrame[T], error) {
 }
 
 func (this *IDataFrame[T]) SortN(ascending bool, numPartitions int64) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -422,7 +422,7 @@ func (this *IDataFrame[T]) SortN(ascending bool, numPartitions int64) (*IDataFra
 }
 
 func (this *IDataFrame[T]) SortBy(src *ISource, ascending bool) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -438,7 +438,7 @@ func (this *IDataFrame[T]) SortBy(src *ISource, ascending bool) (*IDataFrame[T],
 }
 
 func (this *IDataFrame[T]) SortByN(src *ISource, ascending bool, numPartitions int64) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -454,7 +454,7 @@ func (this *IDataFrame[T]) SortByN(src *ISource, ascending bool, numPartitions i
 }
 
 func (this *IDataFrame[T]) Union(other *IDataFrame[T], preserveOrder bool, src *ISource) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -475,7 +475,7 @@ func (this *IDataFrame[T]) Union(other *IDataFrame[T], preserveOrder bool, src *
 }
 
 func (this *IDataFrame[T]) Distinct(src *ISource) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -496,7 +496,7 @@ func (this *IDataFrame[T]) Distinct(src *ISource) (*IDataFrame[T], error) {
 }
 
 func (this *IDataFrame[T]) DistinctN(numPartitions int64, src *ISource) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -519,7 +519,7 @@ func (this *IDataFrame[T]) DistinctN(numPartitions int64, src *ISource) (*IDataF
 /*General Action*/
 
 func (this *IDataFrame[T]) Reduce(src *ISource) (T, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return *new(T), err
 	}
@@ -533,7 +533,7 @@ func (this *IDataFrame[T]) Reduce(src *ISource) (T, error) {
 }
 
 func (this *IDataFrame[T]) TreeReduce(src *ISource) (T, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return *new(T), err
 	}
@@ -547,7 +547,7 @@ func (this *IDataFrame[T]) TreeReduce(src *ISource) (T, error) {
 }
 
 func (this *IDataFrame[T]) Collect() ([]T, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -561,7 +561,7 @@ func (this *IDataFrame[T]) Collect() ([]T, error) {
 }
 
 func Aggregate[T any, R any](this *IDataFrame[T], zero, seqOp, combOp *ISource) (R, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return *new(R), err
 	}
@@ -575,7 +575,7 @@ func Aggregate[T any, R any](this *IDataFrame[T], zero, seqOp, combOp *ISource) 
 }
 
 func TreeAggregate[T any, R any](this *IDataFrame[T], zero, seqOp, combOp *ISource) (R, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return *new(R), err
 	}
@@ -589,7 +589,7 @@ func TreeAggregate[T any, R any](this *IDataFrame[T], zero, seqOp, combOp *ISour
 }
 
 func (this *IDataFrame[T]) Fold(zero, src *ISource) (interface{}, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -603,7 +603,7 @@ func (this *IDataFrame[T]) Fold(zero, src *ISource) (interface{}, error) {
 }
 
 func (this *IDataFrame[T]) TreeFold(zero, src *ISource) (interface{}, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -617,7 +617,7 @@ func (this *IDataFrame[T]) TreeFold(zero, src *ISource) (interface{}, error) {
 }
 
 func (this *IDataFrame[T]) Take(num int64) ([]T, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -631,7 +631,7 @@ func (this *IDataFrame[T]) Take(num int64) ([]T, error) {
 }
 
 func (this *IDataFrame[T]) Foreach(src *ISource) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -644,7 +644,7 @@ func (this *IDataFrame[T]) Foreach(src *ISource) error {
 }
 
 func (this *IDataFrame[T]) ForeachPartition(src *ISource) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -657,7 +657,7 @@ func (this *IDataFrame[T]) ForeachPartition(src *ISource) error {
 }
 
 func (this *IDataFrame[T]) ForeachExecutor(src *ISource) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -670,7 +670,7 @@ func (this *IDataFrame[T]) ForeachExecutor(src *ISource) error {
 }
 
 func (this *IDataFrame[T]) Top(num int64) ([]T, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -684,7 +684,7 @@ func (this *IDataFrame[T]) Top(num int64) ([]T, error) {
 }
 
 func (this *IDataFrame[T]) TopCmp(num int64, cmp *ISource) ([]T, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -698,7 +698,7 @@ func (this *IDataFrame[T]) TopCmp(num int64, cmp *ISource) ([]T, error) {
 }
 
 func (this *IDataFrame[T]) TakeOrdered(num int64) ([]T, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -712,7 +712,7 @@ func (this *IDataFrame[T]) TakeOrdered(num int64) ([]T, error) {
 }
 
 func (this *IDataFrame[T]) TakeOrderedCmp(num int64, cmp *ISource) ([]T, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -726,7 +726,7 @@ func (this *IDataFrame[T]) TakeOrderedCmp(num int64, cmp *ISource) ([]T, error) 
 }
 
 func (this *IDataFrame[T]) Sample(withReplacement bool, fraction float64, seed int) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -742,7 +742,7 @@ func (this *IDataFrame[T]) Sample(withReplacement bool, fraction float64, seed i
 }
 
 func (this *IDataFrame[T]) TakeSample(withReplacement bool, num int64, seed int) ([]T, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -756,7 +756,7 @@ func (this *IDataFrame[T]) TakeSample(withReplacement bool, num int64, seed int)
 }
 
 func (this *IDataFrame[T]) Count() (int64, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return -1, err
 	}
@@ -773,7 +773,7 @@ func (this *IDataFrame[T]) Max(cmp *ISource) (T, error) {
 }
 
 func (this *IDataFrame[T]) MaxCmp(cmp *ISource) (T, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return *new(T), err
 	}
@@ -796,7 +796,7 @@ func (this *IDataFrame[T]) Min() (T, error) {
 }
 
 func (this *IDataFrame[T]) MinCmp(cmp *ISource) (T, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return *new(T), err
 	}
@@ -831,7 +831,7 @@ func (this *IPairDataFrame[Key, Value]) FromPair() *IDataFrame[ipair.IPair[Key, 
 }
 
 func (this *IPairDataFrame[Key, Value]) Join(other *IPairDataFrame[Key, Value], src *ISource) (*IPairDataFrame[Key, Value], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -852,7 +852,7 @@ func (this *IPairDataFrame[Key, Value]) Join(other *IPairDataFrame[Key, Value], 
 }
 
 func (this *IPairDataFrame[Key, Value]) JoinN(other *IPairDataFrame[Key, Value], numPartitions int64, src *ISource) (*IPairDataFrame[Key, Value], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -873,7 +873,7 @@ func (this *IPairDataFrame[Key, Value]) JoinN(other *IPairDataFrame[Key, Value],
 }
 
 func FlatMapValues[Key any, Value any, R any](this *IPairDataFrame[Key, Value], src *ISource) (*IPairDataFrame[Key, R], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -889,7 +889,7 @@ func FlatMapValues[Key any, Value any, R any](this *IPairDataFrame[Key, Value], 
 }
 
 func MapValues[Key any, Value any, R any](this *IPairDataFrame[Key, Value], src *ISource) (*IPairDataFrame[Key, R], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -905,7 +905,7 @@ func MapValues[Key any, Value any, R any](this *IPairDataFrame[Key, Value], src 
 }
 
 func GroupByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value], src *ISource) (*IPairDataFrame[Key, []Value], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -926,7 +926,7 @@ func GroupByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value], src
 }
 
 func GroupByKeyN[Key comparable, Value any](this *IPairDataFrame[Key, Value], numPartitions int64, src *ISource) (*IPairDataFrame[Key, []Value], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -947,7 +947,7 @@ func GroupByKeyN[Key comparable, Value any](this *IPairDataFrame[Key, Value], nu
 }
 
 func (this *IPairDataFrame[Key, Value]) ReduceByKey(src *ISource, localReduce bool) (*IPairDataFrame[Key, Value], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -963,7 +963,7 @@ func (this *IPairDataFrame[Key, Value]) ReduceByKey(src *ISource, localReduce bo
 }
 
 func (this *IPairDataFrame[Key, Value]) ReduceByKeyN(src *ISource, numPartitions int64, localReduce bool) (*IPairDataFrame[Key, Value], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -984,7 +984,7 @@ func (this *IPairDataFrame[Key, Value]) ReduceByKeyN(src *ISource, numPartitions
 }
 
 func AggregateByKey[Key any, Value any, R any](this *IPairDataFrame[Key, Value], zero, seqOp, combOp *ISource) (*IPairDataFrame[Key, R], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -1005,7 +1005,7 @@ func AggregateByKey[Key any, Value any, R any](this *IPairDataFrame[Key, Value],
 }
 
 func AggregateByKeyN[Key any, Value any, R any](this *IPairDataFrame[Key, Value], zero, seqOp, combOp *ISource, numPartitions int64) (*IPairDataFrame[Key, R], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -1026,7 +1026,7 @@ func AggregateByKeyN[Key any, Value any, R any](this *IPairDataFrame[Key, Value]
 }
 
 func (this *IPairDataFrame[Key, Value]) FoldByKey(zero, src *ISource) (*IPairDataFrame[Key, Value], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -1042,7 +1042,7 @@ func (this *IPairDataFrame[Key, Value]) FoldByKey(zero, src *ISource) (*IPairDat
 }
 
 func (this *IPairDataFrame[Key, Value]) FoldByKeyN(zero, src *ISource, numPartitions int64, localFold bool) (*IPairDataFrame[Key, Value], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -1063,7 +1063,7 @@ func (this *IPairDataFrame[Key, Value]) FoldByKeyN(zero, src *ISource, numPartit
 }
 
 func (this *IPairDataFrame[Key, Value]) SortByKey(ascending bool, src *ISource) (*IPairDataFrame[Key, Value], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -1084,7 +1084,7 @@ func (this *IPairDataFrame[Key, Value]) SortByKey(ascending bool, src *ISource) 
 }
 
 func (this *IPairDataFrame[Key, Value]) SortByKeyN(ascending bool, numPartitions int64, src *ISource) (*IPairDataFrame[Key, Value], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -1105,7 +1105,7 @@ func (this *IPairDataFrame[Key, Value]) SortByKeyN(ascending bool, numPartitions
 }
 
 func (this *IPairDataFrame[Key, Value]) Keys() ([]Key, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -1119,7 +1119,7 @@ func (this *IPairDataFrame[Key, Value]) Keys() ([]Key, error) {
 }
 
 func (this *IPairDataFrame[Key, Value]) Values() ([]Value, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -1133,7 +1133,7 @@ func (this *IPairDataFrame[Key, Value]) Values() ([]Value, error) {
 }
 
 func SampleByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value], withReplacement bool, fraction map[Key]float64, seed int) (*IPairDataFrame[Key, Value], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -1154,7 +1154,7 @@ func SampleByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value], wi
 }
 
 func CountByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value]) (map[Key]int64, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -1187,7 +1187,7 @@ func CountByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value]) (ma
 }
 
 func CountByValue[Key any, Value comparable](this *IPairDataFrame[Key, Value]) (map[Value]int64, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}

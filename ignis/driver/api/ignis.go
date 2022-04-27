@@ -40,7 +40,9 @@ func (this *_Ignis) Start() error {
 		return derror.NewGenericIDriverError(err)
 	}
 	var backendPort, backendCompression, callbackPort, callbackCompression int
-	fmt.Fscanf(output, "%d\n%d\n%d\n%d\n", &backendPort, &backendCompression, &callbackPort, &callbackCompression)
+	if _, err := fmt.Fscanf(output, "%d\n%d\n%d\n%d\n", &backendPort, &backendCompression, &callbackPort, &callbackCompression); err != nil {
+		return derror.NewGenericIDriverError(err)
+	}
 	this.callback, err = core.NewICallBack(callbackPort, callbackCompression)
 	if err != nil {
 		this.Stop()
@@ -71,4 +73,18 @@ func (this *_Ignis) Stop() {
 			this.callback = nil
 		}
 	}
+}
+
+func (this *_Ignis) driverContext() *core.IDriverContext {
+	if this.callback == nil {
+		panic("Ignis.start() must be invoked before the other routines")
+	}
+	return this.callback.DriverContext()
+}
+
+func (this *_Ignis) clientPool() *core.IClientPool {
+	if this.pool == nil {
+		panic("Ignis.start() must be invoked before the other routines")
+	}
+	return this.pool
 }

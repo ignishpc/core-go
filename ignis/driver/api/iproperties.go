@@ -10,7 +10,7 @@ type IProperties struct {
 }
 
 func NewIProperties() (*IProperties, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func NewIProperties() (*IProperties, error) {
 }
 
 func NewIPropertiesCopy(props *IProperties) (*IProperties, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func NewIPropertiesCopy(props *IProperties) (*IProperties, error) {
 }
 
 func (this *IProperties) Set(key string, value string) (string, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return "", err
 	}
@@ -53,7 +53,7 @@ func (this *IProperties) Set(key string, value string) (string, error) {
 }
 
 func (this *IProperties) Get(key string) (string, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return "", err
 	}
@@ -66,7 +66,7 @@ func (this *IProperties) Get(key string) (string, error) {
 }
 
 func (this *IProperties) Rm(key string) (string, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return "", err
 	}
@@ -79,7 +79,7 @@ func (this *IProperties) Rm(key string) (string, error) {
 }
 
 func (this *IProperties) Contains(key string) (bool, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return false, err
 	}
@@ -92,7 +92,7 @@ func (this *IProperties) Contains(key string) (bool, error) {
 }
 
 func (this *IProperties) ToMap(defaults bool) (map[string]string, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (this *IProperties) ToMap(defaults bool) (map[string]string, error) {
 }
 
 func (this *IProperties) FromMap(m map[string]string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (this *IProperties) FromMap(m map[string]string) error {
 }
 
 func (this *IProperties) Load(path string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func (this *IProperties) Load(path string) error {
 }
 
 func (this *IProperties) Store(path string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func (this *IProperties) Store(path string) error {
 }
 
 func (this *IProperties) Clear() error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}

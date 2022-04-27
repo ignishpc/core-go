@@ -10,7 +10,7 @@ type ICluster struct {
 }
 
 func NewIClusterDefault() (*ICluster, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func NewIClusterDefault() (*ICluster, error) {
 }
 
 func NewIClusterProps(properties *IProperties) (*ICluster, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func NewIClusterProps(properties *IProperties) (*ICluster, error) {
 }
 
 func NewIClusterName(name string) (*ICluster, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func NewIClusterName(name string) (*ICluster, error) {
 }
 
 func NewICluster(properties *IProperties, name string) (*ICluster, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func NewICluster(properties *IProperties, name string) (*ICluster, error) {
 }
 
 func (this *ICluster) Start() error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (this *ICluster) Start() error {
 }
 
 func (this *ICluster) Destroy() error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (this *ICluster) Destroy() error {
 }
 
 func (this *ICluster) SetName(name string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (this *ICluster) SetName(name string) error {
 }
 
 func (this *ICluster) Execute(cmd ...string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (this *ICluster) Execute(cmd ...string) error {
 }
 
 func (this *ICluster) ExecuteScript(script string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func (this *ICluster) ExecuteScript(script string) error {
 }
 
 func (this *ICluster) SendFile(source, target string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func (this *ICluster) SendFile(source, target string) error {
 }
 
 func (this *ICluster) SendCompressedFile(source, target string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}

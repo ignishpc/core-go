@@ -13,7 +13,7 @@ type IWorker struct {
 }
 
 func NewIWorkerDefault(cluster *ICluster, tp string) (*IWorker, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func NewIWorkerDefault(cluster *ICluster, tp string) (*IWorker, error) {
 }
 
 func NewIWorkerName(cluster *ICluster, tp, name string) (*IWorker, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func NewIWorkerName(cluster *ICluster, tp, name string) (*IWorker, error) {
 }
 
 func NewIWorkerCores(cluster *ICluster, tp string, cores int, instances int) (*IWorker, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func NewIWorkerCores(cluster *ICluster, tp string, cores int, instances int) (*I
 }
 
 func NewIWorker(cluster *ICluster, tp, name string, cores int, instances int) (*IWorker, error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func NewIWorker(cluster *ICluster, tp, name string, cores int, instances int) (*
 }
 
 func (this *IWorker) Start() error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (this *IWorker) Start() error {
 }
 
 func (this *IWorker) Destroy() error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func (this *IWorker) GetCluster() *ICluster {
 }
 
 func (this *IWorker) SetName(name string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -108,11 +108,11 @@ func (this *IWorker) SetName(name string) error {
 }
 
 func Parallelize[T any](this *IWorker, data []T, partitions int64, src *ISource, native bool) (*IDataFrame[T], error) {
-	id, err := core.Parallelize(Ignis.callback.DriverContext(), data, native)
+	id, err := core.Parallelize(Ignis.driverContext(), data, native)
 	if err != nil {
 		return nil, err
 	}
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func Parallelize[T any](this *IWorker, data []T, partitions int64, src *ISource,
 }
 
 func ImportDataFrame[T any](this *IWorker, data *IDataFrame[T], src *ISource) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func ImportDataFrame[T any](this *IWorker, data *IDataFrame[T], src *ISource) (*
 }
 
 func TextFile[T any](this *IWorker, path string) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func TextFile[T any](this *IWorker, path string) (*IDataFrame[T], error) {
 }
 
 func (this *IWorker) TextFileN(path string, minPartitions int64) (*IDataFrame[string], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func (this *IWorker) TextFileN(path string, minPartitions int64) (*IDataFrame[st
 }
 
 func (this *IWorker) PlainFile(path string, delim int8) (*IDataFrame[string], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +202,7 @@ func (this *IWorker) PlainFile(path string, delim int8) (*IDataFrame[string], er
 }
 
 func (this *IWorker) PlainFileN(path string, minPartitions int64, delim int8) (*IDataFrame[string], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +218,7 @@ func (this *IWorker) PlainFileN(path string, minPartitions int64, delim int8) (*
 }
 
 func PartitionObjectFile[T any](this *IWorker, path string, src *ISource) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func PartitionObjectFile[T any](this *IWorker, path string, src *ISource) (*IDat
 }
 
 func (this *IWorker) PartitionTextFile(path string) (*IDataFrame[string], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +255,7 @@ func (this *IWorker) PartitionTextFile(path string) (*IDataFrame[string], error)
 }
 
 func PartitionJsonFile[T any](this *IWorker, path string) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +271,7 @@ func PartitionJsonFile[T any](this *IWorker, path string) (*IDataFrame[T], error
 }
 
 func PartitionJsonFileMapping[T any](this *IWorker, path string, src *ISource, objectMapping bool) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -292,7 +292,7 @@ func PartitionJsonFileMapping[T any](this *IWorker, path string, src *ISource, o
 }
 
 func (this *IWorker) LoadLibrary(path string) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -305,7 +305,7 @@ func (this *IWorker) LoadLibrary(path string) error {
 }
 
 func (this *IWorker) Execute(src *ISource) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil
 	}
@@ -318,7 +318,7 @@ func (this *IWorker) Execute(src *ISource) error {
 }
 
 func ExecuteTo[T any](this *IWorker, src *ISource) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -334,7 +334,7 @@ func ExecuteTo[T any](this *IWorker, src *ISource) (*IDataFrame[T], error) {
 }
 
 func VoidCall[T any](this *IWorker, src *ISource, data *IDataFrame[T]) error {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
 	}
@@ -351,7 +351,7 @@ func VoidCall[T any](this *IWorker, src *ISource, data *IDataFrame[T]) error {
 }
 
 func Call[T any](this *IWorker, src *ISource, data *IDataFrame[T]) (*IDataFrame[T], error) {
-	client, err := Ignis.pool.GetClient()
+	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
