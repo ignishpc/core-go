@@ -483,7 +483,7 @@ func mapPartitionsWithIndexTest[T any](this *IGeneralModuleTest, t *testing.T, n
 	elems := gen.create(100*cores*2, 0)
 	loadToPartitions(t, this.executorData, elems, cores*2)
 
-	require.Nil(t, this.general.MapPartitionsWithIndex(nil, newSource(name), false))
+	require.Nil(t, this.general.MapPartitionsWithIndex(nil, newSource(name)))
 	result := getFromPartitions[string](t, this.executorData)
 
 	require.Equal(t, len(elems), len(result))

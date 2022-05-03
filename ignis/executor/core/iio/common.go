@@ -76,6 +76,9 @@ func init() {
 func AddBasicType[T any]() {
 	tp := utils.TypeObj[T]()
 
+	//Basic
+	SetPrinter(utils.TypeName[T](), &IPrinterFmt[T]{})
+
 	if ipair.IsPairType(utils.TypeObj[T]()) { // Only if TP is Pair
 		firstTp := tp.Field(0).Type
 		secondTp := tp.Field(1).Type

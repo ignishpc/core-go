@@ -16,6 +16,7 @@ import (
 	"math"
 	"os"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -173,6 +174,7 @@ func (this *IExecutorData) Mpi() *IMpi {
 }
 
 func (this *IExecutorData) SetCores(n int) {
+	runtime.GOMAXPROCS(n)
 	ithreads.SetDefaultCores(n)
 }
 

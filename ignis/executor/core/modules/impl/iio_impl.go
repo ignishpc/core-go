@@ -96,9 +96,9 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byt
 			return ierror.Raise(err)
 		}
 		defer file.Close()
-		id := this.executorData.GetContext().ThreadId()
+		id := rctx.ThreadId()
 		globalThreadId := this.executorData.GetContext().ExecutorId()*ioCores + id
-		threads := this.executorData.GetContext().ExecutorId() * ioCores
+		threads := this.executorData.GetContext().Executors() * ioCores
 		exChunk := size / int64(threads)
 		exChunkInit := int64(globalThreadId) * exChunk
 		exChunkEnd := exChunkInit + exChunk
@@ -106,23 +106,23 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byt
 		if err != nil {
 			return ierror.Raise(err)
 		}
-		globalMinPartitions := minPartitions
-		minPartitions := int64(math.Ceil(float64(globalMinPartitions) / float64(threads)))
+		minPartitions := int64(math.Ceil(float64(minPartitions) / float64(threads)))
 
 		if globalThreadId > 0 {
 			if _, err = file.Seek(utils.Ternary(exChunkInit > 0, exChunkInit-1, exChunkInit), 0); err != nil {
 				return ierror.Raise(err)
 			}
 			value := make([]byte, 256)
+		OUT:
 			for true {
-				if n, err := file.Read(value); err != nil {
+				if n, err := file.Read(value); err != nil && err != io.EOF {
 					return ierror.Raise(err)
 				} else if n == 0 {
 					break
 				} else {
 					for i := 0; i < n; i++ {
 						if value[i] == delim {
-							break
+							break OUT
 						}
 						exChunkInit++
 					}
@@ -178,14 +178,14 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byt
 			filepos += int64(len(line))
 			threadElements++
 			if eof {
-				if err = writeIterator.Write(string(line)); err != nil {
-					return ierror.Raise(err)
-				}
-			} else {
-				if err = writeIterator.Write(string(line[:len(line)-1])); err != nil {
+				if err := writeIterator.Write(string(line)); err != nil {
 					return ierror.Raise(err)
 				}
 				break
+			} else {
+				if err := writeIterator.Write(string(line[:len(line)-1])); err != nil {
+					return ierror.Raise(err)
+				}
 			}
 		}
 		return rctx.Critical(func() error {
@@ -275,20 +275,25 @@ func (this *IIOImpl) PartitionTextFile(path string, first int64, partitions int6
 				return ierror.Raise(err)
 			}
 			reader := bufio.NewReader(file)
-			line, err := reader.ReadBytes('\n')
-			eof := err == io.EOF
-			if err != nil && err != io.EOF {
-				return ierror.Raise(err)
-			}
-			if eof {
-				if err = writeIterator.Write(string(line)); err != nil {
+			for true {
+				line, err := reader.ReadBytes('\n')
+				eof := err == io.EOF
+				if err != nil && err != io.EOF {
 					return ierror.Raise(err)
 				}
-			} else {
-				if err = writeIterator.Write(string(line[:len(line)-1])); err != nil {
-					return ierror.Raise(err)
+				if eof {
+					if len(line) == 0 {
+						break
+					}
+					if err = writeIterator.Write(string(line)); err != nil {
+						return ierror.Raise(err)
+					}
+					return nil
+				} else {
+					if err = writeIterator.Write(string(line[:len(line)-1])); err != nil {
+						return ierror.Raise(err)
+					}
 				}
-				return nil
 			}
 			return nil
 		})
@@ -377,19 +382,19 @@ func SaveAsTextFile[T any](this *IIOImpl, path string, first int64) error {
 				if err != nil {
 					return ierror.Raise(err)
 				}
-				file, err = this.openFileWrite(fileName) //Only to check
+				file, err = this.openFileWrite(fileName)
 				if err != nil {
 					return ierror.Raise(err)
 				}
-				_ = file.Close()
 				return err
 			}); err != nil {
 				return ierror.Raise(err)
 			}
+			defer file.Close()
 
 			if isMemory {
 				list := group.Get(p).Inner().(storage.IList)
-				if err = iio.Print(file, list); err != nil {
+				if err = iio.Print(file, list.Array()); err != nil {
 					return ierror.Raise(err)
 				}
 			} else {

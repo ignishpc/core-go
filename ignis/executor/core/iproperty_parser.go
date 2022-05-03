@@ -38,15 +38,15 @@ func (this *IPropertyParser) SortResampling() (bool, error) {
 }
 
 func (this *IPropertyParser) IoOverwrite() (bool, error) {
-	return this.GetBool("ignis.modules.iio.overwrite")
+	return this.GetBool("ignis.modules.io.overwrite")
 }
 
 func (this *IPropertyParser) IoCores() (float64, error) {
-	return this.GetMinFloat("ignis.modules.iio.cores", 0)
+	return this.GetMinFloat("ignis.modules.io.cores", 0)
 }
 
 func (this *IPropertyParser) IoCompression() (int64, error) {
-	return this.GetRangeNumber("ignis.modules.iio.compression", 0, 9)
+	return this.GetRangeNumber("ignis.modules.io.compression", 0, 9)
 }
 
 func (this *IPropertyParser) MsgCompression() (int8, error) {
@@ -58,11 +58,12 @@ func (this *IPropertyParser) MsgCompression() (int8, error) {
 }
 
 func (this *IPropertyParser) NativeSerialization() (bool, error) {
-	value, err := this.GetString("ignis.partition.serialization")
+	/*value, err := this.GetString("ignis.partition.serialization")
 	if err != nil {
 		return false, err
 	}
-	return value == "native", nil
+	return value == "native", nil*/
+	return false, nil //TODO
 }
 
 func (this *IPropertyParser) PartitionCompression() (int64, error) {

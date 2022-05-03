@@ -7,6 +7,8 @@ import (
 	"ignis/executor/core/modules/impl"
 	"ignis/executor/core/storage"
 	"math/rand"
+	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 )
@@ -25,6 +27,35 @@ func MPI_init() {
 		panic(err)
 	}
 	skip = aux == 1
+
+	wd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	wd, err = filepath.Abs(wd)
+	if err != nil {
+		panic(err)
+	}
+	if err := impi.MPI_Comm_rank(impi.MPI_COMM_WORLD, &aux); err != nil {
+		panic(err)
+	}
+	rank := int(aux)
+	for true {
+		parent := filepath.Dir(wd)
+		if filepath.Base(wd) == "ignis" || filepath.Base(wd) == "debug" {
+			wd = filepath.Join(parent, "debug", strconv.Itoa(rank))
+			if err = os.MkdirAll(wd, os.ModePerm); err != nil {
+				panic(err)
+			}
+			if err = os.Chdir(wd); err != nil {
+				panic(err)
+			}
+			break
+		} else if wd == parent {
+			break
+		}
+		wd = parent
+	}
 }
 
 func init() {

@@ -18,10 +18,7 @@ type IClient struct {
 }
 
 func NewIClient(port int, compression int) (*IClient, error) {
-	socket, err := thrift.NewTSocketConf(fmt.Sprintf("localhost:%d", port), &thrift.TConfiguration{})
-	if err != nil {
-		return nil, derror.NewGenericIDriverError(err)
-	}
+	socket := thrift.NewTSocketConf(fmt.Sprintf("localhost:%d", port), &thrift.TConfiguration{})
 	trans, err2 := thrift.NewTZlibTransport(socket, compression)
 	if err2 != nil {
 		return nil, derror.NewGenericIDriverError(err2)

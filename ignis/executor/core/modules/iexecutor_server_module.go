@@ -59,7 +59,7 @@ func (this *IExecutorServerModule) Serve(name string, port int, compression int,
 
 func (this *IExecutorServerModule) Start(ctx context.Context, properties map[string]string, env map[string]string) (_err error) {
 	for key, value := range properties {
-		this.executorData.GetContext().Vars()[key] = value
+		this.executorData.GetContext().Props()[key] = value
 	}
 	cores, err := this.executorData.GetProperties().Cores()
 	if err != nil {

@@ -189,7 +189,7 @@ func (this *ICacheImpl) LoadCacheFromDisk() error {
 	if err != nil {
 		return ierror.Raise(err)
 	}
-	if _, err := os.Stat("./conf/app.ini"); os.IsNotExist(err) {
+	if _, err := os.Stat("./conf/app.ini"); os.IsExist(err) {
 		logger.Info("CacheContext: cache file found, loading")
 		file, err := os.Open(cache)
 		if err != nil {

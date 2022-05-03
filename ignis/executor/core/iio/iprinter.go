@@ -59,7 +59,7 @@ func getPrinterAux(id string) IPrinter {
 		}
 	}
 	return &IPrinterType{func(stream io.Writer, rtp reflect.Type, obj unsafe.Pointer, level int) error {
-		_, err := fmt.Fprintf(stream, "%+v", obj)
+		_, err := fmt.Fprintf(stream, "%+v", reflect.NewAt(rtp, obj).Elem().Interface())
 		return err
 	}}
 }
@@ -104,6 +104,14 @@ func GetPrinterObj[T any](obj T) (IPrinter, reflect.Type) {
 	}
 	printer := getPrinterAux(tp.String())
 	return printer, tp
+}
+
+type IPrinterFmt[T any] struct {
+}
+
+func (this *IPrinterFmt[T]) Print(stream io.Writer, rtp reflect.Type, obj unsafe.Pointer, level int) error {
+	_, err := fmt.Fprintf(stream, "%+v", *(*T)(obj))
+	return err
 }
 
 type IPrinterType struct {

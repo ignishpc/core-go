@@ -22,7 +22,7 @@ RUN cd /tmp/core-go/ignis && \
 	cp -R ${IGNIS_DEVEL}/mpi/lib ${IGNIS_HOME}/core/go/lib && \
 	export CGO_CFLAGS="-I${IGNIS_HOME}/core/go/include" && \
 	export LIBRARY_PATH=${IGNIS_HOME}/core/go/lib && \
-	${IGNIS_HOME}/core/go/go/bin/go build -o ${IGNIS_HOME}/bin/core-go && \
+	${IGNIS_HOME}/core/go/go/bin/go build -o ${IGNIS_HOME}/bin/ignis-go && \
 	cd .. && \
 	mv ignis ${IGNIS_HOME}/core/go/ && \
-	rm -fR /tmp/core-go
+	rm -fR /tmp/ignis-go

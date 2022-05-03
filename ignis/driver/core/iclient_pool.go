@@ -1,15 +1,14 @@
 package core
 
 import (
-	"container/list"
 	"sync"
 )
 
 type IClientPool struct {
 	port        int
 	compression int
-	clients     list.List
-	queue       list.List
+	clients     []*IClient
+	queue       []*IClient
 	mu          sync.Mutex
 }
 
@@ -22,8 +21,8 @@ func NewIClientPool(port, compression int) *IClientPool {
 	return &IClientPool{
 		port,
 		compression,
-		*list.New(),
-		*list.New(),
+		make([]*IClient, 0),
+		make([]*IClient, 0),
 		sync.Mutex{},
 	}
 }
@@ -31,30 +30,29 @@ func NewIClientPool(port, compression int) *IClientPool {
 func (this *IClientPool) Destroy() {
 	this.mu.Lock()
 	defer this.mu.Unlock()
-	e := this.clients.Front()
-	for e != nil {
-		e.Value.(*IClient).close()
-		e = e.Next()
+	for _, c := range this.clients {
+		c.close()
 	}
-	this.queue.Init()
-	this.clients.Init()
+	this.clients = make([]*IClient, 0)
+	this.queue = make([]*IClient, 0)
 }
 
 func (this *IClientPool) GetClient() (*IClientBound, error) {
 	this.mu.Lock()
 	defer this.mu.Unlock()
-	if this.queue.Len() == 0 {
+	if len(this.queue) == 0 {
 		client, err := NewIClient(this.port, this.compression)
 		if err != nil {
 			return nil, err
 		}
-		this.clients.PushBack(client)
+		this.clients = append(this.clients, client)
 		return &IClientBound{this, client}, nil
 
 	} else {
-		e := this.queue.Front()
-		this.queue.Remove(e)
-		return &IClientBound{this, e.Value.(*IClient)}, nil
+		l := len(this.queue)
+		c := this.queue[l-1]
+		this.queue = this.queue[:l-1]
+		return &IClientBound{this, c}, nil
 	}
 
 }
@@ -66,6 +64,6 @@ func (this *IClientBound) Services() *IClient {
 func (this *IClientBound) Free() {
 	this.pool.mu.Lock()
 	defer this.pool.mu.Unlock()
-	this.pool.queue.PushBack(this.client)
+	this.pool.queue = append(this.pool.queue, this.client)
 	this.client = nil
 }

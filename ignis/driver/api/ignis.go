@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"ignis/driver/api/derror"
 	"ignis/driver/core"
+	"os"
 	"os/exec"
 	"sync"
 )
@@ -21,13 +22,15 @@ var Ignis _Ignis
 func (this *_Ignis) Start() error {
 	mu.Lock()
 	defer mu.Unlock()
-	if this.cmd == nil {
+	if this.cmd != nil {
 		return nil
 	}
 	ctx := context.Background()
 	this.cmd = exec.CommandContext(ctx, "ignis-backend")
+	this.cmd.Stderr = os.Stderr
 	input, err := this.cmd.StdinPipe()
 	if err != nil {
+		this.cmd = nil
 		return derror.NewGenericIDriverError(err)
 	}
 	_ = input
@@ -37,10 +40,12 @@ func (this *_Ignis) Start() error {
 	}
 	err = this.cmd.Start()
 	if err != nil {
+		this.cmd = nil
 		return derror.NewGenericIDriverError(err)
 	}
 	var backendPort, backendCompression, callbackPort, callbackCompression int
 	if _, err := fmt.Fscanf(output, "%d\n%d\n%d\n%d\n", &backendPort, &backendCompression, &callbackPort, &callbackCompression); err != nil {
+		this.Stop()
 		return derror.NewGenericIDriverError(err)
 	}
 	this.callback, err = core.NewICallBack(callbackPort, callbackCompression)
