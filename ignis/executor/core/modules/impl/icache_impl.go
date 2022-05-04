@@ -2,10 +2,12 @@ package impl
 
 import (
 	"bufio"
+	"errors"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/logger"
 	"ignis/executor/core/storage"
+	"io/fs"
 	"os"
 	"strconv"
 	"strings"
@@ -22,6 +24,8 @@ func NewICacheImpl(executorData *core.IExecutorData) *ICacheImpl {
 	return &ICacheImpl{
 		IBaseImpl:     IBaseImpl{executorData},
 		nextContextId: 11,
+		context:       make(map[int64]storage.IPartitionGroupBase),
+		cache:         make(map[int64]storage.IPartitionGroupBase),
 	}
 }
 
@@ -40,6 +44,7 @@ func (this *ICacheImpl) SaveContext() (int64, error) {
 		for i := int64(0); i <= 10; i++ {
 			if _, used := this.context[i]; !used {
 				id = i
+				break
 			}
 		}
 	} else {
@@ -189,7 +194,7 @@ func (this *ICacheImpl) LoadCacheFromDisk() error {
 	if err != nil {
 		return ierror.Raise(err)
 	}
-	if _, err := os.Stat("./conf/app.ini"); os.IsExist(err) {
+	if _, err := os.Stat(cache); errors.Is(err, fs.ErrExist) {
 		logger.Info("CacheContext: cache file found, loading")
 		file, err := os.Open(cache)
 		if err != nil {

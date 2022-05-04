@@ -1,7 +1,9 @@
 package core
 
 import (
+	"errors"
 	"ignis/executor/core/ierror"
+	"io/fs"
 	"os"
 	"plugin"
 	"strings"
@@ -33,7 +35,7 @@ func (this *ILibraryLoader) LoadFunction(name string) (any, error) {
 	path := name[:sep]
 	class_name := name[sep+1:]
 
-	if _, err := os.Stat(path); err == nil {
+	if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
 		return nil, ierror.RaiseMsgCause(path+" was not found", err)
 	}
 
@@ -64,7 +66,7 @@ func (this *ILibraryLoader) LoadLibrary(path string) ([]string, error) {
 		}
 	}
 
-	if _, err := os.Stat(path); err == nil {
+	if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
 		return nil, ierror.RaiseMsgCause(path+" was not found", err)
 	}
 

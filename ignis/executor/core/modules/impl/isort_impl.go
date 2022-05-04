@@ -205,7 +205,7 @@ func SortByKeyByWithPartitions[T any, K any](this *ISortImpl, f function.IFuncti
 	if err := f.Before(context); err != nil {
 		return ierror.Raise(err)
 	}
-	if _, ok := this.executorData.GetPartitionsAny().First().(*ipair.IPair[K, T]); ok {
+	if _, ok := this.executorData.GetPartitionsAny().First().(ipair.IPair[K, T]); ok {
 		pf := func(a, b ipair.IPair[K, T]) bool {
 			less, err := f.Call(a.First, b.First, context)
 			if err != nil {
@@ -217,14 +217,14 @@ func SortByKeyByWithPartitions[T any, K any](this *ISortImpl, f function.IFuncti
 			return ierror.Raise(err)
 		}
 	} else {
-		pf := func(a, b any) bool {
-			less, err := f.Call(a.(ipair.IAbstractPair).GetFirst().(K), b.(ipair.IAbstractPair).GetFirst().(K), context)
+		pf := func(a, b ipair.IPair[any, any]) bool {
+			less, err := f.Call(a.GetFirst().(K), b.GetFirst().(K), context)
 			if err != nil {
 				panic(err)
 			}
 			return less
 		}
-		if err := sortImpl[any](this, pf, ascending, partitions, true); err != nil {
+		if err := sortImpl[ipair.IPair[any, any]](this, pf, ascending, partitions, true); err != nil {
 			return ierror.Raise(err)
 		}
 	}

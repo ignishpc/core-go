@@ -89,11 +89,18 @@ func (this *IExecutorServerModule) Start(ctx context.Context, properties map[str
 }
 
 func (this *IExecutorServerModule) Stop(ctx context.Context) (_err error) {
-	impi.MPI_Finalize()
 	err := this.server.Stop()
 	this.processor = nil
 	this.server = nil
-	return err
+	var flag impi.C_int
+	err2 := impi.MPI_Initialized(&flag)
+	if flag != 0 && err2 == nil {
+		err2 = impi.MPI_Finalize()
+	}
+	if err != nil {
+		return err2
+	}
+	return err2
 }
 
 func (this *IExecutorServerModule) Test(ctx context.Context) (_r bool, _err error) {

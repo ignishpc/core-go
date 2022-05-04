@@ -17,12 +17,19 @@ COPY ${RELPATH}ignis-go-install.sh ${IGNIS_HOME}/bin
 RUN chmod +x ${IGNIS_HOME}/bin/ignis-go-install.sh
 
 COPY / /tmp/core-go
-RUN cd /tmp/core-go/ignis && \
+RUN cd /tmp/core-go && \
 	cp -R ${IGNIS_DEVEL}/mpi/include ${IGNIS_HOME}/core/go/include && \
 	cp -R ${IGNIS_DEVEL}/mpi/lib ${IGNIS_HOME}/core/go/lib && \
 	export CGO_CFLAGS="-I${IGNIS_HOME}/core/go/include" && \
 	export LIBRARY_PATH=${IGNIS_HOME}/core/go/lib && \
-	${IGNIS_HOME}/core/go/go/bin/go build -o ${IGNIS_HOME}/bin/ignis-go && \
+    export go=${IGNIS_HOME}/core/go/go/bin/go && \
+    mv ignis ${IGNIS_HOME}/core/go/ && \
+    mkdir ignis && \
+    mv ${IGNIS_HOME}/core/go/ignis/main.go ignis/ && \
+    cd ignis && \
+    printf "module ignism\ngo 1.18\nrequire ignis v0.0.0\n" > go.mod && \
+    $go mod edit -replace ignis=${IGNIS_HOME}/core/go/ignis go.mod && \
+    $go get && \
+    $go build -trimpath -o ${IGNIS_HOME}/bin/ignis-go && \
 	cd .. && \
-	mv ignis ${IGNIS_HOME}/core/go/ && \
 	rm -fR /tmp/ignis-go

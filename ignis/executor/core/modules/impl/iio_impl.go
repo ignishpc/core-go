@@ -73,7 +73,7 @@ func (this *IIOImpl) TextFile(path string, minPartitions int64) error {
 
 func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byte) error {
 	size := int64(0)
-	if info, err := os.Stat(path); err != nil {
+	if info, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
 		return ierror.Raise(err)
 	} else {
 		size = info.Size()
