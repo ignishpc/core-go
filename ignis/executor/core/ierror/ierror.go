@@ -12,7 +12,7 @@ type IExecutorError struct {
 	cause   error
 }
 
-func Raise(err error) *IExecutorError {
+func Raise(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -26,7 +26,7 @@ func Raise(err error) *IExecutorError {
 	}
 }
 
-func RaiseMsg(message string) *IExecutorError {
+func RaiseMsg(message string) error {
 	return &IExecutorError{
 		message,
 		stack(),
@@ -34,7 +34,7 @@ func RaiseMsg(message string) *IExecutorError {
 	}
 }
 
-func RaiseMsgCause(message string, cause error) *IExecutorError {
+func RaiseMsgCause(message string, cause error) error {
 	return &IExecutorError{
 		message,
 		stack(),
