@@ -170,8 +170,8 @@ func (this *iTypeA[T]) Repartition(repartitionImpl *impl.IRepartitionImpl, numPa
 	return impl.Repartition[T](repartitionImpl, numPartitions, preserveOrdering, global)
 }
 
-func (this *iTypeA[T]) PartitionByRandom(repartitionImpl *impl.IRepartitionImpl, numPartitions int64) error {
-	return impl.PartitionByRandom[T](repartitionImpl, numPartitions)
+func (this *iTypeA[T]) PartitionByRandom(repartitionImpl *impl.IRepartitionImpl, numPartitions int64, seed int32) error {
+	return impl.PartitionByRandom[T](repartitionImpl, numPartitions, seed)
 }
 
 func (this *iTypeA[T]) PartitionByHash(repartitionImpl *impl.IRepartitionImpl, numPartitions int64) error {

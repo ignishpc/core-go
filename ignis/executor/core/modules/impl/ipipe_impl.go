@@ -6,6 +6,7 @@ import (
 	"ignis/executor/api/iterator"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
+	"ignis/executor/core/impi"
 	"ignis/executor/core/ithreads"
 	"ignis/executor/core/logger"
 	"ignis/executor/core/storage"
@@ -297,6 +298,78 @@ func KeyBy[T any, R comparable](this *IPipeImpl, f function.IFunction[T, R]) err
 	return nil
 }
 
+func MapWithIndex[T any, R any](this *IPipeImpl, f function.IFunction2[int64, T, R]) error {
+	context := this.executorData.GetContext()
+	input, err := core.GetAndDeletePartitions[T](this.executorData)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.Before(context); err != nil {
+		return ierror.Raise(err)
+	}
+	ouput, err := core.NewPartitionGroupWithSize[R](this.executorData.GetPartitionTools(), input.Size())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+
+	logger.Info("General: mapWithIndex ", +input.Size(), " partitions")
+
+	indices := make([]impi.C_int64, context.Executors())
+	elems := impi.C_int64(0)
+	for _, p := range input.Iter() {
+		elems += impi.C_int64(p.Size())
+	}
+	err = impi.MPI_Allgather(impi.P(&elems), 1, impi.MPI_LONG_LONG_INT, impi.P(&indices[0]), 1,
+		impi.MPI_LONG_LONG_INT, this.executorData.Mpi().Native())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	offset := make([]int64, input.Size())
+	for i := 0; i < context.ExecutorId(); i++ {
+		offset[0] += int64(indices[i])
+	}
+	for i := 1; i < input.Size(); i++ {
+		offset[i] = offset[i-1] + input.Get(i).Size()
+	}
+
+	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
+		context := this.executorData.GetThreadContext(rctx.ThreadId())
+		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
+			reader, err := input.Get(i).ReadIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			writer, err := ouput.Get(i).WriteIterator()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			id := offset[i]
+			for reader.HasNext() {
+				elem, err := reader.Next()
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				result, err := f.Call(id, elem, context)
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				id++
+				if err = writer.Write(result); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			return nil
+		})
+	}); err != nil {
+		return ierror.Raise(err)
+	}
+	if err := f.After(context); err != nil {
+		return ierror.Raise(err)
+	}
+	core.SetPartitions(this.executorData, ouput)
+	return nil
+}
+
 func MapPartitions[T any, R any](this *IPipeImpl, f function.IFunction[iterator.IReadIterator[T], []R]) error {
 	context := this.executorData.GetContext()
 	input, err := core.GetAndDeletePartitions[T](this.executorData)
@@ -362,6 +435,19 @@ func MapPartitionsWithIndex[T, R any](this *IPipeImpl, f function.IFunction2[int
 	}
 
 	logger.Info("General: mapPartitionsWithIndex ", +input.Size(), " partitions")
+
+	indices := make([]impi.C_int64, context.Executors())
+	parts := impi.C_int64(input.Size())
+	err = impi.MPI_Allgather(impi.P(&parts), 1, impi.MPI_LONG_LONG_INT, impi.P(&indices[0]), 1,
+		impi.MPI_LONG_LONG_INT, this.executorData.Mpi().Native())
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	offset := int64(0)
+	for i := 0; i < context.ExecutorId(); i++ {
+		offset += int64(indices[i])
+	}
+
 	if err := ithreads.Parallel(func(rctx ithreads.IRuntimeContext) error {
 		context := this.executorData.GetThreadContext(rctx.ThreadId())
 		return rctx.For().Dynamic().Run(input.Size(), func(i int) error {
@@ -373,7 +459,7 @@ func MapPartitionsWithIndex[T, R any](this *IPipeImpl, f function.IFunction2[int
 			if err != nil {
 				return ierror.Raise(err)
 			}
-			result, err := f.Call(int64(i), reader, context)
+			result, err := f.Call(offset+int64(i), reader, context)
 			if err != nil {
 				return ierror.Raise(err)
 			}

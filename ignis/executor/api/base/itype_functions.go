@@ -46,7 +46,7 @@ type ITypeFunctions interface {
 	Distinct(reduceImpl *impl.IReduceImpl, numPartitions int64) error
 
 	Repartition(repartitionImpl *impl.IRepartitionImpl, numPartitions int64, preserveOrdering bool, global bool) error
-	PartitionByRandom(repartitionImpl *impl.IRepartitionImpl, numPartitions int64) error
+	PartitionByRandom(repartitionImpl *impl.IRepartitionImpl, numPartitions int64, seed int32) error
 	PartitionByHash(repartitionImpl *impl.IRepartitionImpl, numPartitions int64) error
 }
 

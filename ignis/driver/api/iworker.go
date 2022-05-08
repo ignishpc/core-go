@@ -153,7 +153,7 @@ func ImportDataFrame[T any](this *IWorker, data *IDataFrame[T], src *ISource) (*
 	}, nil
 }
 
-func TextFile[T any](this *IWorker, path string) (*IDataFrame[T], error) {
+func (this *IWorker) TextFile(path string) (*IDataFrame[string], error) {
 	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
@@ -163,7 +163,7 @@ func TextFile[T any](this *IWorker, path string) (*IDataFrame[T], error) {
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
+	return &IDataFrame[string]{
 		this,
 		id,
 	}, nil

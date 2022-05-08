@@ -90,6 +90,21 @@ func (this *IGroupBy[T, R]) Types() []api.IContextType {
 	return []api.IContextType{NewTypeA[T](), NewTypeC[R](), NewTypeCA[R, T](), NewTypeCA[R, []T]()}
 }
 
+type IMapWithIndexAbs interface {
+	RunMapWithIndex(i *impl.IPipeImpl, f function.IBaseFunction) error
+}
+
+type IMapWithIndex[T any, R any] struct {
+}
+
+func (this *IMapWithIndex[T, R]) Types() []api.IContextType {
+	return []api.IContextType{NewTypeA[T](), NewTypeA[R]()}
+}
+
+func (this *IMapWithIndex[T, R]) RunMapWithIndex(i *impl.IPipeImpl, f function.IBaseFunction) error {
+	return impl.MapWithIndex[T, R](i, f.(function.IFunction2[int64, T, R]))
+}
+
 type IMapPartitionsAbs interface {
 	RunMapPartitions(i *impl.IPipeImpl, f function.IBaseFunction) error
 }

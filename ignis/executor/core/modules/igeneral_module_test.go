@@ -106,6 +106,20 @@ func TestKeyByStringInt(t *testing.T) {
 	keyByTest(generalModuleTest, t, "KeyByString", 2, "Memory")
 }
 
+type MapWithIndexInt struct {
+	function.IOnlyCall
+	base.IMapWithIndex[int64, int64]
+}
+
+func (this *MapWithIndexInt) Call(v1 int64, v2 int64, ctx api.IContext) (int64, error) {
+	return v1 + v2, nil
+}
+
+func TestMapWithIndexInt(t *testing.T) {
+	generalModuleTest.executorData.RegisterFunction(&MapWithIndexInt{})
+	mapWithIndexTest(generalModuleTest, t, "MapWithIndexInt", 2, "Memory")
+}
+
 type MapPartitionsInt struct {
 	function.IOnlyCall
 	base.IMapPartitions[int64, string]
@@ -459,6 +473,22 @@ func keyByTest(this *IGeneralModuleTest, t *testing.T, name string, cores int, p
 	for i := 0; i < len(elems); i++ {
 		require.Equal(t, len(elems[i]), result[i].First)
 		require.Equal(t, elems[i], result[i].Second)
+	}
+}
+
+func mapWithIndexTest(this *IGeneralModuleTest, t *testing.T, name string, cores int, partitionType string) {
+	this.executorData.GetContext().Props()["ignis.partition.type"] = partitionType
+	gen := &IElemensInt{}
+	this.executorData.SetCores(cores)
+	elems := gen.create(100*cores, 0)
+	loadToPartitions[int64](t, this.executorData, elems, cores*2)
+	require.Nil(t, this.general.MapWithIndex(nil, newSource(name)))
+	result := getFromPartitions[int64](t, this.executorData)
+	offset := int64(len(elems) * this.executorData.Mpi().Rank())
+
+	require.Equal(t, len(elems), len(result))
+	for i := 0; i < len(elems); i++ {
+		require.Equal(t, elems[i]+int64(i)+offset, result[i])
 	}
 }
 
@@ -1017,7 +1047,7 @@ func partitionByRandomTest[T comparable](this *IGeneralModuleTest, t *testing.T,
 	elems = append(elems, elems[:100]...)
 	loadToPartitions(t, this.executorData, localElems, cores*2)
 
-	require.Nil(t, this.general.PartitionByRandom(nil, int64(2+np+1)))
+	require.Nil(t, this.general.PartitionByRandom(nil, int64(2+np+1), 0))
 
 	result := getFromPartitions[T](t, this.executorData)
 

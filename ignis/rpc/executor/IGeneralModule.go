@@ -38,6 +38,9 @@ type IGeneralModule interface {
   KeyBy(ctx context.Context, src *rpc.ISource) (_err error)
   // Parameters:
   //  - Src
+  MapWithIndex(ctx context.Context, src *rpc.ISource) (_err error)
+  // Parameters:
+  //  - Src
   MapPartitions(ctx context.Context, src *rpc.ISource) (_err error)
   // Parameters:
   //  - Src
@@ -100,7 +103,8 @@ type IGeneralModule interface {
   Repartition(ctx context.Context, numPartitions int64, preserveOrdering bool, global_ bool) (_err error)
   // Parameters:
   //  - NumPartitions
-  PartitionByRandom(ctx context.Context, numPartitions int64) (_err error)
+  //  - Seed
+  PartitionByRandom(ctx context.Context, numPartitions int64, seed int32) (_err error)
   // Parameters:
   //  - NumPartitions
   PartitionByHash(ctx context.Context, numPartitions int64) (_err error)
@@ -298,12 +302,12 @@ func (p *IGeneralModuleClient) KeyBy(ctx context.Context, src *rpc.ISource) (_er
 
 // Parameters:
 //  - Src
-func (p *IGeneralModuleClient) MapPartitions(ctx context.Context, src *rpc.ISource) (_err error) {
-  var _args15 IGeneralModuleMapPartitionsArgs
+func (p *IGeneralModuleClient) MapWithIndex(ctx context.Context, src *rpc.ISource) (_err error) {
+  var _args15 IGeneralModuleMapWithIndexArgs
   _args15.Src = src
-  var _result17 IGeneralModuleMapPartitionsResult
+  var _result17 IGeneralModuleMapWithIndexResult
   var _meta16 thrift.ResponseMeta
-  _meta16, _err = p.Client_().Call(ctx, "mapPartitions", &_args15, &_result17)
+  _meta16, _err = p.Client_().Call(ctx, "mapWithIndex", &_args15, &_result17)
   p.SetLastResponseMeta_(_meta16)
   if _err != nil {
     return
@@ -318,12 +322,12 @@ func (p *IGeneralModuleClient) MapPartitions(ctx context.Context, src *rpc.ISour
 
 // Parameters:
 //  - Src
-func (p *IGeneralModuleClient) MapPartitionsWithIndex(ctx context.Context, src *rpc.ISource) (_err error) {
-  var _args18 IGeneralModuleMapPartitionsWithIndexArgs
+func (p *IGeneralModuleClient) MapPartitions(ctx context.Context, src *rpc.ISource) (_err error) {
+  var _args18 IGeneralModuleMapPartitionsArgs
   _args18.Src = src
-  var _result20 IGeneralModuleMapPartitionsWithIndexResult
+  var _result20 IGeneralModuleMapPartitionsResult
   var _meta19 thrift.ResponseMeta
-  _meta19, _err = p.Client_().Call(ctx, "mapPartitionsWithIndex", &_args18, &_result20)
+  _meta19, _err = p.Client_().Call(ctx, "mapPartitions", &_args18, &_result20)
   p.SetLastResponseMeta_(_meta19)
   if _err != nil {
     return
@@ -338,12 +342,12 @@ func (p *IGeneralModuleClient) MapPartitionsWithIndex(ctx context.Context, src *
 
 // Parameters:
 //  - Src
-func (p *IGeneralModuleClient) MapExecutor(ctx context.Context, src *rpc.ISource) (_err error) {
-  var _args21 IGeneralModuleMapExecutorArgs
+func (p *IGeneralModuleClient) MapPartitionsWithIndex(ctx context.Context, src *rpc.ISource) (_err error) {
+  var _args21 IGeneralModuleMapPartitionsWithIndexArgs
   _args21.Src = src
-  var _result23 IGeneralModuleMapExecutorResult
+  var _result23 IGeneralModuleMapPartitionsWithIndexResult
   var _meta22 thrift.ResponseMeta
-  _meta22, _err = p.Client_().Call(ctx, "mapExecutor", &_args21, &_result23)
+  _meta22, _err = p.Client_().Call(ctx, "mapPartitionsWithIndex", &_args21, &_result23)
   p.SetLastResponseMeta_(_meta22)
   if _err != nil {
     return
@@ -358,12 +362,12 @@ func (p *IGeneralModuleClient) MapExecutor(ctx context.Context, src *rpc.ISource
 
 // Parameters:
 //  - Src
-func (p *IGeneralModuleClient) MapExecutorTo(ctx context.Context, src *rpc.ISource) (_err error) {
-  var _args24 IGeneralModuleMapExecutorToArgs
+func (p *IGeneralModuleClient) MapExecutor(ctx context.Context, src *rpc.ISource) (_err error) {
+  var _args24 IGeneralModuleMapExecutorArgs
   _args24.Src = src
-  var _result26 IGeneralModuleMapExecutorToResult
+  var _result26 IGeneralModuleMapExecutorResult
   var _meta25 thrift.ResponseMeta
-  _meta25, _err = p.Client_().Call(ctx, "mapExecutorTo", &_args24, &_result26)
+  _meta25, _err = p.Client_().Call(ctx, "mapExecutor", &_args24, &_result26)
   p.SetLastResponseMeta_(_meta25)
   if _err != nil {
     return
@@ -378,14 +382,12 @@ func (p *IGeneralModuleClient) MapExecutorTo(ctx context.Context, src *rpc.ISour
 
 // Parameters:
 //  - Src
-//  - NumPartitions
-func (p *IGeneralModuleClient) GroupBy(ctx context.Context, src *rpc.ISource, numPartitions int64) (_err error) {
-  var _args27 IGeneralModuleGroupByArgs
+func (p *IGeneralModuleClient) MapExecutorTo(ctx context.Context, src *rpc.ISource) (_err error) {
+  var _args27 IGeneralModuleMapExecutorToArgs
   _args27.Src = src
-  _args27.NumPartitions = numPartitions
-  var _result29 IGeneralModuleGroupByResult
+  var _result29 IGeneralModuleMapExecutorToResult
   var _meta28 thrift.ResponseMeta
-  _meta28, _err = p.Client_().Call(ctx, "groupBy", &_args27, &_result29)
+  _meta28, _err = p.Client_().Call(ctx, "mapExecutorTo", &_args27, &_result29)
   p.SetLastResponseMeta_(_meta28)
   if _err != nil {
     return
@@ -399,13 +401,15 @@ func (p *IGeneralModuleClient) GroupBy(ctx context.Context, src *rpc.ISource, nu
 }
 
 // Parameters:
-//  - Ascending
-func (p *IGeneralModuleClient) Sort(ctx context.Context, ascending bool) (_err error) {
-  var _args30 IGeneralModuleSortArgs
-  _args30.Ascending = ascending
-  var _result32 IGeneralModuleSortResult
+//  - Src
+//  - NumPartitions
+func (p *IGeneralModuleClient) GroupBy(ctx context.Context, src *rpc.ISource, numPartitions int64) (_err error) {
+  var _args30 IGeneralModuleGroupByArgs
+  _args30.Src = src
+  _args30.NumPartitions = numPartitions
+  var _result32 IGeneralModuleGroupByResult
   var _meta31 thrift.ResponseMeta
-  _meta31, _err = p.Client_().Call(ctx, "sort", &_args30, &_result32)
+  _meta31, _err = p.Client_().Call(ctx, "groupBy", &_args30, &_result32)
   p.SetLastResponseMeta_(_meta31)
   if _err != nil {
     return
@@ -420,14 +424,12 @@ func (p *IGeneralModuleClient) Sort(ctx context.Context, ascending bool) (_err e
 
 // Parameters:
 //  - Ascending
-//  - NumPartitions
-func (p *IGeneralModuleClient) Sort2(ctx context.Context, ascending bool, numPartitions int64) (_err error) {
-  var _args33 IGeneralModuleSort2Args
+func (p *IGeneralModuleClient) Sort(ctx context.Context, ascending bool) (_err error) {
+  var _args33 IGeneralModuleSortArgs
   _args33.Ascending = ascending
-  _args33.NumPartitions = numPartitions
-  var _result35 IGeneralModuleSort2Result
+  var _result35 IGeneralModuleSortResult
   var _meta34 thrift.ResponseMeta
-  _meta34, _err = p.Client_().Call(ctx, "sort2", &_args33, &_result35)
+  _meta34, _err = p.Client_().Call(ctx, "sort", &_args33, &_result35)
   p.SetLastResponseMeta_(_meta34)
   if _err != nil {
     return
@@ -441,15 +443,15 @@ func (p *IGeneralModuleClient) Sort2(ctx context.Context, ascending bool, numPar
 }
 
 // Parameters:
-//  - Src
 //  - Ascending
-func (p *IGeneralModuleClient) SortBy(ctx context.Context, src *rpc.ISource, ascending bool) (_err error) {
-  var _args36 IGeneralModuleSortByArgs
-  _args36.Src = src
+//  - NumPartitions
+func (p *IGeneralModuleClient) Sort2(ctx context.Context, ascending bool, numPartitions int64) (_err error) {
+  var _args36 IGeneralModuleSort2Args
   _args36.Ascending = ascending
-  var _result38 IGeneralModuleSortByResult
+  _args36.NumPartitions = numPartitions
+  var _result38 IGeneralModuleSort2Result
   var _meta37 thrift.ResponseMeta
-  _meta37, _err = p.Client_().Call(ctx, "sortBy", &_args36, &_result38)
+  _meta37, _err = p.Client_().Call(ctx, "sort2", &_args36, &_result38)
   p.SetLastResponseMeta_(_meta37)
   if _err != nil {
     return
@@ -465,15 +467,13 @@ func (p *IGeneralModuleClient) SortBy(ctx context.Context, src *rpc.ISource, asc
 // Parameters:
 //  - Src
 //  - Ascending
-//  - NumPartitions
-func (p *IGeneralModuleClient) SortBy3(ctx context.Context, src *rpc.ISource, ascending bool, numPartitions int64) (_err error) {
-  var _args39 IGeneralModuleSortBy3Args
+func (p *IGeneralModuleClient) SortBy(ctx context.Context, src *rpc.ISource, ascending bool) (_err error) {
+  var _args39 IGeneralModuleSortByArgs
   _args39.Src = src
   _args39.Ascending = ascending
-  _args39.NumPartitions = numPartitions
-  var _result41 IGeneralModuleSortBy3Result
+  var _result41 IGeneralModuleSortByResult
   var _meta40 thrift.ResponseMeta
-  _meta40, _err = p.Client_().Call(ctx, "sortBy3", &_args39, &_result41)
+  _meta40, _err = p.Client_().Call(ctx, "sortBy", &_args39, &_result41)
   p.SetLastResponseMeta_(_meta40)
   if _err != nil {
     return
@@ -487,15 +487,17 @@ func (p *IGeneralModuleClient) SortBy3(ctx context.Context, src *rpc.ISource, as
 }
 
 // Parameters:
-//  - Other
-//  - PreserveOrder
-func (p *IGeneralModuleClient) Union_(ctx context.Context, other string, preserveOrder bool) (_err error) {
-  var _args42 IGeneralModuleUnion_Args
-  _args42.Other = other
-  _args42.PreserveOrder = preserveOrder
-  var _result44 IGeneralModuleUnion_Result
+//  - Src
+//  - Ascending
+//  - NumPartitions
+func (p *IGeneralModuleClient) SortBy3(ctx context.Context, src *rpc.ISource, ascending bool, numPartitions int64) (_err error) {
+  var _args42 IGeneralModuleSortBy3Args
+  _args42.Src = src
+  _args42.Ascending = ascending
+  _args42.NumPartitions = numPartitions
+  var _result44 IGeneralModuleSortBy3Result
   var _meta43 thrift.ResponseMeta
-  _meta43, _err = p.Client_().Call(ctx, "union_", &_args42, &_result44)
+  _meta43, _err = p.Client_().Call(ctx, "sortBy3", &_args42, &_result44)
   p.SetLastResponseMeta_(_meta43)
   if _err != nil {
     return
@@ -511,15 +513,13 @@ func (p *IGeneralModuleClient) Union_(ctx context.Context, other string, preserv
 // Parameters:
 //  - Other
 //  - PreserveOrder
-//  - Src
-func (p *IGeneralModuleClient) Union2(ctx context.Context, other string, preserveOrder bool, src *rpc.ISource) (_err error) {
-  var _args45 IGeneralModuleUnion2Args
+func (p *IGeneralModuleClient) Union_(ctx context.Context, other string, preserveOrder bool) (_err error) {
+  var _args45 IGeneralModuleUnion_Args
   _args45.Other = other
   _args45.PreserveOrder = preserveOrder
-  _args45.Src = src
-  var _result47 IGeneralModuleUnion2Result
+  var _result47 IGeneralModuleUnion_Result
   var _meta46 thrift.ResponseMeta
-  _meta46, _err = p.Client_().Call(ctx, "union2", &_args45, &_result47)
+  _meta46, _err = p.Client_().Call(ctx, "union_", &_args45, &_result47)
   p.SetLastResponseMeta_(_meta46)
   if _err != nil {
     return
@@ -534,14 +534,16 @@ func (p *IGeneralModuleClient) Union2(ctx context.Context, other string, preserv
 
 // Parameters:
 //  - Other
-//  - NumPartitions
-func (p *IGeneralModuleClient) Join(ctx context.Context, other string, numPartitions int64) (_err error) {
-  var _args48 IGeneralModuleJoinArgs
+//  - PreserveOrder
+//  - Src
+func (p *IGeneralModuleClient) Union2(ctx context.Context, other string, preserveOrder bool, src *rpc.ISource) (_err error) {
+  var _args48 IGeneralModuleUnion2Args
   _args48.Other = other
-  _args48.NumPartitions = numPartitions
-  var _result50 IGeneralModuleJoinResult
+  _args48.PreserveOrder = preserveOrder
+  _args48.Src = src
+  var _result50 IGeneralModuleUnion2Result
   var _meta49 thrift.ResponseMeta
-  _meta49, _err = p.Client_().Call(ctx, "join", &_args48, &_result50)
+  _meta49, _err = p.Client_().Call(ctx, "union2", &_args48, &_result50)
   p.SetLastResponseMeta_(_meta49)
   if _err != nil {
     return
@@ -557,15 +559,13 @@ func (p *IGeneralModuleClient) Join(ctx context.Context, other string, numPartit
 // Parameters:
 //  - Other
 //  - NumPartitions
-//  - Src
-func (p *IGeneralModuleClient) Join3(ctx context.Context, other string, numPartitions int64, src *rpc.ISource) (_err error) {
-  var _args51 IGeneralModuleJoin3Args
+func (p *IGeneralModuleClient) Join(ctx context.Context, other string, numPartitions int64) (_err error) {
+  var _args51 IGeneralModuleJoinArgs
   _args51.Other = other
   _args51.NumPartitions = numPartitions
-  _args51.Src = src
-  var _result53 IGeneralModuleJoin3Result
+  var _result53 IGeneralModuleJoinResult
   var _meta52 thrift.ResponseMeta
-  _meta52, _err = p.Client_().Call(ctx, "join3", &_args51, &_result53)
+  _meta52, _err = p.Client_().Call(ctx, "join", &_args51, &_result53)
   p.SetLastResponseMeta_(_meta52)
   if _err != nil {
     return
@@ -579,13 +579,17 @@ func (p *IGeneralModuleClient) Join3(ctx context.Context, other string, numParti
 }
 
 // Parameters:
+//  - Other
 //  - NumPartitions
-func (p *IGeneralModuleClient) Distinct(ctx context.Context, numPartitions int64) (_err error) {
-  var _args54 IGeneralModuleDistinctArgs
+//  - Src
+func (p *IGeneralModuleClient) Join3(ctx context.Context, other string, numPartitions int64, src *rpc.ISource) (_err error) {
+  var _args54 IGeneralModuleJoin3Args
+  _args54.Other = other
   _args54.NumPartitions = numPartitions
-  var _result56 IGeneralModuleDistinctResult
+  _args54.Src = src
+  var _result56 IGeneralModuleJoin3Result
   var _meta55 thrift.ResponseMeta
-  _meta55, _err = p.Client_().Call(ctx, "distinct", &_args54, &_result56)
+  _meta55, _err = p.Client_().Call(ctx, "join3", &_args54, &_result56)
   p.SetLastResponseMeta_(_meta55)
   if _err != nil {
     return
@@ -600,14 +604,12 @@ func (p *IGeneralModuleClient) Distinct(ctx context.Context, numPartitions int64
 
 // Parameters:
 //  - NumPartitions
-//  - Src
-func (p *IGeneralModuleClient) Distinct2(ctx context.Context, numPartitions int64, src *rpc.ISource) (_err error) {
-  var _args57 IGeneralModuleDistinct2Args
+func (p *IGeneralModuleClient) Distinct(ctx context.Context, numPartitions int64) (_err error) {
+  var _args57 IGeneralModuleDistinctArgs
   _args57.NumPartitions = numPartitions
-  _args57.Src = src
-  var _result59 IGeneralModuleDistinct2Result
+  var _result59 IGeneralModuleDistinctResult
   var _meta58 thrift.ResponseMeta
-  _meta58, _err = p.Client_().Call(ctx, "distinct2", &_args57, &_result59)
+  _meta58, _err = p.Client_().Call(ctx, "distinct", &_args57, &_result59)
   p.SetLastResponseMeta_(_meta58)
   if _err != nil {
     return
@@ -622,16 +624,14 @@ func (p *IGeneralModuleClient) Distinct2(ctx context.Context, numPartitions int6
 
 // Parameters:
 //  - NumPartitions
-//  - PreserveOrdering
-//  - Global_
-func (p *IGeneralModuleClient) Repartition(ctx context.Context, numPartitions int64, preserveOrdering bool, global_ bool) (_err error) {
-  var _args60 IGeneralModuleRepartitionArgs
+//  - Src
+func (p *IGeneralModuleClient) Distinct2(ctx context.Context, numPartitions int64, src *rpc.ISource) (_err error) {
+  var _args60 IGeneralModuleDistinct2Args
   _args60.NumPartitions = numPartitions
-  _args60.PreserveOrdering = preserveOrdering
-  _args60.Global_ = global_
-  var _result62 IGeneralModuleRepartitionResult
+  _args60.Src = src
+  var _result62 IGeneralModuleDistinct2Result
   var _meta61 thrift.ResponseMeta
-  _meta61, _err = p.Client_().Call(ctx, "repartition", &_args60, &_result62)
+  _meta61, _err = p.Client_().Call(ctx, "distinct2", &_args60, &_result62)
   p.SetLastResponseMeta_(_meta61)
   if _err != nil {
     return
@@ -646,12 +646,16 @@ func (p *IGeneralModuleClient) Repartition(ctx context.Context, numPartitions in
 
 // Parameters:
 //  - NumPartitions
-func (p *IGeneralModuleClient) PartitionByRandom(ctx context.Context, numPartitions int64) (_err error) {
-  var _args63 IGeneralModulePartitionByRandomArgs
+//  - PreserveOrdering
+//  - Global_
+func (p *IGeneralModuleClient) Repartition(ctx context.Context, numPartitions int64, preserveOrdering bool, global_ bool) (_err error) {
+  var _args63 IGeneralModuleRepartitionArgs
   _args63.NumPartitions = numPartitions
-  var _result65 IGeneralModulePartitionByRandomResult
+  _args63.PreserveOrdering = preserveOrdering
+  _args63.Global_ = global_
+  var _result65 IGeneralModuleRepartitionResult
   var _meta64 thrift.ResponseMeta
-  _meta64, _err = p.Client_().Call(ctx, "partitionByRandom", &_args63, &_result65)
+  _meta64, _err = p.Client_().Call(ctx, "repartition", &_args63, &_result65)
   p.SetLastResponseMeta_(_meta64)
   if _err != nil {
     return
@@ -666,12 +670,14 @@ func (p *IGeneralModuleClient) PartitionByRandom(ctx context.Context, numPartiti
 
 // Parameters:
 //  - NumPartitions
-func (p *IGeneralModuleClient) PartitionByHash(ctx context.Context, numPartitions int64) (_err error) {
-  var _args66 IGeneralModulePartitionByHashArgs
+//  - Seed
+func (p *IGeneralModuleClient) PartitionByRandom(ctx context.Context, numPartitions int64, seed int32) (_err error) {
+  var _args66 IGeneralModulePartitionByRandomArgs
   _args66.NumPartitions = numPartitions
-  var _result68 IGeneralModulePartitionByHashResult
+  _args66.Seed = seed
+  var _result68 IGeneralModulePartitionByRandomResult
   var _meta67 thrift.ResponseMeta
-  _meta67, _err = p.Client_().Call(ctx, "partitionByHash", &_args66, &_result68)
+  _meta67, _err = p.Client_().Call(ctx, "partitionByRandom", &_args66, &_result68)
   p.SetLastResponseMeta_(_meta67)
   if _err != nil {
     return
@@ -685,15 +691,13 @@ func (p *IGeneralModuleClient) PartitionByHash(ctx context.Context, numPartition
 }
 
 // Parameters:
-//  - Src
 //  - NumPartitions
-func (p *IGeneralModuleClient) PartitionBy(ctx context.Context, src *rpc.ISource, numPartitions int64) (_err error) {
-  var _args69 IGeneralModulePartitionByArgs
-  _args69.Src = src
+func (p *IGeneralModuleClient) PartitionByHash(ctx context.Context, numPartitions int64) (_err error) {
+  var _args69 IGeneralModulePartitionByHashArgs
   _args69.NumPartitions = numPartitions
-  var _result71 IGeneralModulePartitionByResult
+  var _result71 IGeneralModulePartitionByHashResult
   var _meta70 thrift.ResponseMeta
-  _meta70, _err = p.Client_().Call(ctx, "partitionBy", &_args69, &_result71)
+  _meta70, _err = p.Client_().Call(ctx, "partitionByHash", &_args69, &_result71)
   p.SetLastResponseMeta_(_meta70)
   if _err != nil {
     return
@@ -708,12 +712,14 @@ func (p *IGeneralModuleClient) PartitionBy(ctx context.Context, src *rpc.ISource
 
 // Parameters:
 //  - Src
-func (p *IGeneralModuleClient) FlatMapValues(ctx context.Context, src *rpc.ISource) (_err error) {
-  var _args72 IGeneralModuleFlatMapValuesArgs
+//  - NumPartitions
+func (p *IGeneralModuleClient) PartitionBy(ctx context.Context, src *rpc.ISource, numPartitions int64) (_err error) {
+  var _args72 IGeneralModulePartitionByArgs
   _args72.Src = src
-  var _result74 IGeneralModuleFlatMapValuesResult
+  _args72.NumPartitions = numPartitions
+  var _result74 IGeneralModulePartitionByResult
   var _meta73 thrift.ResponseMeta
-  _meta73, _err = p.Client_().Call(ctx, "flatMapValues", &_args72, &_result74)
+  _meta73, _err = p.Client_().Call(ctx, "partitionBy", &_args72, &_result74)
   p.SetLastResponseMeta_(_meta73)
   if _err != nil {
     return
@@ -728,12 +734,12 @@ func (p *IGeneralModuleClient) FlatMapValues(ctx context.Context, src *rpc.ISour
 
 // Parameters:
 //  - Src
-func (p *IGeneralModuleClient) MapValues(ctx context.Context, src *rpc.ISource) (_err error) {
-  var _args75 IGeneralModuleMapValuesArgs
+func (p *IGeneralModuleClient) FlatMapValues(ctx context.Context, src *rpc.ISource) (_err error) {
+  var _args75 IGeneralModuleFlatMapValuesArgs
   _args75.Src = src
-  var _result77 IGeneralModuleMapValuesResult
+  var _result77 IGeneralModuleFlatMapValuesResult
   var _meta76 thrift.ResponseMeta
-  _meta76, _err = p.Client_().Call(ctx, "mapValues", &_args75, &_result77)
+  _meta76, _err = p.Client_().Call(ctx, "flatMapValues", &_args75, &_result77)
   p.SetLastResponseMeta_(_meta76)
   if _err != nil {
     return
@@ -747,13 +753,13 @@ func (p *IGeneralModuleClient) MapValues(ctx context.Context, src *rpc.ISource) 
 }
 
 // Parameters:
-//  - NumPartitions
-func (p *IGeneralModuleClient) GroupByKey(ctx context.Context, numPartitions int64) (_err error) {
-  var _args78 IGeneralModuleGroupByKeyArgs
-  _args78.NumPartitions = numPartitions
-  var _result80 IGeneralModuleGroupByKeyResult
+//  - Src
+func (p *IGeneralModuleClient) MapValues(ctx context.Context, src *rpc.ISource) (_err error) {
+  var _args78 IGeneralModuleMapValuesArgs
+  _args78.Src = src
+  var _result80 IGeneralModuleMapValuesResult
   var _meta79 thrift.ResponseMeta
-  _meta79, _err = p.Client_().Call(ctx, "groupByKey", &_args78, &_result80)
+  _meta79, _err = p.Client_().Call(ctx, "mapValues", &_args78, &_result80)
   p.SetLastResponseMeta_(_meta79)
   if _err != nil {
     return
@@ -768,14 +774,12 @@ func (p *IGeneralModuleClient) GroupByKey(ctx context.Context, numPartitions int
 
 // Parameters:
 //  - NumPartitions
-//  - Src
-func (p *IGeneralModuleClient) GroupByKey2(ctx context.Context, numPartitions int64, src *rpc.ISource) (_err error) {
-  var _args81 IGeneralModuleGroupByKey2Args
+func (p *IGeneralModuleClient) GroupByKey(ctx context.Context, numPartitions int64) (_err error) {
+  var _args81 IGeneralModuleGroupByKeyArgs
   _args81.NumPartitions = numPartitions
-  _args81.Src = src
-  var _result83 IGeneralModuleGroupByKey2Result
+  var _result83 IGeneralModuleGroupByKeyResult
   var _meta82 thrift.ResponseMeta
-  _meta82, _err = p.Client_().Call(ctx, "groupByKey2", &_args81, &_result83)
+  _meta82, _err = p.Client_().Call(ctx, "groupByKey", &_args81, &_result83)
   p.SetLastResponseMeta_(_meta82)
   if _err != nil {
     return
@@ -789,17 +793,15 @@ func (p *IGeneralModuleClient) GroupByKey2(ctx context.Context, numPartitions in
 }
 
 // Parameters:
-//  - Src
 //  - NumPartitions
-//  - LocalReduce
-func (p *IGeneralModuleClient) ReduceByKey(ctx context.Context, src *rpc.ISource, numPartitions int64, localReduce bool) (_err error) {
-  var _args84 IGeneralModuleReduceByKeyArgs
-  _args84.Src = src
+//  - Src
+func (p *IGeneralModuleClient) GroupByKey2(ctx context.Context, numPartitions int64, src *rpc.ISource) (_err error) {
+  var _args84 IGeneralModuleGroupByKey2Args
   _args84.NumPartitions = numPartitions
-  _args84.LocalReduce = localReduce
-  var _result86 IGeneralModuleReduceByKeyResult
+  _args84.Src = src
+  var _result86 IGeneralModuleGroupByKey2Result
   var _meta85 thrift.ResponseMeta
-  _meta85, _err = p.Client_().Call(ctx, "reduceByKey", &_args84, &_result86)
+  _meta85, _err = p.Client_().Call(ctx, "groupByKey2", &_args84, &_result86)
   p.SetLastResponseMeta_(_meta85)
   if _err != nil {
     return
@@ -813,17 +815,17 @@ func (p *IGeneralModuleClient) ReduceByKey(ctx context.Context, src *rpc.ISource
 }
 
 // Parameters:
-//  - Zero
-//  - SeqOp
+//  - Src
 //  - NumPartitions
-func (p *IGeneralModuleClient) AggregateByKey(ctx context.Context, zero *rpc.ISource, seqOp *rpc.ISource, numPartitions int64) (_err error) {
-  var _args87 IGeneralModuleAggregateByKeyArgs
-  _args87.Zero = zero
-  _args87.SeqOp = seqOp
+//  - LocalReduce
+func (p *IGeneralModuleClient) ReduceByKey(ctx context.Context, src *rpc.ISource, numPartitions int64, localReduce bool) (_err error) {
+  var _args87 IGeneralModuleReduceByKeyArgs
+  _args87.Src = src
   _args87.NumPartitions = numPartitions
-  var _result89 IGeneralModuleAggregateByKeyResult
+  _args87.LocalReduce = localReduce
+  var _result89 IGeneralModuleReduceByKeyResult
   var _meta88 thrift.ResponseMeta
-  _meta88, _err = p.Client_().Call(ctx, "aggregateByKey", &_args87, &_result89)
+  _meta88, _err = p.Client_().Call(ctx, "reduceByKey", &_args87, &_result89)
   p.SetLastResponseMeta_(_meta88)
   if _err != nil {
     return
@@ -839,17 +841,15 @@ func (p *IGeneralModuleClient) AggregateByKey(ctx context.Context, zero *rpc.ISo
 // Parameters:
 //  - Zero
 //  - SeqOp
-//  - CombOp
 //  - NumPartitions
-func (p *IGeneralModuleClient) AggregateByKey4(ctx context.Context, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, numPartitions int64) (_err error) {
-  var _args90 IGeneralModuleAggregateByKey4Args
+func (p *IGeneralModuleClient) AggregateByKey(ctx context.Context, zero *rpc.ISource, seqOp *rpc.ISource, numPartitions int64) (_err error) {
+  var _args90 IGeneralModuleAggregateByKeyArgs
   _args90.Zero = zero
   _args90.SeqOp = seqOp
-  _args90.CombOp = combOp
   _args90.NumPartitions = numPartitions
-  var _result92 IGeneralModuleAggregateByKey4Result
+  var _result92 IGeneralModuleAggregateByKeyResult
   var _meta91 thrift.ResponseMeta
-  _meta91, _err = p.Client_().Call(ctx, "aggregateByKey4", &_args90, &_result92)
+  _meta91, _err = p.Client_().Call(ctx, "aggregateByKey", &_args90, &_result92)
   p.SetLastResponseMeta_(_meta91)
   if _err != nil {
     return
@@ -864,18 +864,18 @@ func (p *IGeneralModuleClient) AggregateByKey4(ctx context.Context, zero *rpc.IS
 
 // Parameters:
 //  - Zero
-//  - Src
+//  - SeqOp
+//  - CombOp
 //  - NumPartitions
-//  - LocalFold
-func (p *IGeneralModuleClient) FoldByKey(ctx context.Context, zero *rpc.ISource, src *rpc.ISource, numPartitions int64, localFold bool) (_err error) {
-  var _args93 IGeneralModuleFoldByKeyArgs
+func (p *IGeneralModuleClient) AggregateByKey4(ctx context.Context, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, numPartitions int64) (_err error) {
+  var _args93 IGeneralModuleAggregateByKey4Args
   _args93.Zero = zero
-  _args93.Src = src
+  _args93.SeqOp = seqOp
+  _args93.CombOp = combOp
   _args93.NumPartitions = numPartitions
-  _args93.LocalFold = localFold
-  var _result95 IGeneralModuleFoldByKeyResult
+  var _result95 IGeneralModuleAggregateByKey4Result
   var _meta94 thrift.ResponseMeta
-  _meta94, _err = p.Client_().Call(ctx, "foldByKey", &_args93, &_result95)
+  _meta94, _err = p.Client_().Call(ctx, "aggregateByKey4", &_args93, &_result95)
   p.SetLastResponseMeta_(_meta94)
   if _err != nil {
     return
@@ -889,13 +889,19 @@ func (p *IGeneralModuleClient) FoldByKey(ctx context.Context, zero *rpc.ISource,
 }
 
 // Parameters:
-//  - Ascending
-func (p *IGeneralModuleClient) SortByKey(ctx context.Context, ascending bool) (_err error) {
-  var _args96 IGeneralModuleSortByKeyArgs
-  _args96.Ascending = ascending
-  var _result98 IGeneralModuleSortByKeyResult
+//  - Zero
+//  - Src
+//  - NumPartitions
+//  - LocalFold
+func (p *IGeneralModuleClient) FoldByKey(ctx context.Context, zero *rpc.ISource, src *rpc.ISource, numPartitions int64, localFold bool) (_err error) {
+  var _args96 IGeneralModuleFoldByKeyArgs
+  _args96.Zero = zero
+  _args96.Src = src
+  _args96.NumPartitions = numPartitions
+  _args96.LocalFold = localFold
+  var _result98 IGeneralModuleFoldByKeyResult
   var _meta97 thrift.ResponseMeta
-  _meta97, _err = p.Client_().Call(ctx, "sortByKey", &_args96, &_result98)
+  _meta97, _err = p.Client_().Call(ctx, "foldByKey", &_args96, &_result98)
   p.SetLastResponseMeta_(_meta97)
   if _err != nil {
     return
@@ -910,14 +916,12 @@ func (p *IGeneralModuleClient) SortByKey(ctx context.Context, ascending bool) (_
 
 // Parameters:
 //  - Ascending
-//  - NumPartitions
-func (p *IGeneralModuleClient) SortByKey2a(ctx context.Context, ascending bool, numPartitions int64) (_err error) {
-  var _args99 IGeneralModuleSortByKey2aArgs
+func (p *IGeneralModuleClient) SortByKey(ctx context.Context, ascending bool) (_err error) {
+  var _args99 IGeneralModuleSortByKeyArgs
   _args99.Ascending = ascending
-  _args99.NumPartitions = numPartitions
-  var _result101 IGeneralModuleSortByKey2aResult
+  var _result101 IGeneralModuleSortByKeyResult
   var _meta100 thrift.ResponseMeta
-  _meta100, _err = p.Client_().Call(ctx, "sortByKey2a", &_args99, &_result101)
+  _meta100, _err = p.Client_().Call(ctx, "sortByKey", &_args99, &_result101)
   p.SetLastResponseMeta_(_meta100)
   if _err != nil {
     return
@@ -931,15 +935,15 @@ func (p *IGeneralModuleClient) SortByKey2a(ctx context.Context, ascending bool, 
 }
 
 // Parameters:
-//  - Src
 //  - Ascending
-func (p *IGeneralModuleClient) SortByKey2b(ctx context.Context, src *rpc.ISource, ascending bool) (_err error) {
-  var _args102 IGeneralModuleSortByKey2bArgs
-  _args102.Src = src
+//  - NumPartitions
+func (p *IGeneralModuleClient) SortByKey2a(ctx context.Context, ascending bool, numPartitions int64) (_err error) {
+  var _args102 IGeneralModuleSortByKey2aArgs
   _args102.Ascending = ascending
-  var _result104 IGeneralModuleSortByKey2bResult
+  _args102.NumPartitions = numPartitions
+  var _result104 IGeneralModuleSortByKey2aResult
   var _meta103 thrift.ResponseMeta
-  _meta103, _err = p.Client_().Call(ctx, "sortByKey2b", &_args102, &_result104)
+  _meta103, _err = p.Client_().Call(ctx, "sortByKey2a", &_args102, &_result104)
   p.SetLastResponseMeta_(_meta103)
   if _err != nil {
     return
@@ -955,15 +959,13 @@ func (p *IGeneralModuleClient) SortByKey2b(ctx context.Context, src *rpc.ISource
 // Parameters:
 //  - Src
 //  - Ascending
-//  - NumPartitions
-func (p *IGeneralModuleClient) SortByKey3(ctx context.Context, src *rpc.ISource, ascending bool, numPartitions int64) (_err error) {
-  var _args105 IGeneralModuleSortByKey3Args
+func (p *IGeneralModuleClient) SortByKey2b(ctx context.Context, src *rpc.ISource, ascending bool) (_err error) {
+  var _args105 IGeneralModuleSortByKey2bArgs
   _args105.Src = src
   _args105.Ascending = ascending
-  _args105.NumPartitions = numPartitions
-  var _result107 IGeneralModuleSortByKey3Result
+  var _result107 IGeneralModuleSortByKey2bResult
   var _meta106 thrift.ResponseMeta
-  _meta106, _err = p.Client_().Call(ctx, "sortByKey3", &_args105, &_result107)
+  _meta106, _err = p.Client_().Call(ctx, "sortByKey2b", &_args105, &_result107)
   p.SetLastResponseMeta_(_meta106)
   if _err != nil {
     return
@@ -971,6 +973,30 @@ func (p *IGeneralModuleClient) SortByKey3(ctx context.Context, src *rpc.ISource,
   switch {
   case _result107.Ex!= nil:
     return _result107.Ex
+  }
+
+  return nil
+}
+
+// Parameters:
+//  - Src
+//  - Ascending
+//  - NumPartitions
+func (p *IGeneralModuleClient) SortByKey3(ctx context.Context, src *rpc.ISource, ascending bool, numPartitions int64) (_err error) {
+  var _args108 IGeneralModuleSortByKey3Args
+  _args108.Src = src
+  _args108.Ascending = ascending
+  _args108.NumPartitions = numPartitions
+  var _result110 IGeneralModuleSortByKey3Result
+  var _meta109 thrift.ResponseMeta
+  _meta109, _err = p.Client_().Call(ctx, "sortByKey3", &_args108, &_result110)
+  p.SetLastResponseMeta_(_meta109)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result110.Ex!= nil:
+    return _result110.Ex
   }
 
   return nil
@@ -996,44 +1022,45 @@ func (p *IGeneralModuleProcessor) ProcessorMap() map[string]thrift.TProcessorFun
 
 func NewIGeneralModuleProcessor(handler IGeneralModule) *IGeneralModuleProcessor {
 
-  self108 := &IGeneralModuleProcessor{handler:handler, processorMap:make(map[string]thrift.TProcessorFunction)}
-  self108.processorMap["executeTo"] = &iGeneralModuleProcessorExecuteTo{handler:handler}
-  self108.processorMap["map_"] = &iGeneralModuleProcessorMap_{handler:handler}
-  self108.processorMap["filter"] = &iGeneralModuleProcessorFilter{handler:handler}
-  self108.processorMap["flatmap"] = &iGeneralModuleProcessorFlatmap{handler:handler}
-  self108.processorMap["keyBy"] = &iGeneralModuleProcessorKeyBy{handler:handler}
-  self108.processorMap["mapPartitions"] = &iGeneralModuleProcessorMapPartitions{handler:handler}
-  self108.processorMap["mapPartitionsWithIndex"] = &iGeneralModuleProcessorMapPartitionsWithIndex{handler:handler}
-  self108.processorMap["mapExecutor"] = &iGeneralModuleProcessorMapExecutor{handler:handler}
-  self108.processorMap["mapExecutorTo"] = &iGeneralModuleProcessorMapExecutorTo{handler:handler}
-  self108.processorMap["groupBy"] = &iGeneralModuleProcessorGroupBy{handler:handler}
-  self108.processorMap["sort"] = &iGeneralModuleProcessorSort{handler:handler}
-  self108.processorMap["sort2"] = &iGeneralModuleProcessorSort2{handler:handler}
-  self108.processorMap["sortBy"] = &iGeneralModuleProcessorSortBy{handler:handler}
-  self108.processorMap["sortBy3"] = &iGeneralModuleProcessorSortBy3{handler:handler}
-  self108.processorMap["union_"] = &iGeneralModuleProcessorUnion_{handler:handler}
-  self108.processorMap["union2"] = &iGeneralModuleProcessorUnion2{handler:handler}
-  self108.processorMap["join"] = &iGeneralModuleProcessorJoin{handler:handler}
-  self108.processorMap["join3"] = &iGeneralModuleProcessorJoin3{handler:handler}
-  self108.processorMap["distinct"] = &iGeneralModuleProcessorDistinct{handler:handler}
-  self108.processorMap["distinct2"] = &iGeneralModuleProcessorDistinct2{handler:handler}
-  self108.processorMap["repartition"] = &iGeneralModuleProcessorRepartition{handler:handler}
-  self108.processorMap["partitionByRandom"] = &iGeneralModuleProcessorPartitionByRandom{handler:handler}
-  self108.processorMap["partitionByHash"] = &iGeneralModuleProcessorPartitionByHash{handler:handler}
-  self108.processorMap["partitionBy"] = &iGeneralModuleProcessorPartitionBy{handler:handler}
-  self108.processorMap["flatMapValues"] = &iGeneralModuleProcessorFlatMapValues{handler:handler}
-  self108.processorMap["mapValues"] = &iGeneralModuleProcessorMapValues{handler:handler}
-  self108.processorMap["groupByKey"] = &iGeneralModuleProcessorGroupByKey{handler:handler}
-  self108.processorMap["groupByKey2"] = &iGeneralModuleProcessorGroupByKey2{handler:handler}
-  self108.processorMap["reduceByKey"] = &iGeneralModuleProcessorReduceByKey{handler:handler}
-  self108.processorMap["aggregateByKey"] = &iGeneralModuleProcessorAggregateByKey{handler:handler}
-  self108.processorMap["aggregateByKey4"] = &iGeneralModuleProcessorAggregateByKey4{handler:handler}
-  self108.processorMap["foldByKey"] = &iGeneralModuleProcessorFoldByKey{handler:handler}
-  self108.processorMap["sortByKey"] = &iGeneralModuleProcessorSortByKey{handler:handler}
-  self108.processorMap["sortByKey2a"] = &iGeneralModuleProcessorSortByKey2a{handler:handler}
-  self108.processorMap["sortByKey2b"] = &iGeneralModuleProcessorSortByKey2b{handler:handler}
-  self108.processorMap["sortByKey3"] = &iGeneralModuleProcessorSortByKey3{handler:handler}
-return self108
+  self111 := &IGeneralModuleProcessor{handler:handler, processorMap:make(map[string]thrift.TProcessorFunction)}
+  self111.processorMap["executeTo"] = &iGeneralModuleProcessorExecuteTo{handler:handler}
+  self111.processorMap["map_"] = &iGeneralModuleProcessorMap_{handler:handler}
+  self111.processorMap["filter"] = &iGeneralModuleProcessorFilter{handler:handler}
+  self111.processorMap["flatmap"] = &iGeneralModuleProcessorFlatmap{handler:handler}
+  self111.processorMap["keyBy"] = &iGeneralModuleProcessorKeyBy{handler:handler}
+  self111.processorMap["mapWithIndex"] = &iGeneralModuleProcessorMapWithIndex{handler:handler}
+  self111.processorMap["mapPartitions"] = &iGeneralModuleProcessorMapPartitions{handler:handler}
+  self111.processorMap["mapPartitionsWithIndex"] = &iGeneralModuleProcessorMapPartitionsWithIndex{handler:handler}
+  self111.processorMap["mapExecutor"] = &iGeneralModuleProcessorMapExecutor{handler:handler}
+  self111.processorMap["mapExecutorTo"] = &iGeneralModuleProcessorMapExecutorTo{handler:handler}
+  self111.processorMap["groupBy"] = &iGeneralModuleProcessorGroupBy{handler:handler}
+  self111.processorMap["sort"] = &iGeneralModuleProcessorSort{handler:handler}
+  self111.processorMap["sort2"] = &iGeneralModuleProcessorSort2{handler:handler}
+  self111.processorMap["sortBy"] = &iGeneralModuleProcessorSortBy{handler:handler}
+  self111.processorMap["sortBy3"] = &iGeneralModuleProcessorSortBy3{handler:handler}
+  self111.processorMap["union_"] = &iGeneralModuleProcessorUnion_{handler:handler}
+  self111.processorMap["union2"] = &iGeneralModuleProcessorUnion2{handler:handler}
+  self111.processorMap["join"] = &iGeneralModuleProcessorJoin{handler:handler}
+  self111.processorMap["join3"] = &iGeneralModuleProcessorJoin3{handler:handler}
+  self111.processorMap["distinct"] = &iGeneralModuleProcessorDistinct{handler:handler}
+  self111.processorMap["distinct2"] = &iGeneralModuleProcessorDistinct2{handler:handler}
+  self111.processorMap["repartition"] = &iGeneralModuleProcessorRepartition{handler:handler}
+  self111.processorMap["partitionByRandom"] = &iGeneralModuleProcessorPartitionByRandom{handler:handler}
+  self111.processorMap["partitionByHash"] = &iGeneralModuleProcessorPartitionByHash{handler:handler}
+  self111.processorMap["partitionBy"] = &iGeneralModuleProcessorPartitionBy{handler:handler}
+  self111.processorMap["flatMapValues"] = &iGeneralModuleProcessorFlatMapValues{handler:handler}
+  self111.processorMap["mapValues"] = &iGeneralModuleProcessorMapValues{handler:handler}
+  self111.processorMap["groupByKey"] = &iGeneralModuleProcessorGroupByKey{handler:handler}
+  self111.processorMap["groupByKey2"] = &iGeneralModuleProcessorGroupByKey2{handler:handler}
+  self111.processorMap["reduceByKey"] = &iGeneralModuleProcessorReduceByKey{handler:handler}
+  self111.processorMap["aggregateByKey"] = &iGeneralModuleProcessorAggregateByKey{handler:handler}
+  self111.processorMap["aggregateByKey4"] = &iGeneralModuleProcessorAggregateByKey4{handler:handler}
+  self111.processorMap["foldByKey"] = &iGeneralModuleProcessorFoldByKey{handler:handler}
+  self111.processorMap["sortByKey"] = &iGeneralModuleProcessorSortByKey{handler:handler}
+  self111.processorMap["sortByKey2a"] = &iGeneralModuleProcessorSortByKey2a{handler:handler}
+  self111.processorMap["sortByKey2b"] = &iGeneralModuleProcessorSortByKey2b{handler:handler}
+  self111.processorMap["sortByKey3"] = &iGeneralModuleProcessorSortByKey3{handler:handler}
+return self111
 }
 
 func (p *IGeneralModuleProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -1044,12 +1071,12 @@ func (p *IGeneralModuleProcessor) Process(ctx context.Context, iprot, oprot thri
   }
   iprot.Skip(ctx, thrift.STRUCT)
   iprot.ReadMessageEnd(ctx)
-  x109 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function " + name)
+  x112 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function " + name)
   oprot.WriteMessageBegin(ctx, name, thrift.EXCEPTION, seqId)
-  x109.Write(ctx, oprot)
+  x112.Write(ctx, oprot)
   oprot.WriteMessageEnd(ctx)
   oprot.Flush(ctx)
-  return false, x109
+  return false, x112
 
 }
 
@@ -1441,6 +1468,87 @@ func (p *iGeneralModuleProcessorKeyBy) Process(ctx context.Context, seqId int32,
   }
   tickerCancel()
   if err2 = oprot.WriteMessageBegin(ctx, "keyBy", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iGeneralModuleProcessorMapWithIndex struct {
+  handler IGeneralModule
+}
+
+func (p *iGeneralModuleProcessorMapWithIndex) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IGeneralModuleMapWithIndexArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "mapWithIndex", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IGeneralModuleMapWithIndexResult{}
+  if err2 = p.handler.MapWithIndex(ctx, args.Src); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *rpc.IExecutorException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing mapWithIndex: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "mapWithIndex", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "mapWithIndex", thrift.REPLY, seqId); err2 != nil {
     err = thrift.WrapTException(err2)
   }
   if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
@@ -2799,7 +2907,7 @@ func (p *iGeneralModuleProcessorPartitionByRandom) Process(ctx context.Context, 
   }
 
   result := IGeneralModulePartitionByRandomResult{}
-  if err2 = p.handler.PartitionByRandom(ctx, args.NumPartitions); err2 != nil {
+  if err2 = p.handler.PartitionByRandom(ctx, args.NumPartitions, args.Seed); err2 != nil {
     tickerCancel()
   switch v := err2.(type) {
     case *rpc.IExecutorException:
@@ -4975,6 +5083,207 @@ func (p *IGeneralModuleKeyByResult) String() string {
     return "<nil>"
   }
   return fmt.Sprintf("IGeneralModuleKeyByResult(%+v)", *p)
+}
+
+// Attributes:
+//  - Src
+type IGeneralModuleMapWithIndexArgs struct {
+  Src *rpc.ISource `thrift:"src,1" db:"src" json:"src"`
+}
+
+func NewIGeneralModuleMapWithIndexArgs() *IGeneralModuleMapWithIndexArgs {
+  return &IGeneralModuleMapWithIndexArgs{}
+}
+
+var IGeneralModuleMapWithIndexArgs_Src_DEFAULT *rpc.ISource
+func (p *IGeneralModuleMapWithIndexArgs) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IGeneralModuleMapWithIndexArgs_Src_DEFAULT
+  }
+return p.Src
+}
+func (p *IGeneralModuleMapWithIndexArgs) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IGeneralModuleMapWithIndexArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleMapWithIndexArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleMapWithIndexArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "mapWithIndex_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleMapWithIndexArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:src: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModuleMapWithIndexArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleMapWithIndexArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Ex
+type IGeneralModuleMapWithIndexResult struct {
+  Ex *rpc.IExecutorException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIGeneralModuleMapWithIndexResult() *IGeneralModuleMapWithIndexResult {
+  return &IGeneralModuleMapWithIndexResult{}
+}
+
+var IGeneralModuleMapWithIndexResult_Ex_DEFAULT *rpc.IExecutorException
+func (p *IGeneralModuleMapWithIndexResult) GetEx() *rpc.IExecutorException {
+  if !p.IsSetEx() {
+    return IGeneralModuleMapWithIndexResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IGeneralModuleMapWithIndexResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IGeneralModuleMapWithIndexResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleMapWithIndexResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &rpc.IExecutorException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IGeneralModuleMapWithIndexResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "mapWithIndex_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IGeneralModuleMapWithIndexResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IGeneralModuleMapWithIndexResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IGeneralModuleMapWithIndexResult(%+v)", *p)
 }
 
 // Attributes:
@@ -8639,8 +8948,10 @@ func (p *IGeneralModuleRepartitionResult) String() string {
 
 // Attributes:
 //  - NumPartitions
+//  - Seed
 type IGeneralModulePartitionByRandomArgs struct {
   NumPartitions int64 `thrift:"numPartitions,1" db:"numPartitions" json:"numPartitions"`
+  Seed int32 `thrift:"seed,2" db:"seed" json:"seed"`
 }
 
 func NewIGeneralModulePartitionByRandomArgs() *IGeneralModulePartitionByRandomArgs {
@@ -8650,6 +8961,10 @@ func NewIGeneralModulePartitionByRandomArgs() *IGeneralModulePartitionByRandomAr
 
 func (p *IGeneralModulePartitionByRandomArgs) GetNumPartitions() int64 {
   return p.NumPartitions
+}
+
+func (p *IGeneralModulePartitionByRandomArgs) GetSeed() int32 {
+  return p.Seed
 }
 func (p *IGeneralModulePartitionByRandomArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
   if _, err := iprot.ReadStructBegin(ctx); err != nil {
@@ -8667,6 +8982,16 @@ func (p *IGeneralModulePartitionByRandomArgs) Read(ctx context.Context, iprot th
     case 1:
       if fieldTypeId == thrift.I64 {
         if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.I32 {
+        if err := p.ReadField2(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -8698,11 +9023,21 @@ func (p *IGeneralModulePartitionByRandomArgs)  ReadField1(ctx context.Context, i
   return nil
 }
 
+func (p *IGeneralModulePartitionByRandomArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI32(ctx); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.Seed = v
+}
+  return nil
+}
+
 func (p *IGeneralModulePartitionByRandomArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "partitionByRandom_args"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if p != nil {
     if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -8718,6 +9053,16 @@ func (p *IGeneralModulePartitionByRandomArgs) writeField1(ctx context.Context, o
   return thrift.PrependError(fmt.Sprintf("%T.numPartitions (1) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 1:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IGeneralModulePartitionByRandomArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "seed", thrift.I32, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:seed: ", p), err) }
+  if err := oprot.WriteI32(ctx, int32(p.Seed)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.seed (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:seed: ", p), err) }
   return err
 }
 

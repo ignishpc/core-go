@@ -254,7 +254,8 @@ type IDataFrameService interface {
   // Parameters:
   //  - ID
   //  - NumPartitions
-  PartitionByRandom(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error)
+  //  - Seed
+  PartitionByRandom(ctx context.Context, id *IDataFrameId, numPartitions int64, seed int32) (_r *IDataFrameId, _err error)
   // Parameters:
   //  - ID
   //  - NumPartitions
@@ -280,6 +281,10 @@ type IDataFrameService interface {
   //  - ID
   //  - Src
   KeyBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error)
+  // Parameters:
+  //  - ID
+  //  - Src
+  MapWithIndex(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error)
   // Parameters:
   //  - ID
   //  - Src
@@ -864,10 +869,12 @@ func (p *IDataFrameServiceClient) Repartition(ctx context.Context, id *IDataFram
 // Parameters:
 //  - ID
 //  - NumPartitions
-func (p *IDataFrameServiceClient) PartitionByRandom(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
+//  - Seed
+func (p *IDataFrameServiceClient) PartitionByRandom(ctx context.Context, id *IDataFrameId, numPartitions int64, seed int32) (_r *IDataFrameId, _err error) {
   var _args31 IDataFrameServicePartitionByRandomArgs
   _args31.ID = id
   _args31.NumPartitions = numPartitions
+  _args31.Seed = seed
   var _result33 IDataFrameServicePartitionByRandomResult
   var _meta32 thrift.ResponseMeta
   _meta32, _err = p.Client_().Call(ctx, "partitionByRandom", &_args31, &_result33)
@@ -1041,13 +1048,13 @@ func (p *IDataFrameServiceClient) KeyBy(ctx context.Context, id *IDataFrameId, s
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) MapPartitions(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args59 IDataFrameServiceMapPartitionsArgs
+func (p *IDataFrameServiceClient) MapWithIndex(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args59 IDataFrameServiceMapWithIndexArgs
   _args59.ID = id
   _args59.Src = src
-  var _result61 IDataFrameServiceMapPartitionsResult
+  var _result61 IDataFrameServiceMapWithIndexResult
   var _meta60 thrift.ResponseMeta
-  _meta60, _err = p.Client_().Call(ctx, "mapPartitions", &_args59, &_result61)
+  _meta60, _err = p.Client_().Call(ctx, "mapWithIndex", &_args59, &_result61)
   p.SetLastResponseMeta_(_meta60)
   if _err != nil {
     return
@@ -1060,19 +1067,19 @@ func (p *IDataFrameServiceClient) MapPartitions(ctx context.Context, id *IDataFr
   if _ret62 := _result61.GetSuccess(); _ret62 != nil {
     return _ret62, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "mapPartitions failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "mapWithIndex failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) MapPartitionsWithIndex(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args63 IDataFrameServiceMapPartitionsWithIndexArgs
+func (p *IDataFrameServiceClient) MapPartitions(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args63 IDataFrameServiceMapPartitionsArgs
   _args63.ID = id
   _args63.Src = src
-  var _result65 IDataFrameServiceMapPartitionsWithIndexResult
+  var _result65 IDataFrameServiceMapPartitionsResult
   var _meta64 thrift.ResponseMeta
-  _meta64, _err = p.Client_().Call(ctx, "mapPartitionsWithIndex", &_args63, &_result65)
+  _meta64, _err = p.Client_().Call(ctx, "mapPartitions", &_args63, &_result65)
   p.SetLastResponseMeta_(_meta64)
   if _err != nil {
     return
@@ -1085,19 +1092,19 @@ func (p *IDataFrameServiceClient) MapPartitionsWithIndex(ctx context.Context, id
   if _ret66 := _result65.GetSuccess(); _ret66 != nil {
     return _ret66, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "mapPartitionsWithIndex failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "mapPartitions failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) MapExecutor(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args67 IDataFrameServiceMapExecutorArgs
+func (p *IDataFrameServiceClient) MapPartitionsWithIndex(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args67 IDataFrameServiceMapPartitionsWithIndexArgs
   _args67.ID = id
   _args67.Src = src
-  var _result69 IDataFrameServiceMapExecutorResult
+  var _result69 IDataFrameServiceMapPartitionsWithIndexResult
   var _meta68 thrift.ResponseMeta
-  _meta68, _err = p.Client_().Call(ctx, "mapExecutor", &_args67, &_result69)
+  _meta68, _err = p.Client_().Call(ctx, "mapPartitionsWithIndex", &_args67, &_result69)
   p.SetLastResponseMeta_(_meta68)
   if _err != nil {
     return
@@ -1110,19 +1117,19 @@ func (p *IDataFrameServiceClient) MapExecutor(ctx context.Context, id *IDataFram
   if _ret70 := _result69.GetSuccess(); _ret70 != nil {
     return _ret70, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "mapExecutor failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "mapPartitionsWithIndex failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) MapExecutorTo(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args71 IDataFrameServiceMapExecutorToArgs
+func (p *IDataFrameServiceClient) MapExecutor(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args71 IDataFrameServiceMapExecutorArgs
   _args71.ID = id
   _args71.Src = src
-  var _result73 IDataFrameServiceMapExecutorToResult
+  var _result73 IDataFrameServiceMapExecutorResult
   var _meta72 thrift.ResponseMeta
-  _meta72, _err = p.Client_().Call(ctx, "mapExecutorTo", &_args71, &_result73)
+  _meta72, _err = p.Client_().Call(ctx, "mapExecutor", &_args71, &_result73)
   p.SetLastResponseMeta_(_meta72)
   if _err != nil {
     return
@@ -1135,19 +1142,19 @@ func (p *IDataFrameServiceClient) MapExecutorTo(ctx context.Context, id *IDataFr
   if _ret74 := _result73.GetSuccess(); _ret74 != nil {
     return _ret74, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "mapExecutorTo failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "mapExecutor failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Src
-func (p *IDataFrameServiceClient) GroupBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args75 IDataFrameServiceGroupByArgs
+func (p *IDataFrameServiceClient) MapExecutorTo(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args75 IDataFrameServiceMapExecutorToArgs
   _args75.ID = id
   _args75.Src = src
-  var _result77 IDataFrameServiceGroupByResult
+  var _result77 IDataFrameServiceMapExecutorToResult
   var _meta76 thrift.ResponseMeta
-  _meta76, _err = p.Client_().Call(ctx, "groupBy", &_args75, &_result77)
+  _meta76, _err = p.Client_().Call(ctx, "mapExecutorTo", &_args75, &_result77)
   p.SetLastResponseMeta_(_meta76)
   if _err != nil {
     return
@@ -1160,21 +1167,19 @@ func (p *IDataFrameServiceClient) GroupBy(ctx context.Context, id *IDataFrameId,
   if _ret78 := _result77.GetSuccess(); _ret78 != nil {
     return _ret78, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupBy failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "mapExecutorTo failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Src
-//  - NumPartitions
-func (p *IDataFrameServiceClient) GroupBy2(ctx context.Context, id *IDataFrameId, src *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args79 IDataFrameServiceGroupBy2Args
+func (p *IDataFrameServiceClient) GroupBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args79 IDataFrameServiceGroupByArgs
   _args79.ID = id
   _args79.Src = src
-  _args79.NumPartitions = numPartitions
-  var _result81 IDataFrameServiceGroupBy2Result
+  var _result81 IDataFrameServiceGroupByResult
   var _meta80 thrift.ResponseMeta
-  _meta80, _err = p.Client_().Call(ctx, "groupBy2", &_args79, &_result81)
+  _meta80, _err = p.Client_().Call(ctx, "groupBy", &_args79, &_result81)
   p.SetLastResponseMeta_(_meta80)
   if _err != nil {
     return
@@ -1187,19 +1192,21 @@ func (p *IDataFrameServiceClient) GroupBy2(ctx context.Context, id *IDataFrameId
   if _ret82 := _result81.GetSuccess(); _ret82 != nil {
     return _ret82, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupBy2 failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupBy failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - Ascending
-func (p *IDataFrameServiceClient) Sort(ctx context.Context, id *IDataFrameId, ascending bool) (_r *IDataFrameId, _err error) {
-  var _args83 IDataFrameServiceSortArgs
+//  - Src
+//  - NumPartitions
+func (p *IDataFrameServiceClient) GroupBy2(ctx context.Context, id *IDataFrameId, src *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args83 IDataFrameServiceGroupBy2Args
   _args83.ID = id
-  _args83.Ascending = ascending
-  var _result85 IDataFrameServiceSortResult
+  _args83.Src = src
+  _args83.NumPartitions = numPartitions
+  var _result85 IDataFrameServiceGroupBy2Result
   var _meta84 thrift.ResponseMeta
-  _meta84, _err = p.Client_().Call(ctx, "sort", &_args83, &_result85)
+  _meta84, _err = p.Client_().Call(ctx, "groupBy2", &_args83, &_result85)
   p.SetLastResponseMeta_(_meta84)
   if _err != nil {
     return
@@ -1212,21 +1219,19 @@ func (p *IDataFrameServiceClient) Sort(ctx context.Context, id *IDataFrameId, as
   if _ret86 := _result85.GetSuccess(); _ret86 != nil {
     return _ret86, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sort failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupBy2 failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Ascending
-//  - NumPartitions
-func (p *IDataFrameServiceClient) Sort2(ctx context.Context, id *IDataFrameId, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args87 IDataFrameServiceSort2Args
+func (p *IDataFrameServiceClient) Sort(ctx context.Context, id *IDataFrameId, ascending bool) (_r *IDataFrameId, _err error) {
+  var _args87 IDataFrameServiceSortArgs
   _args87.ID = id
   _args87.Ascending = ascending
-  _args87.NumPartitions = numPartitions
-  var _result89 IDataFrameServiceSort2Result
+  var _result89 IDataFrameServiceSortResult
   var _meta88 thrift.ResponseMeta
-  _meta88, _err = p.Client_().Call(ctx, "sort2", &_args87, &_result89)
+  _meta88, _err = p.Client_().Call(ctx, "sort", &_args87, &_result89)
   p.SetLastResponseMeta_(_meta88)
   if _err != nil {
     return
@@ -1239,21 +1244,21 @@ func (p *IDataFrameServiceClient) Sort2(ctx context.Context, id *IDataFrameId, a
   if _ret90 := _result89.GetSuccess(); _ret90 != nil {
     return _ret90, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sort2 failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sort failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - Src
 //  - Ascending
-func (p *IDataFrameServiceClient) SortBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool) (_r *IDataFrameId, _err error) {
-  var _args91 IDataFrameServiceSortByArgs
+//  - NumPartitions
+func (p *IDataFrameServiceClient) Sort2(ctx context.Context, id *IDataFrameId, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args91 IDataFrameServiceSort2Args
   _args91.ID = id
-  _args91.Src = src
   _args91.Ascending = ascending
-  var _result93 IDataFrameServiceSortByResult
+  _args91.NumPartitions = numPartitions
+  var _result93 IDataFrameServiceSort2Result
   var _meta92 thrift.ResponseMeta
-  _meta92, _err = p.Client_().Call(ctx, "sortBy", &_args91, &_result93)
+  _meta92, _err = p.Client_().Call(ctx, "sort2", &_args91, &_result93)
   p.SetLastResponseMeta_(_meta92)
   if _err != nil {
     return
@@ -1266,23 +1271,21 @@ func (p *IDataFrameServiceClient) SortBy(ctx context.Context, id *IDataFrameId, 
   if _ret94 := _result93.GetSuccess(); _ret94 != nil {
     return _ret94, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortBy failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sort2 failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Src
 //  - Ascending
-//  - NumPartitions
-func (p *IDataFrameServiceClient) SortBy3(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args95 IDataFrameServiceSortBy3Args
+func (p *IDataFrameServiceClient) SortBy(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool) (_r *IDataFrameId, _err error) {
+  var _args95 IDataFrameServiceSortByArgs
   _args95.ID = id
   _args95.Src = src
   _args95.Ascending = ascending
-  _args95.NumPartitions = numPartitions
-  var _result97 IDataFrameServiceSortBy3Result
+  var _result97 IDataFrameServiceSortByResult
   var _meta96 thrift.ResponseMeta
-  _meta96, _err = p.Client_().Call(ctx, "sortBy3", &_args95, &_result97)
+  _meta96, _err = p.Client_().Call(ctx, "sortBy", &_args95, &_result97)
   p.SetLastResponseMeta_(_meta96)
   if _err != nil {
     return
@@ -1295,21 +1298,23 @@ func (p *IDataFrameServiceClient) SortBy3(ctx context.Context, id *IDataFrameId,
   if _ret98 := _result97.GetSuccess(); _ret98 != nil {
     return _ret98, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortBy3 failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortBy failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - Other
-//  - PreserveOrder
-func (p *IDataFrameServiceClient) Union_(ctx context.Context, id *IDataFrameId, other *IDataFrameId, preserveOrder bool) (_r *IDataFrameId, _err error) {
-  var _args99 IDataFrameServiceUnion_Args
+//  - Src
+//  - Ascending
+//  - NumPartitions
+func (p *IDataFrameServiceClient) SortBy3(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args99 IDataFrameServiceSortBy3Args
   _args99.ID = id
-  _args99.Other = other
-  _args99.PreserveOrder = preserveOrder
-  var _result101 IDataFrameServiceUnion_Result
+  _args99.Src = src
+  _args99.Ascending = ascending
+  _args99.NumPartitions = numPartitions
+  var _result101 IDataFrameServiceSortBy3Result
   var _meta100 thrift.ResponseMeta
-  _meta100, _err = p.Client_().Call(ctx, "union_", &_args99, &_result101)
+  _meta100, _err = p.Client_().Call(ctx, "sortBy3", &_args99, &_result101)
   p.SetLastResponseMeta_(_meta100)
   if _err != nil {
     return
@@ -1322,23 +1327,21 @@ func (p *IDataFrameServiceClient) Union_(ctx context.Context, id *IDataFrameId, 
   if _ret102 := _result101.GetSuccess(); _ret102 != nil {
     return _ret102, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "union_ failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortBy3 failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Other
 //  - PreserveOrder
-//  - Src
-func (p *IDataFrameServiceClient) Union4(ctx context.Context, id *IDataFrameId, other *IDataFrameId, preserveOrder bool, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args103 IDataFrameServiceUnion4Args
+func (p *IDataFrameServiceClient) Union_(ctx context.Context, id *IDataFrameId, other *IDataFrameId, preserveOrder bool) (_r *IDataFrameId, _err error) {
+  var _args103 IDataFrameServiceUnion_Args
   _args103.ID = id
   _args103.Other = other
   _args103.PreserveOrder = preserveOrder
-  _args103.Src = src
-  var _result105 IDataFrameServiceUnion4Result
+  var _result105 IDataFrameServiceUnion_Result
   var _meta104 thrift.ResponseMeta
-  _meta104, _err = p.Client_().Call(ctx, "union4", &_args103, &_result105)
+  _meta104, _err = p.Client_().Call(ctx, "union_", &_args103, &_result105)
   p.SetLastResponseMeta_(_meta104)
   if _err != nil {
     return
@@ -1351,19 +1354,23 @@ func (p *IDataFrameServiceClient) Union4(ctx context.Context, id *IDataFrameId, 
   if _ret106 := _result105.GetSuccess(); _ret106 != nil {
     return _ret106, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "union4 failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "union_ failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Other
-func (p *IDataFrameServiceClient) Join(ctx context.Context, id *IDataFrameId, other *IDataFrameId) (_r *IDataFrameId, _err error) {
-  var _args107 IDataFrameServiceJoinArgs
+//  - PreserveOrder
+//  - Src
+func (p *IDataFrameServiceClient) Union4(ctx context.Context, id *IDataFrameId, other *IDataFrameId, preserveOrder bool, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args107 IDataFrameServiceUnion4Args
   _args107.ID = id
   _args107.Other = other
-  var _result109 IDataFrameServiceJoinResult
+  _args107.PreserveOrder = preserveOrder
+  _args107.Src = src
+  var _result109 IDataFrameServiceUnion4Result
   var _meta108 thrift.ResponseMeta
-  _meta108, _err = p.Client_().Call(ctx, "join", &_args107, &_result109)
+  _meta108, _err = p.Client_().Call(ctx, "union4", &_args107, &_result109)
   p.SetLastResponseMeta_(_meta108)
   if _err != nil {
     return
@@ -1376,21 +1383,19 @@ func (p *IDataFrameServiceClient) Join(ctx context.Context, id *IDataFrameId, ot
   if _ret110 := _result109.GetSuccess(); _ret110 != nil {
     return _ret110, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "join failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "union4 failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Other
-//  - NumPartitions
-func (p *IDataFrameServiceClient) Join3a(ctx context.Context, id *IDataFrameId, other *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args111 IDataFrameServiceJoin3aArgs
+func (p *IDataFrameServiceClient) Join(ctx context.Context, id *IDataFrameId, other *IDataFrameId) (_r *IDataFrameId, _err error) {
+  var _args111 IDataFrameServiceJoinArgs
   _args111.ID = id
   _args111.Other = other
-  _args111.NumPartitions = numPartitions
-  var _result113 IDataFrameServiceJoin3aResult
+  var _result113 IDataFrameServiceJoinResult
   var _meta112 thrift.ResponseMeta
-  _meta112, _err = p.Client_().Call(ctx, "join3a", &_args111, &_result113)
+  _meta112, _err = p.Client_().Call(ctx, "join", &_args111, &_result113)
   p.SetLastResponseMeta_(_meta112)
   if _err != nil {
     return
@@ -1403,6 +1408,33 @@ func (p *IDataFrameServiceClient) Join3a(ctx context.Context, id *IDataFrameId, 
   if _ret114 := _result113.GetSuccess(); _ret114 != nil {
     return _ret114, nil
   }
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "join failed: unknown result")
+}
+
+// Parameters:
+//  - ID
+//  - Other
+//  - NumPartitions
+func (p *IDataFrameServiceClient) Join3a(ctx context.Context, id *IDataFrameId, other *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args115 IDataFrameServiceJoin3aArgs
+  _args115.ID = id
+  _args115.Other = other
+  _args115.NumPartitions = numPartitions
+  var _result117 IDataFrameServiceJoin3aResult
+  var _meta116 thrift.ResponseMeta
+  _meta116, _err = p.Client_().Call(ctx, "join3a", &_args115, &_result117)
+  p.SetLastResponseMeta_(_meta116)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result117.Ex!= nil:
+    return _r, _result117.Ex
+  }
+
+  if _ret118 := _result117.GetSuccess(); _ret118 != nil {
+    return _ret118, nil
+  }
   return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "join3a failed: unknown result")
 }
 
@@ -1411,19 +1443,19 @@ func (p *IDataFrameServiceClient) Join3a(ctx context.Context, id *IDataFrameId, 
 //  - Other
 //  - Src
 func (p *IDataFrameServiceClient) Join3b(ctx context.Context, id *IDataFrameId, other *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args115 IDataFrameServiceJoin3bArgs
-  _args115.ID = id
-  _args115.Other = other
-  _args115.Src = src
-  var _result117 IDataFrameServiceJoin3bResult
-  var _meta116 thrift.ResponseMeta
-  _meta116, _err = p.Client_().Call(ctx, "join3b", &_args115, &_result117)
-  p.SetLastResponseMeta_(_meta116)
+  var _args119 IDataFrameServiceJoin3bArgs
+  _args119.ID = id
+  _args119.Other = other
+  _args119.Src = src
+  var _result121 IDataFrameServiceJoin3bResult
+  var _meta120 thrift.ResponseMeta
+  _meta120, _err = p.Client_().Call(ctx, "join3b", &_args119, &_result121)
+  p.SetLastResponseMeta_(_meta120)
   if _err != nil {
     return
   }
-  if _ret118 := _result117.GetSuccess(); _ret118 != nil {
-    return _ret118, nil
+  if _ret122 := _result121.GetSuccess(); _ret122 != nil {
+    return _ret122, nil
   }
   return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "join3b failed: unknown result")
 }
@@ -1434,37 +1466,14 @@ func (p *IDataFrameServiceClient) Join3b(ctx context.Context, id *IDataFrameId, 
 //  - NumPartitions
 //  - Src
 func (p *IDataFrameServiceClient) Join4(ctx context.Context, id *IDataFrameId, other *IDataFrameId, numPartitions int64, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args119 IDataFrameServiceJoin4Args
-  _args119.ID = id
-  _args119.Other = other
-  _args119.NumPartitions = numPartitions
-  _args119.Src = src
-  var _result121 IDataFrameServiceJoin4Result
-  var _meta120 thrift.ResponseMeta
-  _meta120, _err = p.Client_().Call(ctx, "join4", &_args119, &_result121)
-  p.SetLastResponseMeta_(_meta120)
-  if _err != nil {
-    return
-  }
-  switch {
-  case _result121.Ex!= nil:
-    return _r, _result121.Ex
-  }
-
-  if _ret122 := _result121.GetSuccess(); _ret122 != nil {
-    return _ret122, nil
-  }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "join4 failed: unknown result")
-}
-
-// Parameters:
-//  - ID
-func (p *IDataFrameServiceClient) Distinct(ctx context.Context, id *IDataFrameId) (_r *IDataFrameId, _err error) {
-  var _args123 IDataFrameServiceDistinctArgs
+  var _args123 IDataFrameServiceJoin4Args
   _args123.ID = id
-  var _result125 IDataFrameServiceDistinctResult
+  _args123.Other = other
+  _args123.NumPartitions = numPartitions
+  _args123.Src = src
+  var _result125 IDataFrameServiceJoin4Result
   var _meta124 thrift.ResponseMeta
-  _meta124, _err = p.Client_().Call(ctx, "distinct", &_args123, &_result125)
+  _meta124, _err = p.Client_().Call(ctx, "join4", &_args123, &_result125)
   p.SetLastResponseMeta_(_meta124)
   if _err != nil {
     return
@@ -1477,19 +1486,17 @@ func (p *IDataFrameServiceClient) Distinct(ctx context.Context, id *IDataFrameId
   if _ret126 := _result125.GetSuccess(); _ret126 != nil {
     return _ret126, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "distinct failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "join4 failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - NumPartitions
-func (p *IDataFrameServiceClient) Distinct2a(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args127 IDataFrameServiceDistinct2aArgs
+func (p *IDataFrameServiceClient) Distinct(ctx context.Context, id *IDataFrameId) (_r *IDataFrameId, _err error) {
+  var _args127 IDataFrameServiceDistinctArgs
   _args127.ID = id
-  _args127.NumPartitions = numPartitions
-  var _result129 IDataFrameServiceDistinct2aResult
+  var _result129 IDataFrameServiceDistinctResult
   var _meta128 thrift.ResponseMeta
-  _meta128, _err = p.Client_().Call(ctx, "distinct2a", &_args127, &_result129)
+  _meta128, _err = p.Client_().Call(ctx, "distinct", &_args127, &_result129)
   p.SetLastResponseMeta_(_meta128)
   if _err != nil {
     return
@@ -1502,19 +1509,19 @@ func (p *IDataFrameServiceClient) Distinct2a(ctx context.Context, id *IDataFrame
   if _ret130 := _result129.GetSuccess(); _ret130 != nil {
     return _ret130, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "distinct2a failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "distinct failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - Src
-func (p *IDataFrameServiceClient) Distinct2b(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args131 IDataFrameServiceDistinct2bArgs
+//  - NumPartitions
+func (p *IDataFrameServiceClient) Distinct2a(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args131 IDataFrameServiceDistinct2aArgs
   _args131.ID = id
-  _args131.Src = src
-  var _result133 IDataFrameServiceDistinct2bResult
+  _args131.NumPartitions = numPartitions
+  var _result133 IDataFrameServiceDistinct2aResult
   var _meta132 thrift.ResponseMeta
-  _meta132, _err = p.Client_().Call(ctx, "distinct2b", &_args131, &_result133)
+  _meta132, _err = p.Client_().Call(ctx, "distinct2a", &_args131, &_result133)
   p.SetLastResponseMeta_(_meta132)
   if _err != nil {
     return
@@ -1527,21 +1534,19 @@ func (p *IDataFrameServiceClient) Distinct2b(ctx context.Context, id *IDataFrame
   if _ret134 := _result133.GetSuccess(); _ret134 != nil {
     return _ret134, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "distinct2b failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "distinct2a failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - NumPartitions
 //  - Src
-func (p *IDataFrameServiceClient) Distinct3(ctx context.Context, id *IDataFrameId, numPartitions int64, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args135 IDataFrameServiceDistinct3Args
+func (p *IDataFrameServiceClient) Distinct2b(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args135 IDataFrameServiceDistinct2bArgs
   _args135.ID = id
-  _args135.NumPartitions = numPartitions
   _args135.Src = src
-  var _result137 IDataFrameServiceDistinct3Result
+  var _result137 IDataFrameServiceDistinct2bResult
   var _meta136 thrift.ResponseMeta
-  _meta136, _err = p.Client_().Call(ctx, "distinct3", &_args135, &_result137)
+  _meta136, _err = p.Client_().Call(ctx, "distinct2b", &_args135, &_result137)
   p.SetLastResponseMeta_(_meta136)
   if _err != nil {
     return
@@ -1554,21 +1559,21 @@ func (p *IDataFrameServiceClient) Distinct3(ctx context.Context, id *IDataFrameI
   if _ret138 := _result137.GetSuccess(); _ret138 != nil {
     return _ret138, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "distinct3 failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "distinct2b failed: unknown result")
 }
 
 // Parameters:
 //  - ID
+//  - NumPartitions
 //  - Src
-//  - Tp
-func (p *IDataFrameServiceClient) Reduce(ctx context.Context, id *IDataFrameId, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args139 IDataFrameServiceReduceArgs
+func (p *IDataFrameServiceClient) Distinct3(ctx context.Context, id *IDataFrameId, numPartitions int64, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args139 IDataFrameServiceDistinct3Args
   _args139.ID = id
+  _args139.NumPartitions = numPartitions
   _args139.Src = src
-  _args139.Tp = tp
-  var _result141 IDataFrameServiceReduceResult
+  var _result141 IDataFrameServiceDistinct3Result
   var _meta140 thrift.ResponseMeta
-  _meta140, _err = p.Client_().Call(ctx, "reduce", &_args139, &_result141)
+  _meta140, _err = p.Client_().Call(ctx, "distinct3", &_args139, &_result141)
   p.SetLastResponseMeta_(_meta140)
   if _err != nil {
     return
@@ -1578,7 +1583,34 @@ func (p *IDataFrameServiceClient) Reduce(ctx context.Context, id *IDataFrameId, 
     return _r, _result141.Ex
   }
 
-  return _result141.GetSuccess(), nil
+  if _ret142 := _result141.GetSuccess(); _ret142 != nil {
+    return _ret142, nil
+  }
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "distinct3 failed: unknown result")
+}
+
+// Parameters:
+//  - ID
+//  - Src
+//  - Tp
+func (p *IDataFrameServiceClient) Reduce(ctx context.Context, id *IDataFrameId, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
+  var _args143 IDataFrameServiceReduceArgs
+  _args143.ID = id
+  _args143.Src = src
+  _args143.Tp = tp
+  var _result145 IDataFrameServiceReduceResult
+  var _meta144 thrift.ResponseMeta
+  _meta144, _err = p.Client_().Call(ctx, "reduce", &_args143, &_result145)
+  p.SetLastResponseMeta_(_meta144)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result145.Ex!= nil:
+    return _r, _result145.Ex
+  }
+
+  return _result145.GetSuccess(), nil
 }
 
 // Parameters:
@@ -1586,45 +1618,45 @@ func (p *IDataFrameServiceClient) Reduce(ctx context.Context, id *IDataFrameId, 
 //  - Src
 //  - Tp
 func (p *IDataFrameServiceClient) TreeReduce(ctx context.Context, id *IDataFrameId, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args142 IDataFrameServiceTreeReduceArgs
-  _args142.ID = id
-  _args142.Src = src
-  _args142.Tp = tp
-  var _result144 IDataFrameServiceTreeReduceResult
-  var _meta143 thrift.ResponseMeta
-  _meta143, _err = p.Client_().Call(ctx, "treeReduce", &_args142, &_result144)
-  p.SetLastResponseMeta_(_meta143)
+  var _args146 IDataFrameServiceTreeReduceArgs
+  _args146.ID = id
+  _args146.Src = src
+  _args146.Tp = tp
+  var _result148 IDataFrameServiceTreeReduceResult
+  var _meta147 thrift.ResponseMeta
+  _meta147, _err = p.Client_().Call(ctx, "treeReduce", &_args146, &_result148)
+  p.SetLastResponseMeta_(_meta147)
   if _err != nil {
     return
   }
   switch {
-  case _result144.Ex!= nil:
-    return _r, _result144.Ex
+  case _result148.Ex!= nil:
+    return _r, _result148.Ex
   }
 
-  return _result144.GetSuccess(), nil
+  return _result148.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
 //  - Tp
 func (p *IDataFrameServiceClient) Collect(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args145 IDataFrameServiceCollectArgs
-  _args145.ID = id
-  _args145.Tp = tp
-  var _result147 IDataFrameServiceCollectResult
-  var _meta146 thrift.ResponseMeta
-  _meta146, _err = p.Client_().Call(ctx, "collect", &_args145, &_result147)
-  p.SetLastResponseMeta_(_meta146)
+  var _args149 IDataFrameServiceCollectArgs
+  _args149.ID = id
+  _args149.Tp = tp
+  var _result151 IDataFrameServiceCollectResult
+  var _meta150 thrift.ResponseMeta
+  _meta150, _err = p.Client_().Call(ctx, "collect", &_args149, &_result151)
+  p.SetLastResponseMeta_(_meta150)
   if _err != nil {
     return
   }
   switch {
-  case _result147.Ex!= nil:
-    return _r, _result147.Ex
+  case _result151.Ex!= nil:
+    return _r, _result151.Ex
   }
 
-  return _result147.GetSuccess(), nil
+  return _result151.GetSuccess(), nil
 }
 
 // Parameters:
@@ -1634,25 +1666,25 @@ func (p *IDataFrameServiceClient) Collect(ctx context.Context, id *IDataFrameId,
 //  - CombOp
 //  - Tp
 func (p *IDataFrameServiceClient) Aggregate(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args148 IDataFrameServiceAggregateArgs
-  _args148.ID = id
-  _args148.Zero = zero
-  _args148.SeqOp = seqOp
-  _args148.CombOp = combOp
-  _args148.Tp = tp
-  var _result150 IDataFrameServiceAggregateResult
-  var _meta149 thrift.ResponseMeta
-  _meta149, _err = p.Client_().Call(ctx, "aggregate", &_args148, &_result150)
-  p.SetLastResponseMeta_(_meta149)
+  var _args152 IDataFrameServiceAggregateArgs
+  _args152.ID = id
+  _args152.Zero = zero
+  _args152.SeqOp = seqOp
+  _args152.CombOp = combOp
+  _args152.Tp = tp
+  var _result154 IDataFrameServiceAggregateResult
+  var _meta153 thrift.ResponseMeta
+  _meta153, _err = p.Client_().Call(ctx, "aggregate", &_args152, &_result154)
+  p.SetLastResponseMeta_(_meta153)
   if _err != nil {
     return
   }
   switch {
-  case _result150.Ex!= nil:
-    return _r, _result150.Ex
+  case _result154.Ex!= nil:
+    return _r, _result154.Ex
   }
 
-  return _result150.GetSuccess(), nil
+  return _result154.GetSuccess(), nil
 }
 
 // Parameters:
@@ -1662,25 +1694,25 @@ func (p *IDataFrameServiceClient) Aggregate(ctx context.Context, id *IDataFrameI
 //  - CombOp
 //  - Tp
 func (p *IDataFrameServiceClient) TreeAggregate(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args151 IDataFrameServiceTreeAggregateArgs
-  _args151.ID = id
-  _args151.Zero = zero
-  _args151.SeqOp = seqOp
-  _args151.CombOp = combOp
-  _args151.Tp = tp
-  var _result153 IDataFrameServiceTreeAggregateResult
-  var _meta152 thrift.ResponseMeta
-  _meta152, _err = p.Client_().Call(ctx, "treeAggregate", &_args151, &_result153)
-  p.SetLastResponseMeta_(_meta152)
+  var _args155 IDataFrameServiceTreeAggregateArgs
+  _args155.ID = id
+  _args155.Zero = zero
+  _args155.SeqOp = seqOp
+  _args155.CombOp = combOp
+  _args155.Tp = tp
+  var _result157 IDataFrameServiceTreeAggregateResult
+  var _meta156 thrift.ResponseMeta
+  _meta156, _err = p.Client_().Call(ctx, "treeAggregate", &_args155, &_result157)
+  p.SetLastResponseMeta_(_meta156)
   if _err != nil {
     return
   }
   switch {
-  case _result153.Ex!= nil:
-    return _r, _result153.Ex
+  case _result157.Ex!= nil:
+    return _r, _result157.Ex
   }
 
-  return _result153.GetSuccess(), nil
+  return _result157.GetSuccess(), nil
 }
 
 // Parameters:
@@ -1689,24 +1721,24 @@ func (p *IDataFrameServiceClient) TreeAggregate(ctx context.Context, id *IDataFr
 //  - Src
 //  - Tp
 func (p *IDataFrameServiceClient) Fold(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args154 IDataFrameServiceFoldArgs
-  _args154.ID = id
-  _args154.Zero = zero
-  _args154.Src = src
-  _args154.Tp = tp
-  var _result156 IDataFrameServiceFoldResult
-  var _meta155 thrift.ResponseMeta
-  _meta155, _err = p.Client_().Call(ctx, "fold", &_args154, &_result156)
-  p.SetLastResponseMeta_(_meta155)
+  var _args158 IDataFrameServiceFoldArgs
+  _args158.ID = id
+  _args158.Zero = zero
+  _args158.Src = src
+  _args158.Tp = tp
+  var _result160 IDataFrameServiceFoldResult
+  var _meta159 thrift.ResponseMeta
+  _meta159, _err = p.Client_().Call(ctx, "fold", &_args158, &_result160)
+  p.SetLastResponseMeta_(_meta159)
   if _err != nil {
     return
   }
   switch {
-  case _result156.Ex!= nil:
-    return _r, _result156.Ex
+  case _result160.Ex!= nil:
+    return _r, _result160.Ex
   }
 
-  return _result156.GetSuccess(), nil
+  return _result160.GetSuccess(), nil
 }
 
 // Parameters:
@@ -1715,24 +1747,24 @@ func (p *IDataFrameServiceClient) Fold(ctx context.Context, id *IDataFrameId, ze
 //  - Src
 //  - Tp
 func (p *IDataFrameServiceClient) TreeFold(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args157 IDataFrameServiceTreeFoldArgs
-  _args157.ID = id
-  _args157.Zero = zero
-  _args157.Src = src
-  _args157.Tp = tp
-  var _result159 IDataFrameServiceTreeFoldResult
-  var _meta158 thrift.ResponseMeta
-  _meta158, _err = p.Client_().Call(ctx, "treeFold", &_args157, &_result159)
-  p.SetLastResponseMeta_(_meta158)
+  var _args161 IDataFrameServiceTreeFoldArgs
+  _args161.ID = id
+  _args161.Zero = zero
+  _args161.Src = src
+  _args161.Tp = tp
+  var _result163 IDataFrameServiceTreeFoldResult
+  var _meta162 thrift.ResponseMeta
+  _meta162, _err = p.Client_().Call(ctx, "treeFold", &_args161, &_result163)
+  p.SetLastResponseMeta_(_meta162)
   if _err != nil {
     return
   }
   switch {
-  case _result159.Ex!= nil:
-    return _r, _result159.Ex
+  case _result163.Ex!= nil:
+    return _r, _result163.Ex
   }
 
-  return _result159.GetSuccess(), nil
+  return _result163.GetSuccess(), nil
 }
 
 // Parameters:
@@ -1740,42 +1772,42 @@ func (p *IDataFrameServiceClient) TreeFold(ctx context.Context, id *IDataFrameId
 //  - Num
 //  - Tp
 func (p *IDataFrameServiceClient) Take(ctx context.Context, id *IDataFrameId, num int64, tp *rpc.ISource) (_r int64, _err error) {
-  var _args160 IDataFrameServiceTakeArgs
-  _args160.ID = id
-  _args160.Num = num
-  _args160.Tp = tp
-  var _result162 IDataFrameServiceTakeResult
-  var _meta161 thrift.ResponseMeta
-  _meta161, _err = p.Client_().Call(ctx, "take", &_args160, &_result162)
-  p.SetLastResponseMeta_(_meta161)
+  var _args164 IDataFrameServiceTakeArgs
+  _args164.ID = id
+  _args164.Num = num
+  _args164.Tp = tp
+  var _result166 IDataFrameServiceTakeResult
+  var _meta165 thrift.ResponseMeta
+  _meta165, _err = p.Client_().Call(ctx, "take", &_args164, &_result166)
+  p.SetLastResponseMeta_(_meta165)
   if _err != nil {
     return
   }
   switch {
-  case _result162.Ex!= nil:
-    return _r, _result162.Ex
+  case _result166.Ex!= nil:
+    return _r, _result166.Ex
   }
 
-  return _result162.GetSuccess(), nil
+  return _result166.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
 //  - Src
 func (p *IDataFrameServiceClient) Foreach_(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_err error) {
-  var _args163 IDataFrameServiceForeach_Args
-  _args163.ID = id
-  _args163.Src = src
-  var _result165 IDataFrameServiceForeach_Result
-  var _meta164 thrift.ResponseMeta
-  _meta164, _err = p.Client_().Call(ctx, "foreach_", &_args163, &_result165)
-  p.SetLastResponseMeta_(_meta164)
+  var _args167 IDataFrameServiceForeach_Args
+  _args167.ID = id
+  _args167.Src = src
+  var _result169 IDataFrameServiceForeach_Result
+  var _meta168 thrift.ResponseMeta
+  _meta168, _err = p.Client_().Call(ctx, "foreach_", &_args167, &_result169)
+  p.SetLastResponseMeta_(_meta168)
   if _err != nil {
     return
   }
   switch {
-  case _result165.Ex!= nil:
-    return _result165.Ex
+  case _result169.Ex!= nil:
+    return _result169.Ex
   }
 
   return nil
@@ -1785,19 +1817,19 @@ func (p *IDataFrameServiceClient) Foreach_(ctx context.Context, id *IDataFrameId
 //  - ID
 //  - Src
 func (p *IDataFrameServiceClient) ForeachPartition(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_err error) {
-  var _args166 IDataFrameServiceForeachPartitionArgs
-  _args166.ID = id
-  _args166.Src = src
-  var _result168 IDataFrameServiceForeachPartitionResult
-  var _meta167 thrift.ResponseMeta
-  _meta167, _err = p.Client_().Call(ctx, "foreachPartition", &_args166, &_result168)
-  p.SetLastResponseMeta_(_meta167)
+  var _args170 IDataFrameServiceForeachPartitionArgs
+  _args170.ID = id
+  _args170.Src = src
+  var _result172 IDataFrameServiceForeachPartitionResult
+  var _meta171 thrift.ResponseMeta
+  _meta171, _err = p.Client_().Call(ctx, "foreachPartition", &_args170, &_result172)
+  p.SetLastResponseMeta_(_meta171)
   if _err != nil {
     return
   }
   switch {
-  case _result168.Ex!= nil:
-    return _result168.Ex
+  case _result172.Ex!= nil:
+    return _result172.Ex
   }
 
   return nil
@@ -1807,19 +1839,19 @@ func (p *IDataFrameServiceClient) ForeachPartition(ctx context.Context, id *IDat
 //  - ID
 //  - Src
 func (p *IDataFrameServiceClient) ForeachExecutor(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_err error) {
-  var _args169 IDataFrameServiceForeachExecutorArgs
-  _args169.ID = id
-  _args169.Src = src
-  var _result171 IDataFrameServiceForeachExecutorResult
-  var _meta170 thrift.ResponseMeta
-  _meta170, _err = p.Client_().Call(ctx, "foreachExecutor", &_args169, &_result171)
-  p.SetLastResponseMeta_(_meta170)
+  var _args173 IDataFrameServiceForeachExecutorArgs
+  _args173.ID = id
+  _args173.Src = src
+  var _result175 IDataFrameServiceForeachExecutorResult
+  var _meta174 thrift.ResponseMeta
+  _meta174, _err = p.Client_().Call(ctx, "foreachExecutor", &_args173, &_result175)
+  p.SetLastResponseMeta_(_meta174)
   if _err != nil {
     return
   }
   switch {
-  case _result171.Ex!= nil:
-    return _result171.Ex
+  case _result175.Ex!= nil:
+    return _result175.Ex
   }
 
   return nil
@@ -1830,23 +1862,23 @@ func (p *IDataFrameServiceClient) ForeachExecutor(ctx context.Context, id *IData
 //  - Num
 //  - Tp
 func (p *IDataFrameServiceClient) Top(ctx context.Context, id *IDataFrameId, num int64, tp *rpc.ISource) (_r int64, _err error) {
-  var _args172 IDataFrameServiceTopArgs
-  _args172.ID = id
-  _args172.Num = num
-  _args172.Tp = tp
-  var _result174 IDataFrameServiceTopResult
-  var _meta173 thrift.ResponseMeta
-  _meta173, _err = p.Client_().Call(ctx, "top", &_args172, &_result174)
-  p.SetLastResponseMeta_(_meta173)
+  var _args176 IDataFrameServiceTopArgs
+  _args176.ID = id
+  _args176.Num = num
+  _args176.Tp = tp
+  var _result178 IDataFrameServiceTopResult
+  var _meta177 thrift.ResponseMeta
+  _meta177, _err = p.Client_().Call(ctx, "top", &_args176, &_result178)
+  p.SetLastResponseMeta_(_meta177)
   if _err != nil {
     return
   }
   switch {
-  case _result174.Ex!= nil:
-    return _r, _result174.Ex
+  case _result178.Ex!= nil:
+    return _r, _result178.Ex
   }
 
-  return _result174.GetSuccess(), nil
+  return _result178.GetSuccess(), nil
 }
 
 // Parameters:
@@ -1855,24 +1887,24 @@ func (p *IDataFrameServiceClient) Top(ctx context.Context, id *IDataFrameId, num
 //  - Cmp
 //  - Tp
 func (p *IDataFrameServiceClient) Top4(ctx context.Context, id *IDataFrameId, num int64, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args175 IDataFrameServiceTop4Args
-  _args175.ID = id
-  _args175.Num = num
-  _args175.Cmp = cmp
-  _args175.Tp = tp
-  var _result177 IDataFrameServiceTop4Result
-  var _meta176 thrift.ResponseMeta
-  _meta176, _err = p.Client_().Call(ctx, "top4", &_args175, &_result177)
-  p.SetLastResponseMeta_(_meta176)
+  var _args179 IDataFrameServiceTop4Args
+  _args179.ID = id
+  _args179.Num = num
+  _args179.Cmp = cmp
+  _args179.Tp = tp
+  var _result181 IDataFrameServiceTop4Result
+  var _meta180 thrift.ResponseMeta
+  _meta180, _err = p.Client_().Call(ctx, "top4", &_args179, &_result181)
+  p.SetLastResponseMeta_(_meta180)
   if _err != nil {
     return
   }
   switch {
-  case _result177.Ex!= nil:
-    return _r, _result177.Ex
+  case _result181.Ex!= nil:
+    return _r, _result181.Ex
   }
 
-  return _result177.GetSuccess(), nil
+  return _result181.GetSuccess(), nil
 }
 
 // Parameters:
@@ -1880,23 +1912,23 @@ func (p *IDataFrameServiceClient) Top4(ctx context.Context, id *IDataFrameId, nu
 //  - Num
 //  - Tp
 func (p *IDataFrameServiceClient) TakeOrdered(ctx context.Context, id *IDataFrameId, num int64, tp *rpc.ISource) (_r int64, _err error) {
-  var _args178 IDataFrameServiceTakeOrderedArgs
-  _args178.ID = id
-  _args178.Num = num
-  _args178.Tp = tp
-  var _result180 IDataFrameServiceTakeOrderedResult
-  var _meta179 thrift.ResponseMeta
-  _meta179, _err = p.Client_().Call(ctx, "takeOrdered", &_args178, &_result180)
-  p.SetLastResponseMeta_(_meta179)
+  var _args182 IDataFrameServiceTakeOrderedArgs
+  _args182.ID = id
+  _args182.Num = num
+  _args182.Tp = tp
+  var _result184 IDataFrameServiceTakeOrderedResult
+  var _meta183 thrift.ResponseMeta
+  _meta183, _err = p.Client_().Call(ctx, "takeOrdered", &_args182, &_result184)
+  p.SetLastResponseMeta_(_meta183)
   if _err != nil {
     return
   }
   switch {
-  case _result180.Ex!= nil:
-    return _r, _result180.Ex
+  case _result184.Ex!= nil:
+    return _r, _result184.Ex
   }
 
-  return _result180.GetSuccess(), nil
+  return _result184.GetSuccess(), nil
 }
 
 // Parameters:
@@ -1905,24 +1937,24 @@ func (p *IDataFrameServiceClient) TakeOrdered(ctx context.Context, id *IDataFram
 //  - Cmp
 //  - Tp
 func (p *IDataFrameServiceClient) TakeOrdered4(ctx context.Context, id *IDataFrameId, num int64, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args181 IDataFrameServiceTakeOrdered4Args
-  _args181.ID = id
-  _args181.Num = num
-  _args181.Cmp = cmp
-  _args181.Tp = tp
-  var _result183 IDataFrameServiceTakeOrdered4Result
-  var _meta182 thrift.ResponseMeta
-  _meta182, _err = p.Client_().Call(ctx, "takeOrdered4", &_args181, &_result183)
-  p.SetLastResponseMeta_(_meta182)
+  var _args185 IDataFrameServiceTakeOrdered4Args
+  _args185.ID = id
+  _args185.Num = num
+  _args185.Cmp = cmp
+  _args185.Tp = tp
+  var _result187 IDataFrameServiceTakeOrdered4Result
+  var _meta186 thrift.ResponseMeta
+  _meta186, _err = p.Client_().Call(ctx, "takeOrdered4", &_args185, &_result187)
+  p.SetLastResponseMeta_(_meta186)
   if _err != nil {
     return
   }
   switch {
-  case _result183.Ex!= nil:
-    return _r, _result183.Ex
+  case _result187.Ex!= nil:
+    return _r, _result187.Ex
   }
 
-  return _result183.GetSuccess(), nil
+  return _result187.GetSuccess(), nil
 }
 
 // Parameters:
@@ -1931,25 +1963,25 @@ func (p *IDataFrameServiceClient) TakeOrdered4(ctx context.Context, id *IDataFra
 //  - Fraction
 //  - Seed
 func (p *IDataFrameServiceClient) Sample(ctx context.Context, id *IDataFrameId, withReplacement bool, fraction float64, seed int32) (_r *IDataFrameId, _err error) {
-  var _args184 IDataFrameServiceSampleArgs
-  _args184.ID = id
-  _args184.WithReplacement = withReplacement
-  _args184.Fraction = fraction
-  _args184.Seed = seed
-  var _result186 IDataFrameServiceSampleResult
-  var _meta185 thrift.ResponseMeta
-  _meta185, _err = p.Client_().Call(ctx, "sample", &_args184, &_result186)
-  p.SetLastResponseMeta_(_meta185)
+  var _args188 IDataFrameServiceSampleArgs
+  _args188.ID = id
+  _args188.WithReplacement = withReplacement
+  _args188.Fraction = fraction
+  _args188.Seed = seed
+  var _result190 IDataFrameServiceSampleResult
+  var _meta189 thrift.ResponseMeta
+  _meta189, _err = p.Client_().Call(ctx, "sample", &_args188, &_result190)
+  p.SetLastResponseMeta_(_meta189)
   if _err != nil {
     return
   }
   switch {
-  case _result186.Ex!= nil:
-    return _r, _result186.Ex
+  case _result190.Ex!= nil:
+    return _r, _result190.Ex
   }
 
-  if _ret187 := _result186.GetSuccess(); _ret187 != nil {
-    return _ret187, nil
+  if _ret191 := _result190.GetSuccess(); _ret191 != nil {
+    return _ret191, nil
   }
   return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sample failed: unknown result")
 }
@@ -1961,67 +1993,67 @@ func (p *IDataFrameServiceClient) Sample(ctx context.Context, id *IDataFrameId, 
 //  - Seed
 //  - Tp
 func (p *IDataFrameServiceClient) TakeSample(ctx context.Context, id *IDataFrameId, withReplacement bool, num int64, seed int32, tp *rpc.ISource) (_r int64, _err error) {
-  var _args188 IDataFrameServiceTakeSampleArgs
-  _args188.ID = id
-  _args188.WithReplacement = withReplacement
-  _args188.Num = num
-  _args188.Seed = seed
-  _args188.Tp = tp
-  var _result190 IDataFrameServiceTakeSampleResult
-  var _meta189 thrift.ResponseMeta
-  _meta189, _err = p.Client_().Call(ctx, "takeSample", &_args188, &_result190)
-  p.SetLastResponseMeta_(_meta189)
+  var _args192 IDataFrameServiceTakeSampleArgs
+  _args192.ID = id
+  _args192.WithReplacement = withReplacement
+  _args192.Num = num
+  _args192.Seed = seed
+  _args192.Tp = tp
+  var _result194 IDataFrameServiceTakeSampleResult
+  var _meta193 thrift.ResponseMeta
+  _meta193, _err = p.Client_().Call(ctx, "takeSample", &_args192, &_result194)
+  p.SetLastResponseMeta_(_meta193)
   if _err != nil {
     return
   }
   switch {
-  case _result190.Ex!= nil:
-    return _r, _result190.Ex
+  case _result194.Ex!= nil:
+    return _r, _result194.Ex
   }
 
-  return _result190.GetSuccess(), nil
+  return _result194.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
 func (p *IDataFrameServiceClient) Count(ctx context.Context, id *IDataFrameId) (_r int64, _err error) {
-  var _args191 IDataFrameServiceCountArgs
-  _args191.ID = id
-  var _result193 IDataFrameServiceCountResult
-  var _meta192 thrift.ResponseMeta
-  _meta192, _err = p.Client_().Call(ctx, "count", &_args191, &_result193)
-  p.SetLastResponseMeta_(_meta192)
+  var _args195 IDataFrameServiceCountArgs
+  _args195.ID = id
+  var _result197 IDataFrameServiceCountResult
+  var _meta196 thrift.ResponseMeta
+  _meta196, _err = p.Client_().Call(ctx, "count", &_args195, &_result197)
+  p.SetLastResponseMeta_(_meta196)
   if _err != nil {
     return
   }
   switch {
-  case _result193.Ex!= nil:
-    return _r, _result193.Ex
+  case _result197.Ex!= nil:
+    return _r, _result197.Ex
   }
 
-  return _result193.GetSuccess(), nil
+  return _result197.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
 //  - Tp
 func (p *IDataFrameServiceClient) Max(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args194 IDataFrameServiceMaxArgs
-  _args194.ID = id
-  _args194.Tp = tp
-  var _result196 IDataFrameServiceMaxResult
-  var _meta195 thrift.ResponseMeta
-  _meta195, _err = p.Client_().Call(ctx, "max", &_args194, &_result196)
-  p.SetLastResponseMeta_(_meta195)
+  var _args198 IDataFrameServiceMaxArgs
+  _args198.ID = id
+  _args198.Tp = tp
+  var _result200 IDataFrameServiceMaxResult
+  var _meta199 thrift.ResponseMeta
+  _meta199, _err = p.Client_().Call(ctx, "max", &_args198, &_result200)
+  p.SetLastResponseMeta_(_meta199)
   if _err != nil {
     return
   }
   switch {
-  case _result196.Ex!= nil:
-    return _r, _result196.Ex
+  case _result200.Ex!= nil:
+    return _r, _result200.Ex
   }
 
-  return _result196.GetSuccess(), nil
+  return _result200.GetSuccess(), nil
 }
 
 // Parameters:
@@ -2029,45 +2061,45 @@ func (p *IDataFrameServiceClient) Max(ctx context.Context, id *IDataFrameId, tp 
 //  - Cmp
 //  - Tp
 func (p *IDataFrameServiceClient) Max3(ctx context.Context, id *IDataFrameId, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args197 IDataFrameServiceMax3Args
-  _args197.ID = id
-  _args197.Cmp = cmp
-  _args197.Tp = tp
-  var _result199 IDataFrameServiceMax3Result
-  var _meta198 thrift.ResponseMeta
-  _meta198, _err = p.Client_().Call(ctx, "max3", &_args197, &_result199)
-  p.SetLastResponseMeta_(_meta198)
+  var _args201 IDataFrameServiceMax3Args
+  _args201.ID = id
+  _args201.Cmp = cmp
+  _args201.Tp = tp
+  var _result203 IDataFrameServiceMax3Result
+  var _meta202 thrift.ResponseMeta
+  _meta202, _err = p.Client_().Call(ctx, "max3", &_args201, &_result203)
+  p.SetLastResponseMeta_(_meta202)
   if _err != nil {
     return
   }
   switch {
-  case _result199.Ex!= nil:
-    return _r, _result199.Ex
+  case _result203.Ex!= nil:
+    return _r, _result203.Ex
   }
 
-  return _result199.GetSuccess(), nil
+  return _result203.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
 //  - Tp
 func (p *IDataFrameServiceClient) Min(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args200 IDataFrameServiceMinArgs
-  _args200.ID = id
-  _args200.Tp = tp
-  var _result202 IDataFrameServiceMinResult
-  var _meta201 thrift.ResponseMeta
-  _meta201, _err = p.Client_().Call(ctx, "min", &_args200, &_result202)
-  p.SetLastResponseMeta_(_meta201)
+  var _args204 IDataFrameServiceMinArgs
+  _args204.ID = id
+  _args204.Tp = tp
+  var _result206 IDataFrameServiceMinResult
+  var _meta205 thrift.ResponseMeta
+  _meta205, _err = p.Client_().Call(ctx, "min", &_args204, &_result206)
+  p.SetLastResponseMeta_(_meta205)
   if _err != nil {
     return
   }
   switch {
-  case _result202.Ex!= nil:
-    return _r, _result202.Ex
+  case _result206.Ex!= nil:
+    return _r, _result206.Ex
   }
 
-  return _result202.GetSuccess(), nil
+  return _result206.GetSuccess(), nil
 }
 
 // Parameters:
@@ -2075,23 +2107,23 @@ func (p *IDataFrameServiceClient) Min(ctx context.Context, id *IDataFrameId, tp 
 //  - Cmp
 //  - Tp
 func (p *IDataFrameServiceClient) Min3(ctx context.Context, id *IDataFrameId, cmp *rpc.ISource, tp *rpc.ISource) (_r int64, _err error) {
-  var _args203 IDataFrameServiceMin3Args
-  _args203.ID = id
-  _args203.Cmp = cmp
-  _args203.Tp = tp
-  var _result205 IDataFrameServiceMin3Result
-  var _meta204 thrift.ResponseMeta
-  _meta204, _err = p.Client_().Call(ctx, "min3", &_args203, &_result205)
-  p.SetLastResponseMeta_(_meta204)
+  var _args207 IDataFrameServiceMin3Args
+  _args207.ID = id
+  _args207.Cmp = cmp
+  _args207.Tp = tp
+  var _result209 IDataFrameServiceMin3Result
+  var _meta208 thrift.ResponseMeta
+  _meta208, _err = p.Client_().Call(ctx, "min3", &_args207, &_result209)
+  p.SetLastResponseMeta_(_meta208)
   if _err != nil {
     return
   }
   switch {
-  case _result205.Ex!= nil:
-    return _r, _result205.Ex
+  case _result209.Ex!= nil:
+    return _r, _result209.Ex
   }
 
-  return _result205.GetSuccess(), nil
+  return _result209.GetSuccess(), nil
 }
 
 // *****************************************Key-Value******************************************
@@ -2100,37 +2132,12 @@ func (p *IDataFrameServiceClient) Min3(ctx context.Context, id *IDataFrameId, cm
 //  - ID
 //  - Src
 func (p *IDataFrameServiceClient) FlatMapValues(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args206 IDataFrameServiceFlatMapValuesArgs
-  _args206.ID = id
-  _args206.Src = src
-  var _result208 IDataFrameServiceFlatMapValuesResult
-  var _meta207 thrift.ResponseMeta
-  _meta207, _err = p.Client_().Call(ctx, "flatMapValues", &_args206, &_result208)
-  p.SetLastResponseMeta_(_meta207)
-  if _err != nil {
-    return
-  }
-  switch {
-  case _result208.Ex!= nil:
-    return _r, _result208.Ex
-  }
-
-  if _ret209 := _result208.GetSuccess(); _ret209 != nil {
-    return _ret209, nil
-  }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "flatMapValues failed: unknown result")
-}
-
-// Parameters:
-//  - ID
-//  - Src
-func (p *IDataFrameServiceClient) MapValues(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args210 IDataFrameServiceMapValuesArgs
+  var _args210 IDataFrameServiceFlatMapValuesArgs
   _args210.ID = id
   _args210.Src = src
-  var _result212 IDataFrameServiceMapValuesResult
+  var _result212 IDataFrameServiceFlatMapValuesResult
   var _meta211 thrift.ResponseMeta
-  _meta211, _err = p.Client_().Call(ctx, "mapValues", &_args210, &_result212)
+  _meta211, _err = p.Client_().Call(ctx, "flatMapValues", &_args210, &_result212)
   p.SetLastResponseMeta_(_meta211)
   if _err != nil {
     return
@@ -2143,17 +2150,19 @@ func (p *IDataFrameServiceClient) MapValues(ctx context.Context, id *IDataFrameI
   if _ret213 := _result212.GetSuccess(); _ret213 != nil {
     return _ret213, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "mapValues failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "flatMapValues failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-func (p *IDataFrameServiceClient) GroupByKey(ctx context.Context, id *IDataFrameId) (_r *IDataFrameId, _err error) {
-  var _args214 IDataFrameServiceGroupByKeyArgs
+//  - Src
+func (p *IDataFrameServiceClient) MapValues(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args214 IDataFrameServiceMapValuesArgs
   _args214.ID = id
-  var _result216 IDataFrameServiceGroupByKeyResult
+  _args214.Src = src
+  var _result216 IDataFrameServiceMapValuesResult
   var _meta215 thrift.ResponseMeta
-  _meta215, _err = p.Client_().Call(ctx, "groupByKey", &_args214, &_result216)
+  _meta215, _err = p.Client_().Call(ctx, "mapValues", &_args214, &_result216)
   p.SetLastResponseMeta_(_meta215)
   if _err != nil {
     return
@@ -2166,19 +2175,17 @@ func (p *IDataFrameServiceClient) GroupByKey(ctx context.Context, id *IDataFrame
   if _ret217 := _result216.GetSuccess(); _ret217 != nil {
     return _ret217, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupByKey failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "mapValues failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - NumPartitions
-func (p *IDataFrameServiceClient) GroupByKey2a(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args218 IDataFrameServiceGroupByKey2aArgs
+func (p *IDataFrameServiceClient) GroupByKey(ctx context.Context, id *IDataFrameId) (_r *IDataFrameId, _err error) {
+  var _args218 IDataFrameServiceGroupByKeyArgs
   _args218.ID = id
-  _args218.NumPartitions = numPartitions
-  var _result220 IDataFrameServiceGroupByKey2aResult
+  var _result220 IDataFrameServiceGroupByKeyResult
   var _meta219 thrift.ResponseMeta
-  _meta219, _err = p.Client_().Call(ctx, "groupByKey2a", &_args218, &_result220)
+  _meta219, _err = p.Client_().Call(ctx, "groupByKey", &_args218, &_result220)
   p.SetLastResponseMeta_(_meta219)
   if _err != nil {
     return
@@ -2191,19 +2198,19 @@ func (p *IDataFrameServiceClient) GroupByKey2a(ctx context.Context, id *IDataFra
   if _ret221 := _result220.GetSuccess(); _ret221 != nil {
     return _ret221, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupByKey2a failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupByKey failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - Src
-func (p *IDataFrameServiceClient) GroupByKey2b(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args222 IDataFrameServiceGroupByKey2bArgs
+//  - NumPartitions
+func (p *IDataFrameServiceClient) GroupByKey2a(ctx context.Context, id *IDataFrameId, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args222 IDataFrameServiceGroupByKey2aArgs
   _args222.ID = id
-  _args222.Src = src
-  var _result224 IDataFrameServiceGroupByKey2bResult
+  _args222.NumPartitions = numPartitions
+  var _result224 IDataFrameServiceGroupByKey2aResult
   var _meta223 thrift.ResponseMeta
-  _meta223, _err = p.Client_().Call(ctx, "groupByKey2b", &_args222, &_result224)
+  _meta223, _err = p.Client_().Call(ctx, "groupByKey2a", &_args222, &_result224)
   p.SetLastResponseMeta_(_meta223)
   if _err != nil {
     return
@@ -2216,21 +2223,19 @@ func (p *IDataFrameServiceClient) GroupByKey2b(ctx context.Context, id *IDataFra
   if _ret225 := _result224.GetSuccess(); _ret225 != nil {
     return _ret225, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupByKey2b failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupByKey2a failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - NumPartitions
 //  - Src
-func (p *IDataFrameServiceClient) GroupByKey3(ctx context.Context, id *IDataFrameId, numPartitions int64, src *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args226 IDataFrameServiceGroupByKey3Args
+func (p *IDataFrameServiceClient) GroupByKey2b(ctx context.Context, id *IDataFrameId, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args226 IDataFrameServiceGroupByKey2bArgs
   _args226.ID = id
-  _args226.NumPartitions = numPartitions
   _args226.Src = src
-  var _result228 IDataFrameServiceGroupByKey3Result
+  var _result228 IDataFrameServiceGroupByKey2bResult
   var _meta227 thrift.ResponseMeta
-  _meta227, _err = p.Client_().Call(ctx, "groupByKey3", &_args226, &_result228)
+  _meta227, _err = p.Client_().Call(ctx, "groupByKey2b", &_args226, &_result228)
   p.SetLastResponseMeta_(_meta227)
   if _err != nil {
     return
@@ -2243,21 +2248,21 @@ func (p *IDataFrameServiceClient) GroupByKey3(ctx context.Context, id *IDataFram
   if _ret229 := _result228.GetSuccess(); _ret229 != nil {
     return _ret229, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupByKey3 failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupByKey2b failed: unknown result")
 }
 
 // Parameters:
 //  - ID
+//  - NumPartitions
 //  - Src
-//  - LocalReduce
-func (p *IDataFrameServiceClient) ReduceByKey(ctx context.Context, id *IDataFrameId, src *rpc.ISource, localReduce bool) (_r *IDataFrameId, _err error) {
-  var _args230 IDataFrameServiceReduceByKeyArgs
+func (p *IDataFrameServiceClient) GroupByKey3(ctx context.Context, id *IDataFrameId, numPartitions int64, src *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args230 IDataFrameServiceGroupByKey3Args
   _args230.ID = id
+  _args230.NumPartitions = numPartitions
   _args230.Src = src
-  _args230.LocalReduce = localReduce
-  var _result232 IDataFrameServiceReduceByKeyResult
+  var _result232 IDataFrameServiceGroupByKey3Result
   var _meta231 thrift.ResponseMeta
-  _meta231, _err = p.Client_().Call(ctx, "reduceByKey", &_args230, &_result232)
+  _meta231, _err = p.Client_().Call(ctx, "groupByKey3", &_args230, &_result232)
   p.SetLastResponseMeta_(_meta231)
   if _err != nil {
     return
@@ -2270,23 +2275,21 @@ func (p *IDataFrameServiceClient) ReduceByKey(ctx context.Context, id *IDataFram
   if _ret233 := _result232.GetSuccess(); _ret233 != nil {
     return _ret233, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "reduceByKey failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "groupByKey3 failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Src
-//  - NumPartitions
 //  - LocalReduce
-func (p *IDataFrameServiceClient) ReduceByKey4(ctx context.Context, id *IDataFrameId, src *rpc.ISource, numPartitions int64, localReduce bool) (_r *IDataFrameId, _err error) {
-  var _args234 IDataFrameServiceReduceByKey4Args
+func (p *IDataFrameServiceClient) ReduceByKey(ctx context.Context, id *IDataFrameId, src *rpc.ISource, localReduce bool) (_r *IDataFrameId, _err error) {
+  var _args234 IDataFrameServiceReduceByKeyArgs
   _args234.ID = id
   _args234.Src = src
-  _args234.NumPartitions = numPartitions
   _args234.LocalReduce = localReduce
-  var _result236 IDataFrameServiceReduceByKey4Result
+  var _result236 IDataFrameServiceReduceByKeyResult
   var _meta235 thrift.ResponseMeta
-  _meta235, _err = p.Client_().Call(ctx, "reduceByKey4", &_args234, &_result236)
+  _meta235, _err = p.Client_().Call(ctx, "reduceByKey", &_args234, &_result236)
   p.SetLastResponseMeta_(_meta235)
   if _err != nil {
     return
@@ -2299,21 +2302,23 @@ func (p *IDataFrameServiceClient) ReduceByKey4(ctx context.Context, id *IDataFra
   if _ret237 := _result236.GetSuccess(); _ret237 != nil {
     return _ret237, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "reduceByKey4 failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "reduceByKey failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - Zero
-//  - SeqOp
-func (p *IDataFrameServiceClient) AggregateByKey(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args238 IDataFrameServiceAggregateByKeyArgs
+//  - Src
+//  - NumPartitions
+//  - LocalReduce
+func (p *IDataFrameServiceClient) ReduceByKey4(ctx context.Context, id *IDataFrameId, src *rpc.ISource, numPartitions int64, localReduce bool) (_r *IDataFrameId, _err error) {
+  var _args238 IDataFrameServiceReduceByKey4Args
   _args238.ID = id
-  _args238.Zero = zero
-  _args238.SeqOp = seqOp
-  var _result240 IDataFrameServiceAggregateByKeyResult
+  _args238.Src = src
+  _args238.NumPartitions = numPartitions
+  _args238.LocalReduce = localReduce
+  var _result240 IDataFrameServiceReduceByKey4Result
   var _meta239 thrift.ResponseMeta
-  _meta239, _err = p.Client_().Call(ctx, "aggregateByKey", &_args238, &_result240)
+  _meta239, _err = p.Client_().Call(ctx, "reduceByKey4", &_args238, &_result240)
   p.SetLastResponseMeta_(_meta239)
   if _err != nil {
     return
@@ -2326,23 +2331,21 @@ func (p *IDataFrameServiceClient) AggregateByKey(ctx context.Context, id *IDataF
   if _ret241 := _result240.GetSuccess(); _ret241 != nil {
     return _ret241, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "aggregateByKey failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "reduceByKey4 failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Zero
 //  - SeqOp
-//  - NumPartitions
-func (p *IDataFrameServiceClient) AggregateByKey4a(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args242 IDataFrameServiceAggregateByKey4aArgs
+func (p *IDataFrameServiceClient) AggregateByKey(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args242 IDataFrameServiceAggregateByKeyArgs
   _args242.ID = id
   _args242.Zero = zero
   _args242.SeqOp = seqOp
-  _args242.NumPartitions = numPartitions
-  var _result244 IDataFrameServiceAggregateByKey4aResult
+  var _result244 IDataFrameServiceAggregateByKeyResult
   var _meta243 thrift.ResponseMeta
-  _meta243, _err = p.Client_().Call(ctx, "aggregateByKey4a", &_args242, &_result244)
+  _meta243, _err = p.Client_().Call(ctx, "aggregateByKey", &_args242, &_result244)
   p.SetLastResponseMeta_(_meta243)
   if _err != nil {
     return
@@ -2355,23 +2358,23 @@ func (p *IDataFrameServiceClient) AggregateByKey4a(ctx context.Context, id *IDat
   if _ret245 := _result244.GetSuccess(); _ret245 != nil {
     return _ret245, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "aggregateByKey4a failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "aggregateByKey failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Zero
 //  - SeqOp
-//  - CombOp
-func (p *IDataFrameServiceClient) AggregateByKey4b(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource) (_r *IDataFrameId, _err error) {
-  var _args246 IDataFrameServiceAggregateByKey4bArgs
+//  - NumPartitions
+func (p *IDataFrameServiceClient) AggregateByKey4a(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args246 IDataFrameServiceAggregateByKey4aArgs
   _args246.ID = id
   _args246.Zero = zero
   _args246.SeqOp = seqOp
-  _args246.CombOp = combOp
-  var _result248 IDataFrameServiceAggregateByKey4bResult
+  _args246.NumPartitions = numPartitions
+  var _result248 IDataFrameServiceAggregateByKey4aResult
   var _meta247 thrift.ResponseMeta
-  _meta247, _err = p.Client_().Call(ctx, "aggregateByKey4b", &_args246, &_result248)
+  _meta247, _err = p.Client_().Call(ctx, "aggregateByKey4a", &_args246, &_result248)
   p.SetLastResponseMeta_(_meta247)
   if _err != nil {
     return
@@ -2384,7 +2387,7 @@ func (p *IDataFrameServiceClient) AggregateByKey4b(ctx context.Context, id *IDat
   if _ret249 := _result248.GetSuccess(); _ret249 != nil {
     return _ret249, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "aggregateByKey4b failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "aggregateByKey4a failed: unknown result")
 }
 
 // Parameters:
@@ -2392,17 +2395,15 @@ func (p *IDataFrameServiceClient) AggregateByKey4b(ctx context.Context, id *IDat
 //  - Zero
 //  - SeqOp
 //  - CombOp
-//  - NumPartitions
-func (p *IDataFrameServiceClient) AggregateByKey5(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args250 IDataFrameServiceAggregateByKey5Args
+func (p *IDataFrameServiceClient) AggregateByKey4b(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource) (_r *IDataFrameId, _err error) {
+  var _args250 IDataFrameServiceAggregateByKey4bArgs
   _args250.ID = id
   _args250.Zero = zero
   _args250.SeqOp = seqOp
   _args250.CombOp = combOp
-  _args250.NumPartitions = numPartitions
-  var _result252 IDataFrameServiceAggregateByKey5Result
+  var _result252 IDataFrameServiceAggregateByKey4bResult
   var _meta251 thrift.ResponseMeta
-  _meta251, _err = p.Client_().Call(ctx, "aggregateByKey5", &_args250, &_result252)
+  _meta251, _err = p.Client_().Call(ctx, "aggregateByKey4b", &_args250, &_result252)
   p.SetLastResponseMeta_(_meta251)
   if _err != nil {
     return
@@ -2415,23 +2416,25 @@ func (p *IDataFrameServiceClient) AggregateByKey5(ctx context.Context, id *IData
   if _ret253 := _result252.GetSuccess(); _ret253 != nil {
     return _ret253, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "aggregateByKey5 failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "aggregateByKey4b failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Zero
-//  - Src
-//  - LocalFold
-func (p *IDataFrameServiceClient) FoldByKey(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, localFold bool) (_r *IDataFrameId, _err error) {
-  var _args254 IDataFrameServiceFoldByKeyArgs
+//  - SeqOp
+//  - CombOp
+//  - NumPartitions
+func (p *IDataFrameServiceClient) AggregateByKey5(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, seqOp *rpc.ISource, combOp *rpc.ISource, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args254 IDataFrameServiceAggregateByKey5Args
   _args254.ID = id
   _args254.Zero = zero
-  _args254.Src = src
-  _args254.LocalFold = localFold
-  var _result256 IDataFrameServiceFoldByKeyResult
+  _args254.SeqOp = seqOp
+  _args254.CombOp = combOp
+  _args254.NumPartitions = numPartitions
+  var _result256 IDataFrameServiceAggregateByKey5Result
   var _meta255 thrift.ResponseMeta
-  _meta255, _err = p.Client_().Call(ctx, "foldByKey", &_args254, &_result256)
+  _meta255, _err = p.Client_().Call(ctx, "aggregateByKey5", &_args254, &_result256)
   p.SetLastResponseMeta_(_meta255)
   if _err != nil {
     return
@@ -2444,25 +2447,23 @@ func (p *IDataFrameServiceClient) FoldByKey(ctx context.Context, id *IDataFrameI
   if _ret257 := _result256.GetSuccess(); _ret257 != nil {
     return _ret257, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "foldByKey failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "aggregateByKey5 failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Zero
 //  - Src
-//  - NumPartitions
 //  - LocalFold
-func (p *IDataFrameServiceClient) FoldByKey5(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, numPartitions int64, localFold bool) (_r *IDataFrameId, _err error) {
-  var _args258 IDataFrameServiceFoldByKey5Args
+func (p *IDataFrameServiceClient) FoldByKey(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, localFold bool) (_r *IDataFrameId, _err error) {
+  var _args258 IDataFrameServiceFoldByKeyArgs
   _args258.ID = id
   _args258.Zero = zero
   _args258.Src = src
-  _args258.NumPartitions = numPartitions
   _args258.LocalFold = localFold
-  var _result260 IDataFrameServiceFoldByKey5Result
+  var _result260 IDataFrameServiceFoldByKeyResult
   var _meta259 thrift.ResponseMeta
-  _meta259, _err = p.Client_().Call(ctx, "foldByKey5", &_args258, &_result260)
+  _meta259, _err = p.Client_().Call(ctx, "foldByKey", &_args258, &_result260)
   p.SetLastResponseMeta_(_meta259)
   if _err != nil {
     return
@@ -2475,19 +2476,25 @@ func (p *IDataFrameServiceClient) FoldByKey5(ctx context.Context, id *IDataFrame
   if _ret261 := _result260.GetSuccess(); _ret261 != nil {
     return _ret261, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "foldByKey5 failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "foldByKey failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - Ascending
-func (p *IDataFrameServiceClient) SortByKey(ctx context.Context, id *IDataFrameId, ascending bool) (_r *IDataFrameId, _err error) {
-  var _args262 IDataFrameServiceSortByKeyArgs
+//  - Zero
+//  - Src
+//  - NumPartitions
+//  - LocalFold
+func (p *IDataFrameServiceClient) FoldByKey5(ctx context.Context, id *IDataFrameId, zero *rpc.ISource, src *rpc.ISource, numPartitions int64, localFold bool) (_r *IDataFrameId, _err error) {
+  var _args262 IDataFrameServiceFoldByKey5Args
   _args262.ID = id
-  _args262.Ascending = ascending
-  var _result264 IDataFrameServiceSortByKeyResult
+  _args262.Zero = zero
+  _args262.Src = src
+  _args262.NumPartitions = numPartitions
+  _args262.LocalFold = localFold
+  var _result264 IDataFrameServiceFoldByKey5Result
   var _meta263 thrift.ResponseMeta
-  _meta263, _err = p.Client_().Call(ctx, "sortByKey", &_args262, &_result264)
+  _meta263, _err = p.Client_().Call(ctx, "foldByKey5", &_args262, &_result264)
   p.SetLastResponseMeta_(_meta263)
   if _err != nil {
     return
@@ -2500,21 +2507,19 @@ func (p *IDataFrameServiceClient) SortByKey(ctx context.Context, id *IDataFrameI
   if _ret265 := _result264.GetSuccess(); _ret265 != nil {
     return _ret265, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortByKey failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "foldByKey5 failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Ascending
-//  - NumPartitions
-func (p *IDataFrameServiceClient) SortByKey3a(ctx context.Context, id *IDataFrameId, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args266 IDataFrameServiceSortByKey3aArgs
+func (p *IDataFrameServiceClient) SortByKey(ctx context.Context, id *IDataFrameId, ascending bool) (_r *IDataFrameId, _err error) {
+  var _args266 IDataFrameServiceSortByKeyArgs
   _args266.ID = id
   _args266.Ascending = ascending
-  _args266.NumPartitions = numPartitions
-  var _result268 IDataFrameServiceSortByKey3aResult
+  var _result268 IDataFrameServiceSortByKeyResult
   var _meta267 thrift.ResponseMeta
-  _meta267, _err = p.Client_().Call(ctx, "sortByKey3a", &_args266, &_result268)
+  _meta267, _err = p.Client_().Call(ctx, "sortByKey", &_args266, &_result268)
   p.SetLastResponseMeta_(_meta267)
   if _err != nil {
     return
@@ -2527,21 +2532,21 @@ func (p *IDataFrameServiceClient) SortByKey3a(ctx context.Context, id *IDataFram
   if _ret269 := _result268.GetSuccess(); _ret269 != nil {
     return _ret269, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortByKey3a failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortByKey failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - Src
 //  - Ascending
-func (p *IDataFrameServiceClient) SortByKey3b(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool) (_r *IDataFrameId, _err error) {
-  var _args270 IDataFrameServiceSortByKey3bArgs
+//  - NumPartitions
+func (p *IDataFrameServiceClient) SortByKey3a(ctx context.Context, id *IDataFrameId, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args270 IDataFrameServiceSortByKey3aArgs
   _args270.ID = id
-  _args270.Src = src
   _args270.Ascending = ascending
-  var _result272 IDataFrameServiceSortByKey3bResult
+  _args270.NumPartitions = numPartitions
+  var _result272 IDataFrameServiceSortByKey3aResult
   var _meta271 thrift.ResponseMeta
-  _meta271, _err = p.Client_().Call(ctx, "sortByKey3b", &_args270, &_result272)
+  _meta271, _err = p.Client_().Call(ctx, "sortByKey3a", &_args270, &_result272)
   p.SetLastResponseMeta_(_meta271)
   if _err != nil {
     return
@@ -2554,23 +2559,21 @@ func (p *IDataFrameServiceClient) SortByKey3b(ctx context.Context, id *IDataFram
   if _ret273 := _result272.GetSuccess(); _ret273 != nil {
     return _ret273, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortByKey3b failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortByKey3a failed: unknown result")
 }
 
 // Parameters:
 //  - ID
 //  - Src
 //  - Ascending
-//  - NumPartitions
-func (p *IDataFrameServiceClient) SortByKey4(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
-  var _args274 IDataFrameServiceSortByKey4Args
+func (p *IDataFrameServiceClient) SortByKey3b(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool) (_r *IDataFrameId, _err error) {
+  var _args274 IDataFrameServiceSortByKey3bArgs
   _args274.ID = id
   _args274.Src = src
   _args274.Ascending = ascending
-  _args274.NumPartitions = numPartitions
-  var _result276 IDataFrameServiceSortByKey4Result
+  var _result276 IDataFrameServiceSortByKey3bResult
   var _meta275 thrift.ResponseMeta
-  _meta275, _err = p.Client_().Call(ctx, "sortByKey4", &_args274, &_result276)
+  _meta275, _err = p.Client_().Call(ctx, "sortByKey3b", &_args274, &_result276)
   p.SetLastResponseMeta_(_meta275)
   if _err != nil {
     return
@@ -2583,19 +2586,23 @@ func (p *IDataFrameServiceClient) SortByKey4(ctx context.Context, id *IDataFrame
   if _ret277 := _result276.GetSuccess(); _ret277 != nil {
     return _ret277, nil
   }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortByKey4 failed: unknown result")
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortByKey3b failed: unknown result")
 }
 
 // Parameters:
 //  - ID
-//  - Tp
-func (p *IDataFrameServiceClient) Keys(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args278 IDataFrameServiceKeysArgs
+//  - Src
+//  - Ascending
+//  - NumPartitions
+func (p *IDataFrameServiceClient) SortByKey4(ctx context.Context, id *IDataFrameId, src *rpc.ISource, ascending bool, numPartitions int64) (_r *IDataFrameId, _err error) {
+  var _args278 IDataFrameServiceSortByKey4Args
   _args278.ID = id
-  _args278.Tp = tp
-  var _result280 IDataFrameServiceKeysResult
+  _args278.Src = src
+  _args278.Ascending = ascending
+  _args278.NumPartitions = numPartitions
+  var _result280 IDataFrameServiceSortByKey4Result
   var _meta279 thrift.ResponseMeta
-  _meta279, _err = p.Client_().Call(ctx, "keys", &_args278, &_result280)
+  _meta279, _err = p.Client_().Call(ctx, "sortByKey4", &_args278, &_result280)
   p.SetLastResponseMeta_(_meta279)
   if _err != nil {
     return
@@ -2605,29 +2612,54 @@ func (p *IDataFrameServiceClient) Keys(ctx context.Context, id *IDataFrameId, tp
     return _r, _result280.Ex
   }
 
-  return _result280.GetSuccess(), nil
+  if _ret281 := _result280.GetSuccess(); _ret281 != nil {
+    return _ret281, nil
+  }
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sortByKey4 failed: unknown result")
+}
+
+// Parameters:
+//  - ID
+//  - Tp
+func (p *IDataFrameServiceClient) Keys(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
+  var _args282 IDataFrameServiceKeysArgs
+  _args282.ID = id
+  _args282.Tp = tp
+  var _result284 IDataFrameServiceKeysResult
+  var _meta283 thrift.ResponseMeta
+  _meta283, _err = p.Client_().Call(ctx, "keys", &_args282, &_result284)
+  p.SetLastResponseMeta_(_meta283)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result284.Ex!= nil:
+    return _r, _result284.Ex
+  }
+
+  return _result284.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
 //  - Tp
 func (p *IDataFrameServiceClient) Values(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args281 IDataFrameServiceValuesArgs
-  _args281.ID = id
-  _args281.Tp = tp
-  var _result283 IDataFrameServiceValuesResult
-  var _meta282 thrift.ResponseMeta
-  _meta282, _err = p.Client_().Call(ctx, "values", &_args281, &_result283)
-  p.SetLastResponseMeta_(_meta282)
+  var _args285 IDataFrameServiceValuesArgs
+  _args285.ID = id
+  _args285.Tp = tp
+  var _result287 IDataFrameServiceValuesResult
+  var _meta286 thrift.ResponseMeta
+  _meta286, _err = p.Client_().Call(ctx, "values", &_args285, &_result287)
+  p.SetLastResponseMeta_(_meta286)
   if _err != nil {
     return
   }
   switch {
-  case _result283.Ex!= nil:
-    return _r, _result283.Ex
+  case _result287.Ex!= nil:
+    return _r, _result287.Ex
   }
 
-  return _result283.GetSuccess(), nil
+  return _result287.GetSuccess(), nil
 }
 
 // Parameters:
@@ -2636,39 +2668,14 @@ func (p *IDataFrameServiceClient) Values(ctx context.Context, id *IDataFrameId, 
 //  - Fractions
 //  - Seed
 func (p *IDataFrameServiceClient) SampleByKey(ctx context.Context, id *IDataFrameId, withReplacement bool, fractions *rpc.ISource, seed int32) (_r *IDataFrameId, _err error) {
-  var _args284 IDataFrameServiceSampleByKeyArgs
-  _args284.ID = id
-  _args284.WithReplacement = withReplacement
-  _args284.Fractions = fractions
-  _args284.Seed = seed
-  var _result286 IDataFrameServiceSampleByKeyResult
-  var _meta285 thrift.ResponseMeta
-  _meta285, _err = p.Client_().Call(ctx, "sampleByKey", &_args284, &_result286)
-  p.SetLastResponseMeta_(_meta285)
-  if _err != nil {
-    return
-  }
-  switch {
-  case _result286.Ex!= nil:
-    return _r, _result286.Ex
-  }
-
-  if _ret287 := _result286.GetSuccess(); _ret287 != nil {
-    return _ret287, nil
-  }
-  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sampleByKey failed: unknown result")
-}
-
-// Parameters:
-//  - ID
-//  - Tp
-func (p *IDataFrameServiceClient) CountByKey(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args288 IDataFrameServiceCountByKeyArgs
+  var _args288 IDataFrameServiceSampleByKeyArgs
   _args288.ID = id
-  _args288.Tp = tp
-  var _result290 IDataFrameServiceCountByKeyResult
+  _args288.WithReplacement = withReplacement
+  _args288.Fractions = fractions
+  _args288.Seed = seed
+  var _result290 IDataFrameServiceSampleByKeyResult
   var _meta289 thrift.ResponseMeta
-  _meta289, _err = p.Client_().Call(ctx, "countByKey", &_args288, &_result290)
+  _meta289, _err = p.Client_().Call(ctx, "sampleByKey", &_args288, &_result290)
   p.SetLastResponseMeta_(_meta289)
   if _err != nil {
     return
@@ -2678,29 +2685,54 @@ func (p *IDataFrameServiceClient) CountByKey(ctx context.Context, id *IDataFrame
     return _r, _result290.Ex
   }
 
-  return _result290.GetSuccess(), nil
+  if _ret291 := _result290.GetSuccess(); _ret291 != nil {
+    return _ret291, nil
+  }
+  return nil, thrift.NewTApplicationException(thrift.MISSING_RESULT, "sampleByKey failed: unknown result")
+}
+
+// Parameters:
+//  - ID
+//  - Tp
+func (p *IDataFrameServiceClient) CountByKey(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
+  var _args292 IDataFrameServiceCountByKeyArgs
+  _args292.ID = id
+  _args292.Tp = tp
+  var _result294 IDataFrameServiceCountByKeyResult
+  var _meta293 thrift.ResponseMeta
+  _meta293, _err = p.Client_().Call(ctx, "countByKey", &_args292, &_result294)
+  p.SetLastResponseMeta_(_meta293)
+  if _err != nil {
+    return
+  }
+  switch {
+  case _result294.Ex!= nil:
+    return _r, _result294.Ex
+  }
+
+  return _result294.GetSuccess(), nil
 }
 
 // Parameters:
 //  - ID
 //  - Tp
 func (p *IDataFrameServiceClient) CountByValue(ctx context.Context, id *IDataFrameId, tp *rpc.ISource) (_r int64, _err error) {
-  var _args291 IDataFrameServiceCountByValueArgs
-  _args291.ID = id
-  _args291.Tp = tp
-  var _result293 IDataFrameServiceCountByValueResult
-  var _meta292 thrift.ResponseMeta
-  _meta292, _err = p.Client_().Call(ctx, "countByValue", &_args291, &_result293)
-  p.SetLastResponseMeta_(_meta292)
+  var _args295 IDataFrameServiceCountByValueArgs
+  _args295.ID = id
+  _args295.Tp = tp
+  var _result297 IDataFrameServiceCountByValueResult
+  var _meta296 thrift.ResponseMeta
+  _meta296, _err = p.Client_().Call(ctx, "countByValue", &_args295, &_result297)
+  p.SetLastResponseMeta_(_meta296)
   if _err != nil {
     return
   }
   switch {
-  case _result293.Ex!= nil:
-    return _r, _result293.Ex
+  case _result297.Ex!= nil:
+    return _r, _result297.Ex
   }
 
-  return _result293.GetSuccess(), nil
+  return _result297.GetSuccess(), nil
 }
 
 type IDataFrameServiceProcessor struct {
@@ -2723,90 +2755,91 @@ func (p *IDataFrameServiceProcessor) ProcessorMap() map[string]thrift.TProcessor
 
 func NewIDataFrameServiceProcessor(handler IDataFrameService) *IDataFrameServiceProcessor {
 
-  self294 := &IDataFrameServiceProcessor{handler:handler, processorMap:make(map[string]thrift.TProcessorFunction)}
-  self294.processorMap["setName"] = &iDataFrameServiceProcessorSetName{handler:handler}
-  self294.processorMap["persist"] = &iDataFrameServiceProcessorPersist{handler:handler}
-  self294.processorMap["cache"] = &iDataFrameServiceProcessorCache{handler:handler}
-  self294.processorMap["unpersist"] = &iDataFrameServiceProcessorUnpersist{handler:handler}
-  self294.processorMap["uncache"] = &iDataFrameServiceProcessorUncache{handler:handler}
-  self294.processorMap["partitions"] = &iDataFrameServiceProcessorPartitions{handler:handler}
-  self294.processorMap["saveAsObjectFile"] = &iDataFrameServiceProcessorSaveAsObjectFile{handler:handler}
-  self294.processorMap["saveAsTextFile"] = &iDataFrameServiceProcessorSaveAsTextFile{handler:handler}
-  self294.processorMap["saveAsJsonFile"] = &iDataFrameServiceProcessorSaveAsJsonFile{handler:handler}
-  self294.processorMap["repartition"] = &iDataFrameServiceProcessorRepartition{handler:handler}
-  self294.processorMap["partitionByRandom"] = &iDataFrameServiceProcessorPartitionByRandom{handler:handler}
-  self294.processorMap["partitionByHash"] = &iDataFrameServiceProcessorPartitionByHash{handler:handler}
-  self294.processorMap["partitionBy"] = &iDataFrameServiceProcessorPartitionBy{handler:handler}
-  self294.processorMap["map_"] = &iDataFrameServiceProcessorMap_{handler:handler}
-  self294.processorMap["filter"] = &iDataFrameServiceProcessorFilter{handler:handler}
-  self294.processorMap["flatmap"] = &iDataFrameServiceProcessorFlatmap{handler:handler}
-  self294.processorMap["keyBy"] = &iDataFrameServiceProcessorKeyBy{handler:handler}
-  self294.processorMap["mapPartitions"] = &iDataFrameServiceProcessorMapPartitions{handler:handler}
-  self294.processorMap["mapPartitionsWithIndex"] = &iDataFrameServiceProcessorMapPartitionsWithIndex{handler:handler}
-  self294.processorMap["mapExecutor"] = &iDataFrameServiceProcessorMapExecutor{handler:handler}
-  self294.processorMap["mapExecutorTo"] = &iDataFrameServiceProcessorMapExecutorTo{handler:handler}
-  self294.processorMap["groupBy"] = &iDataFrameServiceProcessorGroupBy{handler:handler}
-  self294.processorMap["groupBy2"] = &iDataFrameServiceProcessorGroupBy2{handler:handler}
-  self294.processorMap["sort"] = &iDataFrameServiceProcessorSort{handler:handler}
-  self294.processorMap["sort2"] = &iDataFrameServiceProcessorSort2{handler:handler}
-  self294.processorMap["sortBy"] = &iDataFrameServiceProcessorSortBy{handler:handler}
-  self294.processorMap["sortBy3"] = &iDataFrameServiceProcessorSortBy3{handler:handler}
-  self294.processorMap["union_"] = &iDataFrameServiceProcessorUnion_{handler:handler}
-  self294.processorMap["union4"] = &iDataFrameServiceProcessorUnion4{handler:handler}
-  self294.processorMap["join"] = &iDataFrameServiceProcessorJoin{handler:handler}
-  self294.processorMap["join3a"] = &iDataFrameServiceProcessorJoin3a{handler:handler}
-  self294.processorMap["join3b"] = &iDataFrameServiceProcessorJoin3b{handler:handler}
-  self294.processorMap["join4"] = &iDataFrameServiceProcessorJoin4{handler:handler}
-  self294.processorMap["distinct"] = &iDataFrameServiceProcessorDistinct{handler:handler}
-  self294.processorMap["distinct2a"] = &iDataFrameServiceProcessorDistinct2a{handler:handler}
-  self294.processorMap["distinct2b"] = &iDataFrameServiceProcessorDistinct2b{handler:handler}
-  self294.processorMap["distinct3"] = &iDataFrameServiceProcessorDistinct3{handler:handler}
-  self294.processorMap["reduce"] = &iDataFrameServiceProcessorReduce{handler:handler}
-  self294.processorMap["treeReduce"] = &iDataFrameServiceProcessorTreeReduce{handler:handler}
-  self294.processorMap["collect"] = &iDataFrameServiceProcessorCollect{handler:handler}
-  self294.processorMap["aggregate"] = &iDataFrameServiceProcessorAggregate{handler:handler}
-  self294.processorMap["treeAggregate"] = &iDataFrameServiceProcessorTreeAggregate{handler:handler}
-  self294.processorMap["fold"] = &iDataFrameServiceProcessorFold{handler:handler}
-  self294.processorMap["treeFold"] = &iDataFrameServiceProcessorTreeFold{handler:handler}
-  self294.processorMap["take"] = &iDataFrameServiceProcessorTake{handler:handler}
-  self294.processorMap["foreach_"] = &iDataFrameServiceProcessorForeach_{handler:handler}
-  self294.processorMap["foreachPartition"] = &iDataFrameServiceProcessorForeachPartition{handler:handler}
-  self294.processorMap["foreachExecutor"] = &iDataFrameServiceProcessorForeachExecutor{handler:handler}
-  self294.processorMap["top"] = &iDataFrameServiceProcessorTop{handler:handler}
-  self294.processorMap["top4"] = &iDataFrameServiceProcessorTop4{handler:handler}
-  self294.processorMap["takeOrdered"] = &iDataFrameServiceProcessorTakeOrdered{handler:handler}
-  self294.processorMap["takeOrdered4"] = &iDataFrameServiceProcessorTakeOrdered4{handler:handler}
-  self294.processorMap["sample"] = &iDataFrameServiceProcessorSample{handler:handler}
-  self294.processorMap["takeSample"] = &iDataFrameServiceProcessorTakeSample{handler:handler}
-  self294.processorMap["count"] = &iDataFrameServiceProcessorCount{handler:handler}
-  self294.processorMap["max"] = &iDataFrameServiceProcessorMax{handler:handler}
-  self294.processorMap["max3"] = &iDataFrameServiceProcessorMax3{handler:handler}
-  self294.processorMap["min"] = &iDataFrameServiceProcessorMin{handler:handler}
-  self294.processorMap["min3"] = &iDataFrameServiceProcessorMin3{handler:handler}
-  self294.processorMap["flatMapValues"] = &iDataFrameServiceProcessorFlatMapValues{handler:handler}
-  self294.processorMap["mapValues"] = &iDataFrameServiceProcessorMapValues{handler:handler}
-  self294.processorMap["groupByKey"] = &iDataFrameServiceProcessorGroupByKey{handler:handler}
-  self294.processorMap["groupByKey2a"] = &iDataFrameServiceProcessorGroupByKey2a{handler:handler}
-  self294.processorMap["groupByKey2b"] = &iDataFrameServiceProcessorGroupByKey2b{handler:handler}
-  self294.processorMap["groupByKey3"] = &iDataFrameServiceProcessorGroupByKey3{handler:handler}
-  self294.processorMap["reduceByKey"] = &iDataFrameServiceProcessorReduceByKey{handler:handler}
-  self294.processorMap["reduceByKey4"] = &iDataFrameServiceProcessorReduceByKey4{handler:handler}
-  self294.processorMap["aggregateByKey"] = &iDataFrameServiceProcessorAggregateByKey{handler:handler}
-  self294.processorMap["aggregateByKey4a"] = &iDataFrameServiceProcessorAggregateByKey4a{handler:handler}
-  self294.processorMap["aggregateByKey4b"] = &iDataFrameServiceProcessorAggregateByKey4b{handler:handler}
-  self294.processorMap["aggregateByKey5"] = &iDataFrameServiceProcessorAggregateByKey5{handler:handler}
-  self294.processorMap["foldByKey"] = &iDataFrameServiceProcessorFoldByKey{handler:handler}
-  self294.processorMap["foldByKey5"] = &iDataFrameServiceProcessorFoldByKey5{handler:handler}
-  self294.processorMap["sortByKey"] = &iDataFrameServiceProcessorSortByKey{handler:handler}
-  self294.processorMap["sortByKey3a"] = &iDataFrameServiceProcessorSortByKey3a{handler:handler}
-  self294.processorMap["sortByKey3b"] = &iDataFrameServiceProcessorSortByKey3b{handler:handler}
-  self294.processorMap["sortByKey4"] = &iDataFrameServiceProcessorSortByKey4{handler:handler}
-  self294.processorMap["keys"] = &iDataFrameServiceProcessorKeys{handler:handler}
-  self294.processorMap["values"] = &iDataFrameServiceProcessorValues{handler:handler}
-  self294.processorMap["sampleByKey"] = &iDataFrameServiceProcessorSampleByKey{handler:handler}
-  self294.processorMap["countByKey"] = &iDataFrameServiceProcessorCountByKey{handler:handler}
-  self294.processorMap["countByValue"] = &iDataFrameServiceProcessorCountByValue{handler:handler}
-return self294
+  self298 := &IDataFrameServiceProcessor{handler:handler, processorMap:make(map[string]thrift.TProcessorFunction)}
+  self298.processorMap["setName"] = &iDataFrameServiceProcessorSetName{handler:handler}
+  self298.processorMap["persist"] = &iDataFrameServiceProcessorPersist{handler:handler}
+  self298.processorMap["cache"] = &iDataFrameServiceProcessorCache{handler:handler}
+  self298.processorMap["unpersist"] = &iDataFrameServiceProcessorUnpersist{handler:handler}
+  self298.processorMap["uncache"] = &iDataFrameServiceProcessorUncache{handler:handler}
+  self298.processorMap["partitions"] = &iDataFrameServiceProcessorPartitions{handler:handler}
+  self298.processorMap["saveAsObjectFile"] = &iDataFrameServiceProcessorSaveAsObjectFile{handler:handler}
+  self298.processorMap["saveAsTextFile"] = &iDataFrameServiceProcessorSaveAsTextFile{handler:handler}
+  self298.processorMap["saveAsJsonFile"] = &iDataFrameServiceProcessorSaveAsJsonFile{handler:handler}
+  self298.processorMap["repartition"] = &iDataFrameServiceProcessorRepartition{handler:handler}
+  self298.processorMap["partitionByRandom"] = &iDataFrameServiceProcessorPartitionByRandom{handler:handler}
+  self298.processorMap["partitionByHash"] = &iDataFrameServiceProcessorPartitionByHash{handler:handler}
+  self298.processorMap["partitionBy"] = &iDataFrameServiceProcessorPartitionBy{handler:handler}
+  self298.processorMap["map_"] = &iDataFrameServiceProcessorMap_{handler:handler}
+  self298.processorMap["filter"] = &iDataFrameServiceProcessorFilter{handler:handler}
+  self298.processorMap["flatmap"] = &iDataFrameServiceProcessorFlatmap{handler:handler}
+  self298.processorMap["keyBy"] = &iDataFrameServiceProcessorKeyBy{handler:handler}
+  self298.processorMap["mapWithIndex"] = &iDataFrameServiceProcessorMapWithIndex{handler:handler}
+  self298.processorMap["mapPartitions"] = &iDataFrameServiceProcessorMapPartitions{handler:handler}
+  self298.processorMap["mapPartitionsWithIndex"] = &iDataFrameServiceProcessorMapPartitionsWithIndex{handler:handler}
+  self298.processorMap["mapExecutor"] = &iDataFrameServiceProcessorMapExecutor{handler:handler}
+  self298.processorMap["mapExecutorTo"] = &iDataFrameServiceProcessorMapExecutorTo{handler:handler}
+  self298.processorMap["groupBy"] = &iDataFrameServiceProcessorGroupBy{handler:handler}
+  self298.processorMap["groupBy2"] = &iDataFrameServiceProcessorGroupBy2{handler:handler}
+  self298.processorMap["sort"] = &iDataFrameServiceProcessorSort{handler:handler}
+  self298.processorMap["sort2"] = &iDataFrameServiceProcessorSort2{handler:handler}
+  self298.processorMap["sortBy"] = &iDataFrameServiceProcessorSortBy{handler:handler}
+  self298.processorMap["sortBy3"] = &iDataFrameServiceProcessorSortBy3{handler:handler}
+  self298.processorMap["union_"] = &iDataFrameServiceProcessorUnion_{handler:handler}
+  self298.processorMap["union4"] = &iDataFrameServiceProcessorUnion4{handler:handler}
+  self298.processorMap["join"] = &iDataFrameServiceProcessorJoin{handler:handler}
+  self298.processorMap["join3a"] = &iDataFrameServiceProcessorJoin3a{handler:handler}
+  self298.processorMap["join3b"] = &iDataFrameServiceProcessorJoin3b{handler:handler}
+  self298.processorMap["join4"] = &iDataFrameServiceProcessorJoin4{handler:handler}
+  self298.processorMap["distinct"] = &iDataFrameServiceProcessorDistinct{handler:handler}
+  self298.processorMap["distinct2a"] = &iDataFrameServiceProcessorDistinct2a{handler:handler}
+  self298.processorMap["distinct2b"] = &iDataFrameServiceProcessorDistinct2b{handler:handler}
+  self298.processorMap["distinct3"] = &iDataFrameServiceProcessorDistinct3{handler:handler}
+  self298.processorMap["reduce"] = &iDataFrameServiceProcessorReduce{handler:handler}
+  self298.processorMap["treeReduce"] = &iDataFrameServiceProcessorTreeReduce{handler:handler}
+  self298.processorMap["collect"] = &iDataFrameServiceProcessorCollect{handler:handler}
+  self298.processorMap["aggregate"] = &iDataFrameServiceProcessorAggregate{handler:handler}
+  self298.processorMap["treeAggregate"] = &iDataFrameServiceProcessorTreeAggregate{handler:handler}
+  self298.processorMap["fold"] = &iDataFrameServiceProcessorFold{handler:handler}
+  self298.processorMap["treeFold"] = &iDataFrameServiceProcessorTreeFold{handler:handler}
+  self298.processorMap["take"] = &iDataFrameServiceProcessorTake{handler:handler}
+  self298.processorMap["foreach_"] = &iDataFrameServiceProcessorForeach_{handler:handler}
+  self298.processorMap["foreachPartition"] = &iDataFrameServiceProcessorForeachPartition{handler:handler}
+  self298.processorMap["foreachExecutor"] = &iDataFrameServiceProcessorForeachExecutor{handler:handler}
+  self298.processorMap["top"] = &iDataFrameServiceProcessorTop{handler:handler}
+  self298.processorMap["top4"] = &iDataFrameServiceProcessorTop4{handler:handler}
+  self298.processorMap["takeOrdered"] = &iDataFrameServiceProcessorTakeOrdered{handler:handler}
+  self298.processorMap["takeOrdered4"] = &iDataFrameServiceProcessorTakeOrdered4{handler:handler}
+  self298.processorMap["sample"] = &iDataFrameServiceProcessorSample{handler:handler}
+  self298.processorMap["takeSample"] = &iDataFrameServiceProcessorTakeSample{handler:handler}
+  self298.processorMap["count"] = &iDataFrameServiceProcessorCount{handler:handler}
+  self298.processorMap["max"] = &iDataFrameServiceProcessorMax{handler:handler}
+  self298.processorMap["max3"] = &iDataFrameServiceProcessorMax3{handler:handler}
+  self298.processorMap["min"] = &iDataFrameServiceProcessorMin{handler:handler}
+  self298.processorMap["min3"] = &iDataFrameServiceProcessorMin3{handler:handler}
+  self298.processorMap["flatMapValues"] = &iDataFrameServiceProcessorFlatMapValues{handler:handler}
+  self298.processorMap["mapValues"] = &iDataFrameServiceProcessorMapValues{handler:handler}
+  self298.processorMap["groupByKey"] = &iDataFrameServiceProcessorGroupByKey{handler:handler}
+  self298.processorMap["groupByKey2a"] = &iDataFrameServiceProcessorGroupByKey2a{handler:handler}
+  self298.processorMap["groupByKey2b"] = &iDataFrameServiceProcessorGroupByKey2b{handler:handler}
+  self298.processorMap["groupByKey3"] = &iDataFrameServiceProcessorGroupByKey3{handler:handler}
+  self298.processorMap["reduceByKey"] = &iDataFrameServiceProcessorReduceByKey{handler:handler}
+  self298.processorMap["reduceByKey4"] = &iDataFrameServiceProcessorReduceByKey4{handler:handler}
+  self298.processorMap["aggregateByKey"] = &iDataFrameServiceProcessorAggregateByKey{handler:handler}
+  self298.processorMap["aggregateByKey4a"] = &iDataFrameServiceProcessorAggregateByKey4a{handler:handler}
+  self298.processorMap["aggregateByKey4b"] = &iDataFrameServiceProcessorAggregateByKey4b{handler:handler}
+  self298.processorMap["aggregateByKey5"] = &iDataFrameServiceProcessorAggregateByKey5{handler:handler}
+  self298.processorMap["foldByKey"] = &iDataFrameServiceProcessorFoldByKey{handler:handler}
+  self298.processorMap["foldByKey5"] = &iDataFrameServiceProcessorFoldByKey5{handler:handler}
+  self298.processorMap["sortByKey"] = &iDataFrameServiceProcessorSortByKey{handler:handler}
+  self298.processorMap["sortByKey3a"] = &iDataFrameServiceProcessorSortByKey3a{handler:handler}
+  self298.processorMap["sortByKey3b"] = &iDataFrameServiceProcessorSortByKey3b{handler:handler}
+  self298.processorMap["sortByKey4"] = &iDataFrameServiceProcessorSortByKey4{handler:handler}
+  self298.processorMap["keys"] = &iDataFrameServiceProcessorKeys{handler:handler}
+  self298.processorMap["values"] = &iDataFrameServiceProcessorValues{handler:handler}
+  self298.processorMap["sampleByKey"] = &iDataFrameServiceProcessorSampleByKey{handler:handler}
+  self298.processorMap["countByKey"] = &iDataFrameServiceProcessorCountByKey{handler:handler}
+  self298.processorMap["countByValue"] = &iDataFrameServiceProcessorCountByValue{handler:handler}
+return self298
 }
 
 func (p *IDataFrameServiceProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -2817,12 +2850,12 @@ func (p *IDataFrameServiceProcessor) Process(ctx context.Context, iprot, oprot t
   }
   iprot.Skip(ctx, thrift.STRUCT)
   iprot.ReadMessageEnd(ctx)
-  x295 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function " + name)
+  x299 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function " + name)
   oprot.WriteMessageBegin(ctx, name, thrift.EXCEPTION, seqId)
-  x295.Write(ctx, oprot)
+  x299.Write(ctx, oprot)
   oprot.WriteMessageEnd(ctx)
   oprot.Flush(ctx)
-  return false, x295
+  return false, x299
 
 }
 
@@ -3688,7 +3721,7 @@ func (p *iDataFrameServiceProcessorPartitionByRandom) Process(ctx context.Contex
 
   result := IDataFrameServicePartitionByRandomResult{}
   var retval *IDataFrameId
-  if retval, err2 = p.handler.PartitionByRandom(ctx, args.ID, args.NumPartitions); err2 != nil {
+  if retval, err2 = p.handler.PartitionByRandom(ctx, args.ID, args.NumPartitions, args.Seed); err2 != nil {
     tickerCancel()
   switch v := err2.(type) {
     case *IDriverException:
@@ -4213,6 +4246,90 @@ func (p *iDataFrameServiceProcessorKeyBy) Process(ctx context.Context, seqId int
   }
   tickerCancel()
   if err2 = oprot.WriteMessageBegin(ctx, "keyBy", thrift.REPLY, seqId); err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.WriteMessageEnd(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+    err = thrift.WrapTException(err2)
+  }
+  if err != nil {
+    return
+  }
+  return true, err
+}
+
+type iDataFrameServiceProcessorMapWithIndex struct {
+  handler IDataFrameService
+}
+
+func (p *iDataFrameServiceProcessorMapWithIndex) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+  args := IDataFrameServiceMapWithIndexArgs{}
+  var err2 error
+  if err2 = args.Read(ctx, iprot); err2 != nil {
+    iprot.ReadMessageEnd(ctx)
+    x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err2.Error())
+    oprot.WriteMessageBegin(ctx, "mapWithIndex", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return false, thrift.WrapTException(err2)
+  }
+  iprot.ReadMessageEnd(ctx)
+
+  tickerCancel := func() {}
+  // Start a goroutine to do server side connectivity check.
+  if thrift.ServerConnectivityCheckInterval > 0 {
+    var cancel context.CancelFunc
+    ctx, cancel = context.WithCancel(ctx)
+    defer cancel()
+    var tickerCtx context.Context
+    tickerCtx, tickerCancel = context.WithCancel(context.Background())
+    defer tickerCancel()
+    go func(ctx context.Context, cancel context.CancelFunc) {
+      ticker := time.NewTicker(thrift.ServerConnectivityCheckInterval)
+      defer ticker.Stop()
+      for {
+        select {
+        case <-ctx.Done():
+          return
+        case <-ticker.C:
+          if !iprot.Transport().IsOpen() {
+            cancel()
+            return
+          }
+        }
+      }
+    }(tickerCtx, cancel)
+  }
+
+  result := IDataFrameServiceMapWithIndexResult{}
+  var retval *IDataFrameId
+  if retval, err2 = p.handler.MapWithIndex(ctx, args.ID, args.Src); err2 != nil {
+    tickerCancel()
+  switch v := err2.(type) {
+    case *IDriverException:
+  result.Ex = v
+    default:
+    if err2 == thrift.ErrAbandonRequest {
+      return false, thrift.WrapTException(err2)
+    }
+    x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing mapWithIndex: " + err2.Error())
+    oprot.WriteMessageBegin(ctx, "mapWithIndex", thrift.EXCEPTION, seqId)
+    x.Write(ctx, oprot)
+    oprot.WriteMessageEnd(ctx)
+    oprot.Flush(ctx)
+    return true, thrift.WrapTException(err2)
+  }
+  } else {
+    result.Success = retval
+  }
+  tickerCancel()
+  if err2 = oprot.WriteMessageBegin(ctx, "mapWithIndex", thrift.REPLY, seqId); err2 != nil {
     err = thrift.WrapTException(err2)
   }
   if err2 = result.Write(ctx, oprot); err == nil && err2 != nil {
@@ -12114,9 +12231,11 @@ func (p *IDataFrameServiceRepartitionResult) String() string {
 // Attributes:
 //  - ID
 //  - NumPartitions
+//  - Seed
 type IDataFrameServicePartitionByRandomArgs struct {
   ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
   NumPartitions int64 `thrift:"numPartitions,2" db:"numPartitions" json:"numPartitions"`
+  Seed int32 `thrift:"seed,3" db:"seed" json:"seed"`
 }
 
 func NewIDataFrameServicePartitionByRandomArgs() *IDataFrameServicePartitionByRandomArgs {
@@ -12133,6 +12252,10 @@ return p.ID
 
 func (p *IDataFrameServicePartitionByRandomArgs) GetNumPartitions() int64 {
   return p.NumPartitions
+}
+
+func (p *IDataFrameServicePartitionByRandomArgs) GetSeed() int32 {
+  return p.Seed
 }
 func (p *IDataFrameServicePartitionByRandomArgs) IsSetID() bool {
   return p.ID != nil
@@ -12164,6 +12287,16 @@ func (p *IDataFrameServicePartitionByRandomArgs) Read(ctx context.Context, iprot
     case 2:
       if fieldTypeId == thrift.I64 {
         if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 3:
+      if fieldTypeId == thrift.I32 {
+        if err := p.ReadField3(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -12203,12 +12336,22 @@ func (p *IDataFrameServicePartitionByRandomArgs)  ReadField2(ctx context.Context
   return nil
 }
 
+func (p *IDataFrameServicePartitionByRandomArgs)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadI32(ctx); err != nil {
+  return thrift.PrependError("error reading field 3: ", err)
+} else {
+  p.Seed = v
+}
+  return nil
+}
+
 func (p *IDataFrameServicePartitionByRandomArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "partitionByRandom_args"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if p != nil {
     if err := p.writeField1(ctx, oprot); err != nil { return err }
     if err := p.writeField2(ctx, oprot); err != nil { return err }
+    if err := p.writeField3(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -12235,6 +12378,16 @@ func (p *IDataFrameServicePartitionByRandomArgs) writeField2(ctx context.Context
   return thrift.PrependError(fmt.Sprintf("%T.numPartitions (2) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 2:numPartitions: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServicePartitionByRandomArgs) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "seed", thrift.I32, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:seed: ", p), err) }
+  if err := oprot.WriteI32(ctx, int32(p.Seed)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.seed (3) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:seed: ", p), err) }
   return err
 }
 
@@ -14148,6 +14301,295 @@ func (p *IDataFrameServiceKeyByResult) String() string {
     return "<nil>"
   }
   return fmt.Sprintf("IDataFrameServiceKeyByResult(%+v)", *p)
+}
+
+// Attributes:
+//  - ID
+//  - Src
+type IDataFrameServiceMapWithIndexArgs struct {
+  ID *IDataFrameId `thrift:"id,1" db:"id" json:"id"`
+  Src *rpc.ISource `thrift:"src,2" db:"src" json:"src"`
+}
+
+func NewIDataFrameServiceMapWithIndexArgs() *IDataFrameServiceMapWithIndexArgs {
+  return &IDataFrameServiceMapWithIndexArgs{}
+}
+
+var IDataFrameServiceMapWithIndexArgs_ID_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceMapWithIndexArgs) GetID() *IDataFrameId {
+  if !p.IsSetID() {
+    return IDataFrameServiceMapWithIndexArgs_ID_DEFAULT
+  }
+return p.ID
+}
+var IDataFrameServiceMapWithIndexArgs_Src_DEFAULT *rpc.ISource
+func (p *IDataFrameServiceMapWithIndexArgs) GetSrc() *rpc.ISource {
+  if !p.IsSetSrc() {
+    return IDataFrameServiceMapWithIndexArgs_Src_DEFAULT
+  }
+return p.Src
+}
+func (p *IDataFrameServiceMapWithIndexArgs) IsSetID() bool {
+  return p.ID != nil
+}
+
+func (p *IDataFrameServiceMapWithIndexArgs) IsSetSrc() bool {
+  return p.Src != nil
+}
+
+func (p *IDataFrameServiceMapWithIndexArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 2:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField2(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceMapWithIndexArgs)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.ID = &IDataFrameId{}
+  if err := p.ID.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ID), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceMapWithIndexArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Src = &rpc.ISource{
+  Params: map[string][]byte{
+  },
+}
+  if err := p.Src.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Src), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceMapWithIndexArgs) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "mapWithIndex_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+    if err := p.writeField2(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceMapWithIndexArgs) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "id", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:id: ", p), err) }
+  if err := p.ID.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ID), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:id: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceMapWithIndexArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if err := oprot.WriteFieldBegin(ctx, "src", thrift.STRUCT, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:src: ", p), err) }
+  if err := p.Src.Write(ctx, oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Src), err)
+  }
+  if err := oprot.WriteFieldEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:src: ", p), err) }
+  return err
+}
+
+func (p *IDataFrameServiceMapWithIndexArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceMapWithIndexArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+//  - Ex
+type IDataFrameServiceMapWithIndexResult struct {
+  Success *IDataFrameId `thrift:"success,0" db:"success" json:"success,omitempty"`
+  Ex *IDriverException `thrift:"ex,1" db:"ex" json:"ex,omitempty"`
+}
+
+func NewIDataFrameServiceMapWithIndexResult() *IDataFrameServiceMapWithIndexResult {
+  return &IDataFrameServiceMapWithIndexResult{}
+}
+
+var IDataFrameServiceMapWithIndexResult_Success_DEFAULT *IDataFrameId
+func (p *IDataFrameServiceMapWithIndexResult) GetSuccess() *IDataFrameId {
+  if !p.IsSetSuccess() {
+    return IDataFrameServiceMapWithIndexResult_Success_DEFAULT
+  }
+return p.Success
+}
+var IDataFrameServiceMapWithIndexResult_Ex_DEFAULT *IDriverException
+func (p *IDataFrameServiceMapWithIndexResult) GetEx() *IDriverException {
+  if !p.IsSetEx() {
+    return IDataFrameServiceMapWithIndexResult_Ex_DEFAULT
+  }
+return p.Ex
+}
+func (p *IDataFrameServiceMapWithIndexResult) IsSetSuccess() bool {
+  return p.Success != nil
+}
+
+func (p *IDataFrameServiceMapWithIndexResult) IsSetEx() bool {
+  return p.Ex != nil
+}
+
+func (p *IDataFrameServiceMapWithIndexResult) Read(ctx context.Context, iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin(ctx)
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField0(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 1:
+      if fieldTypeId == thrift.STRUCT {
+        if err := p.ReadField1(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    default:
+      if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(ctx); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(ctx); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceMapWithIndexResult)  ReadField0(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Success = &IDataFrameId{}
+  if err := p.Success.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceMapWithIndexResult)  ReadField1(ctx context.Context, iprot thrift.TProtocol) error {
+  p.Ex = &IDriverException{}
+  if err := p.Ex.Read(ctx, iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ex), err)
+  }
+  return nil
+}
+
+func (p *IDataFrameServiceMapWithIndexResult) Write(ctx context.Context, oprot thrift.TProtocol) error {
+  if err := oprot.WriteStructBegin(ctx, "mapWithIndex_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if p != nil {
+    if err := p.writeField0(ctx, oprot); err != nil { return err }
+    if err := p.writeField1(ctx, oprot); err != nil { return err }
+  }
+  if err := oprot.WriteFieldStop(ctx); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(ctx); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *IDataFrameServiceMapWithIndexResult) writeField0(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin(ctx, "success", thrift.STRUCT, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := p.Success.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceMapWithIndexResult) writeField1(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetEx() {
+    if err := oprot.WriteFieldBegin(ctx, "ex", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ex: ", p), err) }
+    if err := p.Ex.Write(ctx, oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ex), err)
+    }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ex: ", p), err) }
+  }
+  return err
+}
+
+func (p *IDataFrameServiceMapWithIndexResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("IDataFrameServiceMapWithIndexResult(%+v)", *p)
 }
 
 // Attributes:

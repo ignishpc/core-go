@@ -103,13 +103,13 @@ func (this *IDataFrame[T]) Repartition(numPartitions int64, preserveOrdering boo
 	}, nil
 }
 
-func (this *IDataFrame[T]) PartitionByRandom(numPartitions int64) (*IDataFrame[T], error) {
+func (this *IDataFrame[T]) PartitionByRandom(numPartitions int64, seed int) (*IDataFrame[T], error) {
 	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Free()
-	id, err := client.Services().GetDataframeService().PartitionByRandom(context.Background(), this.id, numPartitions)
+	id, err := client.Services().GetDataframeService().PartitionByRandom(context.Background(), this.id, numPartitions, int32(seed))
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
@@ -284,6 +284,22 @@ func KeyBy[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], err
 	}
 	defer client.Free()
 	id, err := client.Services().GetDataframeService().KeyBy(context.Background(), this.id, src.rpc())
+	if err != nil {
+		return nil, derror.NewGenericIDriverError(err)
+	}
+	return &IDataFrame[R]{
+		this.worker,
+		id,
+	}, nil
+}
+
+func MapWithIndex[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], error) {
+	client, err := Ignis.clientPool().GetClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Free()
+	id, err := client.Services().GetDataframeService().MapWithIndex(context.Background(), this.id, src.rpc())
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}

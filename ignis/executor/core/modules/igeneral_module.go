@@ -99,6 +99,20 @@ func (this *IGeneralModule) KeyBy(ctx context.Context, src *rpc.ISource) (_err e
 	return this.CompatibilyError(reflect.TypeOf(basefun), "keyBy")
 }
 
+func (this *IGeneralModule) MapWithIndex(ctx context.Context, src *rpc.ISource) (_err error) {
+	defer this.moduleRecover(&_err)
+	basefun, err := this.executorData.LoadLibrary(src)
+	if err != nil {
+		return this.PackError(err)
+	}
+	if fun, ok := basefun.(base.IMapWithIndexAbs); ok {
+		return this.PackError(fun.RunMapWithIndex(this.pipeImpl, basefun))
+	} else if anyfun, ok := basefun.(function.IFunction2[int64, any, any]); ok {
+		return this.PackError(impl.MapWithIndex(this.pipeImpl, anyfun))
+	}
+	return this.CompatibilyError(reflect.TypeOf(basefun), "mapWithIndex")
+}
+
 func (this *IGeneralModule) MapPartitions(ctx context.Context, src *rpc.ISource) (_err error) {
 	defer this.moduleRecover(&_err)
 	basefun, err := this.executorData.LoadLibrary(src)
@@ -281,13 +295,13 @@ func (this *IGeneralModule) Repartition(ctx context.Context, numPartitions int64
 	}
 	return this.PackError(base.Repartition(this.repartitionImpl, numPartitions, preserveOrdering, global_))
 }
-func (this *IGeneralModule) PartitionByRandom(ctx context.Context, numPartitions int64) (_err error) {
+func (this *IGeneralModule) PartitionByRandom(ctx context.Context, numPartitions int64, seed int32) (_err error) {
 	defer this.moduleRecover(&_err)
 	base, err := this.TypeFromPartition()
 	if err != nil {
 		return this.PackError(err)
 	}
-	return this.PackError(base.PartitionByRandom(this.repartitionImpl, numPartitions))
+	return this.PackError(base.PartitionByRandom(this.repartitionImpl, numPartitions, seed))
 }
 func (this *IGeneralModule) PartitionByHash(ctx context.Context, numPartitions int64) (_err error) {
 	defer this.moduleRecover(&_err)

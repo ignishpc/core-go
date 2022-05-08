@@ -19,7 +19,7 @@ func NewIRepartitionImpl(executorData *core.IExecutorData) *IRepartitionImpl {
 func Repartition[T any](this *IRepartitionImpl, numPartitions int64, preserveOrdering bool, global_ bool) error {
 	return ierror.RaiseMsg("Not implemented yet") //TODO
 }
-func PartitionByRandom[T any](this *IRepartitionImpl, numPartitions int64) error {
+func PartitionByRandom[T any](this *IRepartitionImpl, numPartitions int64, seed int32) error {
 	return ierror.RaiseMsg("Not implemented yet") //TODO
 }
 func PartitionByHash[T any](this *IRepartitionImpl, numPartitions int64) error {
