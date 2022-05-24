@@ -129,6 +129,7 @@ func Map[T any, R any](this *IPipeImpl, f function.IFunction[T, R]) error {
 					return ierror.Raise(err)
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -182,6 +183,7 @@ func Filter[T any](this *IPipeImpl, f function.IFunction[T, bool]) error {
 					}
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -235,6 +237,7 @@ func Flatmap[T any, R any](this *IPipeImpl, f function.IFunction[T, []R]) error 
 					}
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -286,6 +289,7 @@ func KeyBy[T any, R comparable](this *IPipeImpl, f function.IFunction[T, R]) err
 					return ierror.Raise(err)
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -358,6 +362,7 @@ func MapWithIndex[T any, R any](this *IPipeImpl, f function.IFunction2[int64, T,
 					return ierror.Raise(err)
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -408,6 +413,7 @@ func MapPartitions[T any, R any](this *IPipeImpl, f function.IFunction[iterator.
 					return ierror.Raise(err)
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -468,6 +474,7 @@ func MapPartitionsWithIndex[T, R any](this *IPipeImpl, f function.IFunction2[int
 					return ierror.Raise(err)
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -674,6 +681,7 @@ func Foreach[T any](this *IPipeImpl, f function.IVoidFunction[T]) error {
 					return ierror.Raise(err)
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -709,6 +717,7 @@ func ForeachPartition[T any](this *IPipeImpl, f function.IVoidFunction[iterator.
 			if err := f.Call(reader, context); err != nil {
 				return ierror.Raise(err)
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -851,6 +860,7 @@ func Keys[T1 any, T2 any](this *IPipeImpl) error {
 					return ierror.Raise(err)
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -890,6 +900,7 @@ func Values[T1 any, T2 any](this *IPipeImpl) error {
 					return ierror.Raise(err)
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -938,6 +949,7 @@ func MapValues[K any, T any, R any](this *IPipeImpl, f function.IFunction[T, R])
 					return ierror.Raise(err)
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {
@@ -991,6 +1003,7 @@ func FlatMapValues[K any, T any, R any](this *IPipeImpl, f function.IFunction[T,
 					}
 				}
 			}
+			input.Set(i, nil)
 			return nil
 		})
 	}); err != nil {

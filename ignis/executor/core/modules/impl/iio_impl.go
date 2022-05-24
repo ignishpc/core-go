@@ -155,7 +155,7 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byt
 		threadElements := int64(0)
 		partitionInit := exChunkInit
 		filepos := exChunkInit
-		reader := bufio.NewReaderSize(file, 65 * 1024)
+		reader := bufio.NewReaderSize(file, utils.Min(1*10e9, utils.Max(65*1024, int(minPartitionSize / 4))))
 		for filepos < exChunkEnd {
 			if (filepos - partitionInit) > minPartitionSize {
 				if err = partition.Fit(); err != nil {
