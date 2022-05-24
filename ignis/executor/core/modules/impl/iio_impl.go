@@ -155,7 +155,7 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byt
 		threadElements := int64(0)
 		partitionInit := exChunkInit
 		filepos := exChunkInit
-		reader := bufio.NewReader(file)
+		reader := bufio.NewReaderSize(file, 65 * 1024)
 		for filepos < exChunkEnd {
 			if (filepos - partitionInit) > minPartitionSize {
 				if err = partition.Fit(); err != nil {
@@ -202,7 +202,7 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byt
 		}
 	}
 
-	logger.Info("IO; created ", result.Size(), " partitions, ", elements, " lines and ", size, " Bytes read")
+	logger.Info("IO: created ", result.Size(), " partitions, ", elements, " lines and ", size, " Bytes read")
 	core.SetPartitions[string](this.executorData, result)
 	return nil
 }
