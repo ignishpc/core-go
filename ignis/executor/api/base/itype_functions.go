@@ -1,11 +1,15 @@
 package base
 
 import (
+	"ignis/executor/api"
+	"ignis/executor/api/ipair"
 	"ignis/executor/core/modules/impl"
 )
 
 type ITypeFunctions interface {
 	Name() string
+	Type() string
+	AddType(tp api.IContextType)
 	LoadType()
 
 	GetPartitions(commImpl *impl.ICommImpl, protocol int8, minPartitions int64) ([][]byte, error)
@@ -51,25 +55,25 @@ type ITypeFunctions interface {
 }
 
 func NewTypeA[T any]() ITypeFunctions {
-	return &iTypeA[T]{}
+	return &iTypeA[T]{tp: "iTypeA"}
 }
 
 func NewTypeC[T comparable]() ITypeFunctions {
-	return &iTypeC[T]{}
+	return &iTypeC[T]{iTypeA[T]{tp: "iTypeC"}}
 }
 
 func NewTypeAA[T1 any, T2 any]() ITypeFunctions {
-	return &iTypeAA[T1, T2]{}
+	return &iTypeAA[T1, T2]{iTypeA[ipair.IPair[T1, T2]]{tp: "iTypeAA"}}
 }
 
 func NewTypeAC[T1 any, T2 comparable]() ITypeFunctions {
-	return &iTypeAC[T1, T2]{}
+	return &iTypeAC[T1, T2]{iTypeA[ipair.IPair[T1, T2]]{tp: "iTypeAC"}}
 }
 
 func NewTypeCA[T1 comparable, T2 any]() ITypeFunctions {
-	return &iTypeCA[T1, T2]{}
+	return &iTypeCA[T1, T2]{iTypeA[ipair.IPair[T1, T2]]{tp: "iTypeCA"}}
 }
 
 func NewTypeCC[T1 comparable, T2 comparable]() ITypeFunctions {
-	return &iTypeCC[T1, T2]{}
+	return &iTypeCC[T1, T2]{iTypeC[ipair.IPair[T1, T2]]{iTypeA[ipair.IPair[T1, T2]]{tp: "iTypeCC"}}}
 }

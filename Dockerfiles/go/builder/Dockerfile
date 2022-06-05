@@ -9,7 +9,8 @@ ENV GO_VERSION=go1.18beta2
 RUN cd ${IGNIS_HOME} && \
 	mkdir -p core/go && \
 	cd core/go && \
-	wget https://go.dev/dl/${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz -O golang.tar.gz && \
+	(wget https://go.dev/dl/${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz -O golang.tar.gz || \ 
+	wget https://go.dev/dl/${GO_VERSION}.linux-$(uname -m).tar.gz -O golang.tar.gz) && \
 	tar -xvzf  golang.tar.gz && \
 	rm -fR golang.tar.gz
 

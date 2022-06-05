@@ -336,7 +336,11 @@ func (this *IExecutorData) RegisterFunction(f function.IBaseFunction) {
 
 func (this *IExecutorData) RegisterType(tp api.IContextType) {
 	tp.LoadType()
-	this.baseTypes[tp.Name()] = tp
+	if tp2, ok := this.baseTypes[tp.Name()]; ok {
+		tp2.AddType(tp)
+	} else {
+		this.baseTypes[tp.Name()] = tp
+	}
 }
 
 func (this *IExecutorData) GetType(name string) api.IContextType {

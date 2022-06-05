@@ -51,32 +51,53 @@ func (this *iTypeAC[T1, T2]) Values(pipeImpl *impl.IPipeImpl) error {
 /*IMathImpl*/
 
 func (this *iTypeAC[T1, T2]) SampleByKeyFilter(mathImpl *impl.IMathImpl) (int64, error) {
+	if this.next != nil {
+		return this.next.SampleByKeyFilter(mathImpl)
+	}
 	return 0, typeACError()
 }
 
 func (this *iTypeAC[T1, T2]) SampleByKey(mathImpl *impl.IMathImpl, withReplacement bool, seed int32) error {
+	if this.next != nil {
+		return this.next.SampleByKey(mathImpl, withReplacement, seed)
+	}
 	return typeACError()
 }
 
 func (this *iTypeAC[T1, T2]) CountByKey(mathImpl *impl.IMathImpl) error {
+	if this.next != nil {
+		return this.next.CountByKey(mathImpl)
+	}
 	return typeACError()
 }
 
 func (this *iTypeAC[T1, T2]) CountByValue(mathImpl *impl.IMathImpl) error {
+	if this.next != nil {
+		return this.next.CountByValue(mathImpl)
+	}
 	return typeACError()
 }
 
 /*IReduceImpl*/
 
 func (this *iTypeAC[T1, T2]) GroupByKey(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
+	if this.next != nil {
+		return this.next.GroupByKey(reduceImpl, numPartitions)
+	}
 	return typeACError()
 }
 
 func (this *iTypeAC[T1, T2]) Join(reduceImpl *impl.IReduceImpl, other string, numPartitions int64) error {
+	if this.next != nil {
+		return this.next.Join(reduceImpl, other, numPartitions)
+	}
 	return typeACError()
 }
 
 func (this *iTypeAC[T1, T2]) Distinct(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
+	if this.next != nil {
+		return this.next.Distinct(reduceImpl, numPartitions)
+	}
 	return typeACError()
 }
 

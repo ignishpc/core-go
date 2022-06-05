@@ -21,5 +21,6 @@ type ITypeBase interface {
 
 type IContextType interface {
 	Name() string
+	AddType(tp IContextType)
 	LoadType()
 }

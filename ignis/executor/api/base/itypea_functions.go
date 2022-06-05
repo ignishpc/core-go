@@ -1,6 +1,7 @@
 package base
 
 import (
+	"ignis/executor/api"
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/iio"
 	"ignis/executor/core/modules/impl"
@@ -14,10 +15,27 @@ func registerTypeA[T any]() {
 }
 
 type iTypeA[T any] struct {
+	tp   string
+	next ITypeFunctions
 }
 
 func (this *iTypeA[T]) Name() string {
 	return utils.TypeName[T]()
+}
+
+func (this *iTypeA[T]) Type() string {
+	return this.tp
+}
+
+func (this *iTypeA[T]) AddType(tp api.IContextType) {
+	rtp := tp.(ITypeFunctions)
+	if rtp.Type() != this.Type() {
+		if this.next != nil {
+			this.next.AddType(tp)
+		} else {
+			this.next = rtp
+		}
+	}
 }
 
 func (this *iTypeA[T]) LoadType() {
@@ -87,10 +105,16 @@ func (this *iTypeA[T]) SortWithPartitions(sortImpl *impl.ISortImpl, ascending bo
 }
 
 func (this *iTypeA[T]) SortByKey(sortImpl *impl.ISortImpl, ascending bool) error {
+	if this.next != nil {
+		return this.next.SortByKey(sortImpl, ascending)
+	}
 	return typeAError()
 }
 
 func (this *iTypeA[T]) SortByKeyWithPartitions(sortImpl *impl.ISortImpl, ascending bool, partitions int64) error {
+	if this.next != nil {
+		return this.next.SortByKeyWithPartitions(sortImpl, ascending, partitions)
+	}
 	return typeAError()
 }
 
@@ -117,10 +141,16 @@ func (this *iTypeA[T]) Take(pipeImpl *impl.IPipeImpl, num int64) error {
 }
 
 func (this *iTypeA[T]) Keys(pipeImpl *impl.IPipeImpl) error {
+	if this.next != nil {
+		return this.next.Keys(pipeImpl)
+	}
 	return typeAError()
 }
 
 func (this *iTypeA[T]) Values(pipeImpl *impl.IPipeImpl) error {
+	if this.next != nil {
+		return this.next.Values(pipeImpl)
+	}
 	return typeAError()
 }
 
@@ -131,24 +161,39 @@ func (this *iTypeA[T]) Sample(mathImpl *impl.IMathImpl, withReplacement bool, nu
 }
 
 func (this *iTypeA[T]) SampleByKeyFilter(mathImpl *impl.IMathImpl) (int64, error) {
+	if this.next != nil {
+		return this.next.SampleByKeyFilter(mathImpl)
+	}
 	return 0, typeAError()
 }
 
 func (this *iTypeA[T]) SampleByKey(mathImpl *impl.IMathImpl, withReplacement bool, seed int32) error {
+	if this.next != nil {
+		return this.next.SampleByKey(mathImpl, withReplacement, seed)
+	}
 	return typeAError()
 }
 
 func (this *iTypeA[T]) CountByKey(mathImpl *impl.IMathImpl) error {
+	if this.next != nil {
+		return this.next.CountByKey(mathImpl)
+	}
 	return typeAError()
 }
 
 func (this *iTypeA[T]) CountByValue(mathImpl *impl.IMathImpl) error {
+	if this.next != nil {
+		return this.next.CountByValue(mathImpl)
+	}
 	return typeAError()
 }
 
 /*IReduceImpl*/
 
 func (this *iTypeA[T]) GroupByKey(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
+	if this.next != nil {
+		return this.next.GroupByKey(reduceImpl, numPartitions)
+	}
 	return typeAError()
 }
 
@@ -157,10 +202,16 @@ func (this *iTypeA[T]) Union(reduceImpl *impl.IReduceImpl, other string, preserv
 }
 
 func (this *iTypeA[T]) Join(reduceImpl *impl.IReduceImpl, other string, numPartitions int64) error {
+	if this.next != nil {
+		return this.next.Join(reduceImpl, other, numPartitions)
+	}
 	return typeAError()
 }
 
 func (this *iTypeA[T]) Distinct(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
+	if this.next != nil {
+		return this.next.Distinct(reduceImpl, numPartitions)
+	}
 	return typeAError()
 }
 
@@ -175,5 +226,8 @@ func (this *iTypeA[T]) PartitionByRandom(repartitionImpl *impl.IRepartitionImpl,
 }
 
 func (this *iTypeA[T]) PartitionByHash(repartitionImpl *impl.IRepartitionImpl, numPartitions int64) error {
+	if this.next != nil {
+		return this.next.PartitionByHash(repartitionImpl, numPartitions)
+	}
 	return typeAError()
 }

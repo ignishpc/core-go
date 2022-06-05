@@ -65,6 +65,9 @@ func (this *iTypeCA[T1, T2]) CountByKey(mathImpl *impl.IMathImpl) error {
 }
 
 func (this *iTypeCA[T1, T2]) CountByValue(mathImpl *impl.IMathImpl) error {
+	if this.next != nil {
+		return this.next.CountByValue(mathImpl)
+	}
 	return typeCAError()
 }
 
@@ -79,6 +82,9 @@ func (this *iTypeCA[T1, T2]) Join(reduceImpl *impl.IReduceImpl, other string, nu
 }
 
 func (this *iTypeCA[T1, T2]) Distinct(reduceImpl *impl.IReduceImpl, numPartitions int64) error {
+	if this.next != nil {
+		return this.next.Distinct(reduceImpl, numPartitions)
+	}
 	return typeCAError()
 }
 
