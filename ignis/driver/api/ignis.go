@@ -39,6 +39,7 @@ func (this *_Ignis) Start() error {
 		return derror.NewGenericIDriverError(err)
 	}
 	err = this.cmd.Start()
+	go this.cmd.Wait()
 	if err != nil {
 		this.cmd = nil
 		return derror.NewGenericIDriverError(err)
@@ -62,11 +63,8 @@ func (this *_Ignis) Stop() {
 	defer mu.Unlock()
 	if this.cmd != nil {
 		client, err := this.pool.GetClient()
-		if err == nil {
-			client.Services().GetBackendService().Stop(context.Background())
-			this.cmd.Wait()
-		} else {
-			this.cmd.Process.Kill()
+		if err != nil || client.Services().GetBackendService().Stop(context.Background()) != nil {
+			_ = this.cmd.Process.Kill()
 		}
 		this.cmd = nil
 		if this.pool != nil {

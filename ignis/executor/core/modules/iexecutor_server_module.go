@@ -11,6 +11,7 @@ import (
 	"ignis/executor/core/utils"
 	"ignis/rpc/executor"
 	"os"
+	"time"
 )
 
 type IExecutorServerModule struct {
@@ -89,18 +90,19 @@ func (this *IExecutorServerModule) Start(ctx context.Context, properties map[str
 }
 
 func (this *IExecutorServerModule) Stop(ctx context.Context) (_err error) {
-	err := this.server.Stop()
+	server := this.server
 	this.processor = nil
 	this.server = nil
 	var flag impi.C_int
-	err2 := impi.MPI_Initialized(&flag)
-	if flag != 0 && err2 == nil {
-		err2 = impi.MPI_Finalize()
+	err := impi.MPI_Initialized(&flag)
+	if flag != 0 && err == nil {
+		_ = impi.MPI_Finalize()
 	}
-	if err != nil {
-		return err2
-	}
-	return err2
+	go func() {
+		time.Sleep(5 * time.Second)
+		server.Stop()
+	}()
+	return nil
 }
 
 func (this *IExecutorServerModule) Test(ctx context.Context) (_r bool, _err error) {
