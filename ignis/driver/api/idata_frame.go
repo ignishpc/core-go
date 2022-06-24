@@ -61,7 +61,7 @@ func (this *IDataFrame[T]) Cache(cacheLevel int8) error {
 	return nil
 }
 
-func (this *IDataFrame[T]) Unpersist(cacheLevel int8) error {
+func (this *IDataFrame[T]) Unpersist() error {
 	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ func (this *IDataFrame[T]) Unpersist(cacheLevel int8) error {
 	return nil
 }
 
-func (this *IDataFrame[T]) Uncache(cacheLevel int8) error {
+func (this *IDataFrame[T]) Uncache() error {
 	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
