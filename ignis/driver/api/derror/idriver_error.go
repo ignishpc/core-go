@@ -24,7 +24,7 @@ func (this *IDriverError) Error() string {
 	sb.WriteString("\n")
 	if this.HasCause() {
 		sb.WriteString("Caused by: ")
-		sb.WriteString(this.msg)
+		sb.WriteString(this.GetCause())
 	}
 	return sb.String()
 }
