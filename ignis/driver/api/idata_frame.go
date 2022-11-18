@@ -22,6 +22,10 @@ type IDataFrame[T any] struct {
 	id     *driver.IDataFrameId
 }
 
+func newIDataFrame[T any](worker *IWorker, id *driver.IDataFrameId) *IDataFrame[T] {
+	return &IDataFrame[T]{worker, id}
+}
+
 func (this *IDataFrame[T]) SetName(name string) error {
 	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
@@ -48,7 +52,7 @@ func (this *IDataFrame[T]) Persist(cacheLevel int8) error {
 	return nil
 }
 
-func (this *IDataFrame[T]) Cache(cacheLevel int8) error {
+func (this *IDataFrame[T]) Cache() error {
 	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return err
@@ -97,10 +101,7 @@ func (this *IDataFrame[T]) Repartition(numPartitions int64, preserveOrdering boo
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) PartitionByRandom(numPartitions int64, seed int) (*IDataFrame[T], error) {
@@ -113,10 +114,7 @@ func (this *IDataFrame[T]) PartitionByRandom(numPartitions int64, seed int) (*ID
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) PartitionByHash(numPartitions int64) (*IDataFrame[T], error) {
@@ -129,10 +127,7 @@ func (this *IDataFrame[T]) PartitionByHash(numPartitions int64) (*IDataFrame[T],
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) PartitionBy(src *ISource, numPartitions int64) (*IDataFrame[T], error) {
@@ -145,10 +140,7 @@ func (this *IDataFrame[T]) PartitionBy(src *ISource, numPartitions int64) (*IDat
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) Partitions() (int64, error) {
@@ -255,10 +247,7 @@ func (this *IDataFrame[T]) Filter(src *ISource) (*IDataFrame[T], error) {
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func Flatmap[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], error) {
@@ -335,10 +324,7 @@ func MapPartitionsWithIndex[T any, R any](this *IDataFrame[T], src *ISource) (*I
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) MapExecutor(src *ISource) (*IDataFrame[T], error) {
@@ -351,10 +337,7 @@ func (this *IDataFrame[T]) MapExecutor(src *ISource) (*IDataFrame[T], error) {
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func MapExecutorTo[T any, R any](this *IDataFrame[T], src *ISource) (*IDataFrame[R], error) {
@@ -383,10 +366,7 @@ func GroupBy[Key any, T any](this *IDataFrame[T], src *ISource) (*IPairDataFrame
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, []T]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, []T](this.worker, id), nil
 }
 
 func GroupByN[Key any, T any](this *IDataFrame[T], src *ISource, numPartitions int64) (*IPairDataFrame[Key, []T], error) {
@@ -399,10 +379,7 @@ func GroupByN[Key any, T any](this *IDataFrame[T], src *ISource, numPartitions i
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, []T]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, []T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) Sort(ascending bool) (*IDataFrame[T], error) {
@@ -415,10 +392,7 @@ func (this *IDataFrame[T]) Sort(ascending bool) (*IDataFrame[T], error) {
 	if err2 != nil {
 		return nil, derror.NewGenericIDriverError(err2)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) SortN(ascending bool, numPartitions int64) (*IDataFrame[T], error) {
@@ -431,10 +405,7 @@ func (this *IDataFrame[T]) SortN(ascending bool, numPartitions int64) (*IDataFra
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) SortBy(src *ISource, ascending bool) (*IDataFrame[T], error) {
@@ -447,10 +418,7 @@ func (this *IDataFrame[T]) SortBy(src *ISource, ascending bool) (*IDataFrame[T],
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) SortByN(src *ISource, ascending bool, numPartitions int64) (*IDataFrame[T], error) {
@@ -463,10 +431,7 @@ func (this *IDataFrame[T]) SortByN(src *ISource, ascending bool, numPartitions i
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) Union(other *IDataFrame[T], preserveOrder bool, src *ISource) (*IDataFrame[T], error) {
@@ -484,10 +449,7 @@ func (this *IDataFrame[T]) Union(other *IDataFrame[T], preserveOrder bool, src *
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) Distinct(src *ISource) (*IDataFrame[T], error) {
@@ -505,10 +467,7 @@ func (this *IDataFrame[T]) Distinct(src *ISource) (*IDataFrame[T], error) {
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) DistinctN(numPartitions int64, src *ISource) (*IDataFrame[T], error) {
@@ -526,10 +485,7 @@ func (this *IDataFrame[T]) DistinctN(numPartitions int64, src *ISource) (*IDataF
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 /*General Action*/
@@ -751,10 +707,7 @@ func (this *IDataFrame[T]) Sample(withReplacement bool, fraction float64, seed i
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IDataFrame[T]{
-		this.worker,
-		id,
-	}, nil
+	return newIDataFrame[T](this.worker, id), nil
 }
 
 func (this *IDataFrame[T]) TakeSample(withReplacement bool, num int64, seed int) ([]T, error) {
@@ -831,19 +784,19 @@ func (this *IDataFrame[T]) MinCmp(cmp *ISource) (T, error) {
 }
 
 func ToPair[Key any, Value any](this *IDataFrame[ipair.IPair[Key, Value]]) *IPairDataFrame[Key, Value] {
-	return &IPairDataFrame[Key, Value]{
-		this.worker,
-		this.id,
-	}
+	return newIPairDataFrame[Key, Value](this.worker, this.id)
 }
 
-type IPairDataFrame[Key any, Value any] IDataFrame[ipair.IPair[Key, Value]]
+type IPairDataFrame[Key any, Value any] struct {
+	IDataFrame[ipair.IPair[Key, Value]]
+}
+
+func newIPairDataFrame[Key any, Value any](worker *IWorker, id *driver.IDataFrameId) *IPairDataFrame[Key, Value] {
+	return &IPairDataFrame[Key, Value]{IDataFrame[ipair.IPair[Key, Value]]{worker, id}}
+}
 
 func (this *IPairDataFrame[Key, Value]) FromPair() *IDataFrame[ipair.IPair[Key, Value]] {
-	return &IDataFrame[ipair.IPair[Key, Value]]{
-		this.worker,
-		this.id,
-	}
+	return newIDataFrame[ipair.IPair[Key, Value]](this.worker, this.id)
 }
 
 func (this *IPairDataFrame[Key, Value]) Join(other *IPairDataFrame[Key, Value], src *ISource) (*IPairDataFrame[Key, Value], error) {
@@ -861,10 +814,7 @@ func (this *IPairDataFrame[Key, Value]) Join(other *IPairDataFrame[Key, Value], 
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, Value]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, Value](this.worker, id), nil
 }
 
 func (this *IPairDataFrame[Key, Value]) JoinN(other *IPairDataFrame[Key, Value], numPartitions int64, src *ISource) (*IPairDataFrame[Key, Value], error) {
@@ -882,10 +832,7 @@ func (this *IPairDataFrame[Key, Value]) JoinN(other *IPairDataFrame[Key, Value],
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, Value]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, Value](this.worker, id), nil
 }
 
 func FlatMapValues[Key any, Value any, R any](this *IPairDataFrame[Key, Value], src *ISource) (*IPairDataFrame[Key, R], error) {
@@ -898,10 +845,7 @@ func FlatMapValues[Key any, Value any, R any](this *IPairDataFrame[Key, Value], 
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, R]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, R](this.worker, id), nil
 }
 
 func MapValues[Key any, Value any, R any](this *IPairDataFrame[Key, Value], src *ISource) (*IPairDataFrame[Key, R], error) {
@@ -914,10 +858,7 @@ func MapValues[Key any, Value any, R any](this *IPairDataFrame[Key, Value], src 
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, R]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, R](this.worker, id), nil
 }
 
 func GroupByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value], src *ISource) (*IPairDataFrame[Key, []Value], error) {
@@ -935,10 +876,7 @@ func GroupByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value], src
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, []Value]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, []Value](this.worker, id), nil
 }
 
 func GroupByKeyN[Key comparable, Value any](this *IPairDataFrame[Key, Value], numPartitions int64, src *ISource) (*IPairDataFrame[Key, []Value], error) {
@@ -956,10 +894,7 @@ func GroupByKeyN[Key comparable, Value any](this *IPairDataFrame[Key, Value], nu
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, []Value]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, []Value](this.worker, id), nil
 }
 
 func (this *IPairDataFrame[Key, Value]) ReduceByKey(src *ISource, localReduce bool) (*IPairDataFrame[Key, Value], error) {
@@ -972,10 +907,7 @@ func (this *IPairDataFrame[Key, Value]) ReduceByKey(src *ISource, localReduce bo
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, Value]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, Value](this.worker, id), nil
 }
 
 func (this *IPairDataFrame[Key, Value]) ReduceByKeyN(src *ISource, numPartitions int64, localReduce bool) (*IPairDataFrame[Key, Value], error) {
@@ -993,10 +925,7 @@ func (this *IPairDataFrame[Key, Value]) ReduceByKeyN(src *ISource, numPartitions
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, Value]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, Value](this.worker, id), nil
 }
 
 func AggregateByKey[Key any, Value any, R any](this *IPairDataFrame[Key, Value], zero, seqOp, combOp *ISource) (*IPairDataFrame[Key, R], error) {
@@ -1014,10 +943,7 @@ func AggregateByKey[Key any, Value any, R any](this *IPairDataFrame[Key, Value],
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, R]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, R](this.worker, id), nil
 }
 
 func AggregateByKeyN[Key any, Value any, R any](this *IPairDataFrame[Key, Value], zero, seqOp, combOp *ISource, numPartitions int64) (*IPairDataFrame[Key, R], error) {
@@ -1035,10 +961,7 @@ func AggregateByKeyN[Key any, Value any, R any](this *IPairDataFrame[Key, Value]
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, R]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, R](this.worker, id), nil
 }
 
 func (this *IPairDataFrame[Key, Value]) FoldByKey(zero, src *ISource) (*IPairDataFrame[Key, Value], error) {
@@ -1051,10 +974,7 @@ func (this *IPairDataFrame[Key, Value]) FoldByKey(zero, src *ISource) (*IPairDat
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, Value]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, Value](this.worker, id), nil
 }
 
 func (this *IPairDataFrame[Key, Value]) FoldByKeyN(zero, src *ISource, numPartitions int64, localFold bool) (*IPairDataFrame[Key, Value], error) {
@@ -1072,10 +992,7 @@ func (this *IPairDataFrame[Key, Value]) FoldByKeyN(zero, src *ISource, numPartit
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, Value]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, Value](this.worker, id), nil
 }
 
 func (this *IPairDataFrame[Key, Value]) SortByKey(ascending bool, src *ISource) (*IPairDataFrame[Key, Value], error) {
@@ -1093,10 +1010,7 @@ func (this *IPairDataFrame[Key, Value]) SortByKey(ascending bool, src *ISource) 
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, Value]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, Value](this.worker, id), nil
 }
 
 func (this *IPairDataFrame[Key, Value]) SortByKeyN(ascending bool, numPartitions int64, src *ISource) (*IPairDataFrame[Key, Value], error) {
@@ -1114,10 +1028,7 @@ func (this *IPairDataFrame[Key, Value]) SortByKeyN(ascending bool, numPartitions
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, Value]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, Value](this.worker, id), nil
 }
 
 func (this *IPairDataFrame[Key, Value]) Keys() ([]Key, error) {
@@ -1163,10 +1074,7 @@ func SampleByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value], wi
 	if err != nil {
 		return nil, derror.NewGenericIDriverError(err)
 	}
-	return &IPairDataFrame[Key, Value]{
-		this.worker,
-		id,
-	}, nil
+	return newIPairDataFrame[Key, Value](this.worker, id), nil
 }
 
 func CountByKey[Key comparable, Value any](this *IPairDataFrame[Key, Value]) (map[Key]int64, error) {
