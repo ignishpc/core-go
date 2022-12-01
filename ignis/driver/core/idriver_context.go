@@ -135,7 +135,7 @@ func RegisterType[T any](this *IDriverContext) *rpc.ISource {
 	this.GetExecutorData().RegisterType(tp)
 	src := rpc.NewISource()
 	src.Obj = rpc.NewIEncoded()
-	name := tp.Name()
+	name := ":" + tp.Name()
 	src.Obj.Name = &name
 	return src
 }

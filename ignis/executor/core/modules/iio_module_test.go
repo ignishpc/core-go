@@ -39,11 +39,19 @@ func TestTextFileN(t *testing.T) {
 }
 
 func TestPlainFile1(t *testing.T) {
-	plainFileTest(ioModuleTest, t, 1, 1)
+	plainFileTest(ioModuleTest, t, 1, 1, "@")
 }
 
 func TestPlainFileN(t *testing.T) {
-	plainFileTest(ioModuleTest, t, 8, 2)
+	plainFileTest(ioModuleTest, t, 8, 2, "@")
+}
+
+func TestPlainFileS1(t *testing.T) {
+	plainFileTest(ioModuleTest, t, 1, 1, "@@")
+}
+
+func TestPlainFileSN(t *testing.T) {
+	plainFileTest(ioModuleTest, t, 8, 2, "@@")
 }
 
 func TestSaveAsTextFile(t *testing.T) {
@@ -86,7 +94,7 @@ func textFileTest(this *IIOModuleTest, t *testing.T, n int, cores int) {
 	}
 }
 
-func plainFileTest(this *IIOModuleTest, t *testing.T, n int, cores int) {
+func plainFileTest(this *IIOModuleTest, t *testing.T, n int, cores int, delim string) {
 	this.executorData.SetCores(cores)
 	path := "./plainfile.txt"
 	executors := this.executorData.GetContext().Executors()
@@ -95,12 +103,12 @@ func plainFileTest(this *IIOModuleTest, t *testing.T, n int, cores int) {
 	lines := (&IElemensString{}).create(10000, 0)
 
 	for _, line := range lines {
-		_, err := file.WriteString(line + "@")
+		_, err := file.WriteString(line + delim)
 		require.Nil(t, err)
 	}
 	require.Nil(t, file.Close())
 
-	require.Nil(t, this.io.PlainFile3(context.Background(), path, int64(n), '@'))
+	require.Nil(t, this.io.PlainFile3(context.Background(), path, int64(n), delim))
 
 	require.GreaterOrEqual(t, this.executorData.GetPartitionsAny().Size(), n/executors)
 
@@ -126,7 +134,7 @@ func saveAsTextFileTest(this *IIOModuleTest, t *testing.T, n int, cores int) {
 	lines := (&IElemensString{}).create(10000, 0)
 
 	loadToPartitions(t, this.executorData, lines, n)
-	
+
 	this.executorData.RegisterType(base.NewTypeC[string]())
 	require.Nil(t, this.io.SaveAsTextFile(context.Background(), path, int64(cores*id)))
 }

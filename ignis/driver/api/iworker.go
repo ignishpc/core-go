@@ -185,7 +185,7 @@ func (this *IWorker) TextFileN(path string, minPartitions int64) (*IDataFrame[st
 	}, nil
 }
 
-func (this *IWorker) PlainFile(path string, delim int8) (*IDataFrame[string], error) {
+func (this *IWorker) PlainFile(path string, delim string) (*IDataFrame[string], error) {
 	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err
@@ -201,7 +201,7 @@ func (this *IWorker) PlainFile(path string, delim int8) (*IDataFrame[string], er
 	}, nil
 }
 
-func (this *IWorker) PlainFileN(path string, minPartitions int64, delim int8) (*IDataFrame[string], error) {
+func (this *IWorker) PlainFileN(path string, minPartitions int64, delim string) (*IDataFrame[string], error) {
 	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
 		return nil, err

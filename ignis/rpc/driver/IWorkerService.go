@@ -225,13 +225,13 @@ type IWorkerService interface {
   //  - ID
   //  - Path
   //  - Delim
-  PlainFile(ctx context.Context, id *IWorkerId, path string, delim int8) (_r *IDataFrameId, _err error)
+  PlainFile(ctx context.Context, id *IWorkerId, path string, delim string) (_r *IDataFrameId, _err error)
   // Parameters:
   //  - ID
   //  - Path
   //  - MinPartitions
   //  - Delim
-  PlainFile4(ctx context.Context, id *IWorkerId, path string, minPartitions int64, delim int8) (_r *IDataFrameId, _err error)
+  PlainFile4(ctx context.Context, id *IWorkerId, path string, minPartitions int64, delim string) (_r *IDataFrameId, _err error)
   // Parameters:
   //  - ID
   //  - Path
@@ -607,7 +607,7 @@ func (p *IWorkerServiceClient) ImportDataFrame3(ctx context.Context, id *IWorker
 //  - ID
 //  - Path
 //  - Delim
-func (p *IWorkerServiceClient) PlainFile(ctx context.Context, id *IWorkerId, path string, delim int8) (_r *IDataFrameId, _err error) {
+func (p *IWorkerServiceClient) PlainFile(ctx context.Context, id *IWorkerId, path string, delim string) (_r *IDataFrameId, _err error) {
   var _args41 IWorkerServicePlainFileArgs
   _args41.ID = id
   _args41.Path = path
@@ -635,7 +635,7 @@ func (p *IWorkerServiceClient) PlainFile(ctx context.Context, id *IWorkerId, pat
 //  - Path
 //  - MinPartitions
 //  - Delim
-func (p *IWorkerServiceClient) PlainFile4(ctx context.Context, id *IWorkerId, path string, minPartitions int64, delim int8) (_r *IDataFrameId, _err error) {
+func (p *IWorkerServiceClient) PlainFile4(ctx context.Context, id *IWorkerId, path string, minPartitions int64, delim string) (_r *IDataFrameId, _err error) {
   var _args45 IWorkerServicePlainFile4Args
   _args45.ID = id
   _args45.Path = path
@@ -6454,7 +6454,7 @@ func (p *IWorkerServiceImportDataFrame3Result) String() string {
 type IWorkerServicePlainFileArgs struct {
   ID *IWorkerId `thrift:"id,1" db:"id" json:"id"`
   Path string `thrift:"path,2" db:"path" json:"path"`
-  Delim int8 `thrift:"delim,3" db:"delim" json:"delim"`
+  Delim string `thrift:"delim,3" db:"delim" json:"delim"`
 }
 
 func NewIWorkerServicePlainFileArgs() *IWorkerServicePlainFileArgs {
@@ -6473,7 +6473,7 @@ func (p *IWorkerServicePlainFileArgs) GetPath() string {
   return p.Path
 }
 
-func (p *IWorkerServicePlainFileArgs) GetDelim() int8 {
+func (p *IWorkerServicePlainFileArgs) GetDelim() string {
   return p.Delim
 }
 func (p *IWorkerServicePlainFileArgs) IsSetID() bool {
@@ -6514,7 +6514,7 @@ func (p *IWorkerServicePlainFileArgs) Read(ctx context.Context, iprot thrift.TPr
         }
       }
     case 3:
-      if fieldTypeId == thrift.BYTE {
+      if fieldTypeId == thrift.STRING {
         if err := p.ReadField3(ctx, iprot); err != nil {
           return err
         }
@@ -6556,11 +6556,10 @@ func (p *IWorkerServicePlainFileArgs)  ReadField2(ctx context.Context, iprot thr
 }
 
 func (p *IWorkerServicePlainFileArgs)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
-  if v, err := iprot.ReadByte(ctx); err != nil {
+  if v, err := iprot.ReadString(ctx); err != nil {
   return thrift.PrependError("error reading field 3: ", err)
 } else {
-  temp := int8(v)
-  p.Delim = temp
+  p.Delim = v
 }
   return nil
 }
@@ -6602,9 +6601,9 @@ func (p *IWorkerServicePlainFileArgs) writeField2(ctx context.Context, oprot thr
 }
 
 func (p *IWorkerServicePlainFileArgs) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "delim", thrift.BYTE, 3); err != nil {
+  if err := oprot.WriteFieldBegin(ctx, "delim", thrift.STRING, 3); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:delim: ", p), err) }
-  if err := oprot.WriteByte(ctx, int8(p.Delim)); err != nil {
+  if err := oprot.WriteString(ctx, string(p.Delim)); err != nil {
   return thrift.PrependError(fmt.Sprintf("%T.delim (3) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 3:delim: ", p), err) }
@@ -6772,7 +6771,7 @@ type IWorkerServicePlainFile4Args struct {
   ID *IWorkerId `thrift:"id,1" db:"id" json:"id"`
   Path string `thrift:"path,2" db:"path" json:"path"`
   MinPartitions int64 `thrift:"minPartitions,3" db:"minPartitions" json:"minPartitions"`
-  Delim int8 `thrift:"delim,4" db:"delim" json:"delim"`
+  Delim string `thrift:"delim,4" db:"delim" json:"delim"`
 }
 
 func NewIWorkerServicePlainFile4Args() *IWorkerServicePlainFile4Args {
@@ -6795,7 +6794,7 @@ func (p *IWorkerServicePlainFile4Args) GetMinPartitions() int64 {
   return p.MinPartitions
 }
 
-func (p *IWorkerServicePlainFile4Args) GetDelim() int8 {
+func (p *IWorkerServicePlainFile4Args) GetDelim() string {
   return p.Delim
 }
 func (p *IWorkerServicePlainFile4Args) IsSetID() bool {
@@ -6846,7 +6845,7 @@ func (p *IWorkerServicePlainFile4Args) Read(ctx context.Context, iprot thrift.TP
         }
       }
     case 4:
-      if fieldTypeId == thrift.BYTE {
+      if fieldTypeId == thrift.STRING {
         if err := p.ReadField4(ctx, iprot); err != nil {
           return err
         }
@@ -6897,11 +6896,10 @@ func (p *IWorkerServicePlainFile4Args)  ReadField3(ctx context.Context, iprot th
 }
 
 func (p *IWorkerServicePlainFile4Args)  ReadField4(ctx context.Context, iprot thrift.TProtocol) error {
-  if v, err := iprot.ReadByte(ctx); err != nil {
+  if v, err := iprot.ReadString(ctx); err != nil {
   return thrift.PrependError("error reading field 4: ", err)
 } else {
-  temp := int8(v)
-  p.Delim = temp
+  p.Delim = v
 }
   return nil
 }
@@ -6954,9 +6952,9 @@ func (p *IWorkerServicePlainFile4Args) writeField3(ctx context.Context, oprot th
 }
 
 func (p *IWorkerServicePlainFile4Args) writeField4(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "delim", thrift.BYTE, 4); err != nil {
+  if err := oprot.WriteFieldBegin(ctx, "delim", thrift.STRING, 4); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:delim: ", p), err) }
-  if err := oprot.WriteByte(ctx, int8(p.Delim)); err != nil {
+  if err := oprot.WriteString(ctx, string(p.Delim)); err != nil {
   return thrift.PrependError(fmt.Sprintf("%T.delim (4) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 4:delim: ", p), err) }

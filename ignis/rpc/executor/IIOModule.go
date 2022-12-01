@@ -33,12 +33,12 @@ type IIOModule interface {
   // Parameters:
   //  - Path
   //  - Delim
-  PlainFile(ctx context.Context, path string, delim int8) (_err error)
+  PlainFile(ctx context.Context, path string, delim string) (_err error)
   // Parameters:
   //  - Path
   //  - MinPartitions
   //  - Delim
-  PlainFile3(ctx context.Context, path string, minPartitions int64, delim int8) (_err error)
+  PlainFile3(ctx context.Context, path string, minPartitions int64, delim string) (_err error)
   // Parameters:
   //  - Path
   TextFile(ctx context.Context, path string) (_err error)
@@ -219,7 +219,7 @@ func (p *IIOModuleClient) PartitionApproxSize(ctx context.Context) (_r int64, _e
 // Parameters:
 //  - Path
 //  - Delim
-func (p *IIOModuleClient) PlainFile(ctx context.Context, path string, delim int8) (_err error) {
+func (p *IIOModuleClient) PlainFile(ctx context.Context, path string, delim string) (_err error) {
   var _args15 IIOModulePlainFileArgs
   _args15.Path = path
   _args15.Delim = delim
@@ -242,7 +242,7 @@ func (p *IIOModuleClient) PlainFile(ctx context.Context, path string, delim int8
 //  - Path
 //  - MinPartitions
 //  - Delim
-func (p *IIOModuleClient) PlainFile3(ctx context.Context, path string, minPartitions int64, delim int8) (_err error) {
+func (p *IIOModuleClient) PlainFile3(ctx context.Context, path string, minPartitions int64, delim string) (_err error) {
   var _args18 IIOModulePlainFile3Args
   _args18.Path = path
   _args18.MinPartitions = minPartitions
@@ -2951,7 +2951,7 @@ func (p *IIOModulePartitionApproxSizeResult) String() string {
 //  - Delim
 type IIOModulePlainFileArgs struct {
   Path string `thrift:"path,1" db:"path" json:"path"`
-  Delim int8 `thrift:"delim,2" db:"delim" json:"delim"`
+  Delim string `thrift:"delim,2" db:"delim" json:"delim"`
 }
 
 func NewIIOModulePlainFileArgs() *IIOModulePlainFileArgs {
@@ -2963,7 +2963,7 @@ func (p *IIOModulePlainFileArgs) GetPath() string {
   return p.Path
 }
 
-func (p *IIOModulePlainFileArgs) GetDelim() int8 {
+func (p *IIOModulePlainFileArgs) GetDelim() string {
   return p.Delim
 }
 func (p *IIOModulePlainFileArgs) Read(ctx context.Context, iprot thrift.TProtocol) error {
@@ -2990,7 +2990,7 @@ func (p *IIOModulePlainFileArgs) Read(ctx context.Context, iprot thrift.TProtoco
         }
       }
     case 2:
-      if fieldTypeId == thrift.BYTE {
+      if fieldTypeId == thrift.STRING {
         if err := p.ReadField2(ctx, iprot); err != nil {
           return err
         }
@@ -3024,11 +3024,10 @@ func (p *IIOModulePlainFileArgs)  ReadField1(ctx context.Context, iprot thrift.T
 }
 
 func (p *IIOModulePlainFileArgs)  ReadField2(ctx context.Context, iprot thrift.TProtocol) error {
-  if v, err := iprot.ReadByte(ctx); err != nil {
+  if v, err := iprot.ReadString(ctx); err != nil {
   return thrift.PrependError("error reading field 2: ", err)
 } else {
-  temp := int8(v)
-  p.Delim = temp
+  p.Delim = v
 }
   return nil
 }
@@ -3058,9 +3057,9 @@ func (p *IIOModulePlainFileArgs) writeField1(ctx context.Context, oprot thrift.T
 }
 
 func (p *IIOModulePlainFileArgs) writeField2(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "delim", thrift.BYTE, 2); err != nil {
+  if err := oprot.WriteFieldBegin(ctx, "delim", thrift.STRING, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:delim: ", p), err) }
-  if err := oprot.WriteByte(ctx, int8(p.Delim)); err != nil {
+  if err := oprot.WriteString(ctx, string(p.Delim)); err != nil {
   return thrift.PrependError(fmt.Sprintf("%T.delim (2) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 2:delim: ", p), err) }
@@ -3181,7 +3180,7 @@ func (p *IIOModulePlainFileResult) String() string {
 type IIOModulePlainFile3Args struct {
   Path string `thrift:"path,1" db:"path" json:"path"`
   MinPartitions int64 `thrift:"minPartitions,2" db:"minPartitions" json:"minPartitions"`
-  Delim int8 `thrift:"delim,3" db:"delim" json:"delim"`
+  Delim string `thrift:"delim,3" db:"delim" json:"delim"`
 }
 
 func NewIIOModulePlainFile3Args() *IIOModulePlainFile3Args {
@@ -3197,7 +3196,7 @@ func (p *IIOModulePlainFile3Args) GetMinPartitions() int64 {
   return p.MinPartitions
 }
 
-func (p *IIOModulePlainFile3Args) GetDelim() int8 {
+func (p *IIOModulePlainFile3Args) GetDelim() string {
   return p.Delim
 }
 func (p *IIOModulePlainFile3Args) Read(ctx context.Context, iprot thrift.TProtocol) error {
@@ -3234,7 +3233,7 @@ func (p *IIOModulePlainFile3Args) Read(ctx context.Context, iprot thrift.TProtoc
         }
       }
     case 3:
-      if fieldTypeId == thrift.BYTE {
+      if fieldTypeId == thrift.STRING {
         if err := p.ReadField3(ctx, iprot); err != nil {
           return err
         }
@@ -3277,11 +3276,10 @@ func (p *IIOModulePlainFile3Args)  ReadField2(ctx context.Context, iprot thrift.
 }
 
 func (p *IIOModulePlainFile3Args)  ReadField3(ctx context.Context, iprot thrift.TProtocol) error {
-  if v, err := iprot.ReadByte(ctx); err != nil {
+  if v, err := iprot.ReadString(ctx); err != nil {
   return thrift.PrependError("error reading field 3: ", err)
 } else {
-  temp := int8(v)
-  p.Delim = temp
+  p.Delim = v
 }
   return nil
 }
@@ -3322,9 +3320,9 @@ func (p *IIOModulePlainFile3Args) writeField2(ctx context.Context, oprot thrift.
 }
 
 func (p *IIOModulePlainFile3Args) writeField3(ctx context.Context, oprot thrift.TProtocol) (err error) {
-  if err := oprot.WriteFieldBegin(ctx, "delim", thrift.BYTE, 3); err != nil {
+  if err := oprot.WriteFieldBegin(ctx, "delim", thrift.STRING, 3); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:delim: ", p), err) }
-  if err := oprot.WriteByte(ctx, int8(p.Delim)); err != nil {
+  if err := oprot.WriteString(ctx, string(p.Delim)); err != nil {
   return thrift.PrependError(fmt.Sprintf("%T.delim (3) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(ctx); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 3:delim: ", p), err) }

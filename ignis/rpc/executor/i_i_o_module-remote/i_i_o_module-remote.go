@@ -29,8 +29,8 @@ func Usage() {
   fmt.Fprintln(os.Stderr, "  i64 partitionCount()")
   fmt.Fprintln(os.Stderr, "   countByPartition()")
   fmt.Fprintln(os.Stderr, "  i64 partitionApproxSize()")
-  fmt.Fprintln(os.Stderr, "  void plainFile(string path, i8 delim)")
-  fmt.Fprintln(os.Stderr, "  void plainFile3(string path, i64 minPartitions, i8 delim)")
+  fmt.Fprintln(os.Stderr, "  void plainFile(string path, string delim)")
+  fmt.Fprintln(os.Stderr, "  void plainFile3(string path, i64 minPartitions, string delim)")
   fmt.Fprintln(os.Stderr, "  void textFile(string path)")
   fmt.Fprintln(os.Stderr, "  void textFile2(string path, i64 minPartitions)")
   fmt.Fprintln(os.Stderr, "  void partitionObjectFile(string path, i64 first, i64 partitions)")
@@ -229,12 +229,7 @@ func main() {
     }
     argvalue0 := flag.Arg(1)
     value0 := argvalue0
-    tmp1, err62 := (strconv.Atoi(flag.Arg(2)))
-    if err62 != nil {
-      Usage()
-      return
-    }
-    argvalue1 := int8(tmp1)
+    argvalue1 := flag.Arg(2)
     value1 := argvalue1
     fmt.Print(client.PlainFile(context.Background(), value0, value1))
     fmt.Print("\n")
@@ -252,12 +247,7 @@ func main() {
       return
     }
     value1 := argvalue1
-    tmp2, err65 := (strconv.Atoi(flag.Arg(3)))
-    if err65 != nil {
-      Usage()
-      return
-    }
-    argvalue2 := int8(tmp2)
+    argvalue2 := flag.Arg(3)
     value2 := argvalue2
     fmt.Print(client.PlainFile3(context.Background(), value0, value1, value2))
     fmt.Print("\n")

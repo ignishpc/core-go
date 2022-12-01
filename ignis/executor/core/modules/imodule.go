@@ -79,6 +79,9 @@ func (this *IModule) TypeFromName(name string) (base.ITypeFunctions, error) {
 }
 
 func (this *IModule) TypeFromSource(src *rpc.ISource) (base.ITypeFunctions, error) {
+	if len(*src.Obj.Name) > 0 && (*src.Obj.Name)[0] == ':'{
+		return this.TypeFromName((*src.Obj.Name)[1:])
+	}
 	basefun, err := this.executorData.LoadLibrary(src)
 	if err != nil {
 		return nil, ierror.Raise(err)

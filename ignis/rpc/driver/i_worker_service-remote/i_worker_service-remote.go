@@ -35,8 +35,8 @@ func Usage() {
   fmt.Fprintln(os.Stderr, "  IDataFrameId parallelize4(IWorkerId id, i64 dataId, i64 partitions, ISource src)")
   fmt.Fprintln(os.Stderr, "  IDataFrameId importDataFrame(IWorkerId id, IDataFrameId data)")
   fmt.Fprintln(os.Stderr, "  IDataFrameId importDataFrame3(IWorkerId id, IDataFrameId data, ISource src)")
-  fmt.Fprintln(os.Stderr, "  IDataFrameId plainFile(IWorkerId id, string path, i8 delim)")
-  fmt.Fprintln(os.Stderr, "  IDataFrameId plainFile4(IWorkerId id, string path, i64 minPartitions, i8 delim)")
+  fmt.Fprintln(os.Stderr, "  IDataFrameId plainFile(IWorkerId id, string path, string delim)")
+  fmt.Fprintln(os.Stderr, "  IDataFrameId plainFile4(IWorkerId id, string path, i64 minPartitions, string delim)")
   fmt.Fprintln(os.Stderr, "  IDataFrameId textFile(IWorkerId id, string path)")
   fmt.Fprintln(os.Stderr, "  IDataFrameId textFile3(IWorkerId id, string path, i64 minPartitions)")
   fmt.Fprintln(os.Stderr, "  IDataFrameId partitionObjectFile(IWorkerId id, string path)")
@@ -562,12 +562,7 @@ func main() {
     value0 := argvalue0
     argvalue1 := flag.Arg(2)
     value1 := argvalue1
-    tmp2, err195 := (strconv.Atoi(flag.Arg(3)))
-    if err195 != nil {
-      Usage()
-      return
-    }
-    argvalue2 := int8(tmp2)
+    argvalue2 := flag.Arg(3)
     value2 := argvalue2
     fmt.Print(client.PlainFile(context.Background(), value0, value1, value2))
     fmt.Print("\n")
@@ -602,12 +597,7 @@ func main() {
       return
     }
     value2 := argvalue2
-    tmp3, err204 := (strconv.Atoi(flag.Arg(4)))
-    if err204 != nil {
-      Usage()
-      return
-    }
-    argvalue3 := int8(tmp3)
+    argvalue3 := flag.Arg(4)
     value3 := argvalue3
     fmt.Print(client.PlainFile4(context.Background(), value0, value1, value2, value3))
     fmt.Print("\n")

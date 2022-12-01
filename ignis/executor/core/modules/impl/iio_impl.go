@@ -2,6 +2,7 @@ package impl
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
@@ -61,17 +62,38 @@ func PartitionApproxSize[T any](this *IIOImpl) (int64, error) {
 	return size, nil
 }
 
-func (this *IIOImpl) PlainFile(path string, minPartitions int64, delim int8) error {
+func (this *IIOImpl) PlainFile(path string, minPartitions int64, delim string) error {
 	logger.Info("IO: reading plain file")
-	return this.plainOrTextFile(path, minPartitions, byte(delim))
+	return this.plainOrTextFile(path, minPartitions, delim)
 }
 
 func (this *IIOImpl) TextFile(path string, minPartitions int64) error {
 	logger.Info("IO: reading text file")
-	return this.plainOrTextFile(path, minPartitions, '\n')
+	return this.plainOrTextFile(path, minPartitions, "\n")
 }
 
-func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byte) error {
+func readBytes(reader *bufio.Reader, buffer *[]byte, delim []byte) ([]byte, error) {
+	if len(delim) == 1 {
+		return reader.ReadBytes(delim[0])
+	}
+	*buffer = (*buffer)[:0]
+	var line []byte
+	var err error
+	dsize := len(delim)
+	for err != io.EOF {
+		line, err = reader.ReadBytes(delim[dsize-1])
+		if err != nil && err != io.EOF {
+			return nil, ierror.Raise(err)
+		}
+		*buffer = append(*buffer, line...)
+		if len(*buffer) > dsize && bytes.Compare((*buffer)[len(*buffer)-dsize:], delim) == 0 {
+			break
+		}
+	}
+	return (*buffer)[:], err
+}
+
+func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim string) error {
 	size := int64(0)
 	if info, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
 		return ierror.Raise(err)
@@ -107,25 +129,38 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byt
 			return ierror.Raise(err)
 		}
 		minPartitions := int64(math.Ceil(float64(minPartitions) / float64(threads)))
+		buffer := make([]byte, 0, 1024)
+		dsize := len(delim)
+		bdelim := []byte(delim)
 
 		if globalThreadId > 0 {
-			if _, err = file.Seek(utils.Ternary(exChunkInit > 0, exChunkInit-1, exChunkInit), 0); err != nil {
+			padding := utils.Ternary(exChunkInit >= int64(dsize), exChunkInit-int64(dsize), exChunkInit)
+			if _, err = file.Seek(padding, 0); err != nil {
 				return ierror.Raise(err)
 			}
 			value := make([]byte, 256)
-		OUT:
-			for true {
-				if n, err := file.Read(value); err != nil && err != io.EOF {
-					return ierror.Raise(err)
-				} else if n == 0 {
-					break
-				} else {
-					for i := 0; i < n; i++ {
-						if value[i] == delim {
-							break OUT
+			if dsize == 1 {
+			OUT:
+				for true {
+					if n, err := file.Read(value); err != nil && err != io.EOF {
+						return ierror.Raise(err)
+					} else if n == 0 {
+						break
+					} else {
+						for i := 0; i < n; i++ {
+							if value[i] == delim[0] {
+								break OUT
+							}
+							exChunkInit++
 						}
-						exChunkInit++
 					}
+				}
+			} else {
+				reader := bufio.NewReader(file)
+				if chunk, err := readBytes(reader, &buffer, bdelim); err != nil {
+					return ierror.Raise(err)
+				} else {
+					exChunkInit = padding + int64(len(chunk))
 				}
 			}
 			if _, err = file.Seek(exChunkInit, 0); err != nil {
@@ -155,7 +190,7 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byt
 		threadElements := int64(0)
 		partitionInit := exChunkInit
 		filepos := exChunkInit
-		reader := bufio.NewReaderSize(file, utils.Min(1*10e9, utils.Max(65*1024, int(minPartitionSize / (4 * int64(ioCores))))))
+		reader := bufio.NewReaderSize(file, utils.Min(1*10e9, utils.Max(65*1024, int(minPartitionSize/(4*int64(ioCores))))))
 		for filepos < exChunkEnd {
 			if (filepos - partitionInit) > minPartitionSize {
 				if err = partition.Fit(); err != nil {
@@ -170,7 +205,7 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byt
 				threadGroup[id].Add(partition)
 				partitionInit = filepos
 			}
-			line, err := reader.ReadBytes(delim)
+			line, err := readBytes(reader, &buffer, bdelim)
 			eof := err == io.EOF
 			if err != nil && err != io.EOF {
 				return ierror.Raise(err)
@@ -183,7 +218,7 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim byt
 				}
 				break
 			} else {
-				if err := writeIterator.Write(string(line[:len(line)-1])); err != nil {
+				if err := writeIterator.Write(string(line[:len(line)-dsize])); err != nil {
 					return ierror.Raise(err)
 				}
 			}
