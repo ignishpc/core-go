@@ -72,21 +72,34 @@ func (this *IIOImpl) TextFile(path string, minPartitions int64) error {
 	return this.plainOrTextFile(path, minPartitions, "\n")
 }
 
-func readBytes(reader *bufio.Reader, buffer *[]byte, delim []byte) ([]byte, error) {
-	if len(delim) == 1 {
+func readBytes(reader *bufio.Reader, buffer *[]byte, delim []byte, exs [][]byte) ([]byte, error) {
+	if len(delim) == 1 && len(exs) == 0 {
 		return reader.ReadBytes(delim[0])
 	}
 	*buffer = (*buffer)[:0]
 	var line []byte
 	var err error
 	dsize := len(delim)
+	overlap := 0
+OUT:
 	for err != io.EOF {
 		line, err = reader.ReadBytes(delim[dsize-1])
 		if err != nil && err != io.EOF {
 			return nil, ierror.Raise(err)
 		}
 		*buffer = append(*buffer, line...)
-		if len(*buffer) > dsize && bytes.Compare((*buffer)[len(*buffer)-dsize:], delim) == 0 {
+		if dsize == 1 || (len(*buffer) >= dsize && bytes.Compare((*buffer)[len(*buffer)-dsize:], delim) == 0) {
+			if len(exs) > 0 {
+				if len(*buffer)-overlap < dsize {
+					continue OUT
+				}
+				for _, ex := range exs {
+					if len(*buffer) > len(ex) && bytes.Compare((*buffer)[len(*buffer)-len(ex):], ex) == 0 {
+						overlap = len(*buffer)
+						continue OUT
+					}
+				}
+			}
 			break
 		}
 	}
@@ -129,40 +142,55 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim str
 			return ierror.Raise(err)
 		}
 		minPartitions := int64(math.Ceil(float64(minPartitions) / float64(threads)))
+		ldelim := delim
 		buffer := make([]byte, 0, 1024)
-		dsize := len(delim)
-		bdelim := []byte(delim)
+		exs := make([][]byte, 0)
+		esize := 0
+		if strings.ContainsRune(ldelim, '!') {
+			flag := rune(0)
+			for ; strings.ContainsRune(ldelim, flag); flag++ {
+			}
+			ldelim = strings.ReplaceAll(ldelim, "\\!", string(flag))
+			fields := strings.Split(ldelim, "!")
+			for i, _ := range fields {
+				fields[i] = strings.ReplaceAll(fields[i], string(flag), "!")
+				if i == 0 {
+					ldelim = fields[0]
+				} else {
+					exs = append(exs, []byte(fields[i]+ldelim))
+				}
+			}
+			for _, ex := range exs {
+				if len(ex) > esize {
+					esize = len(ex) + 1
+				}
+			}
+		}
+		if len(ldelim) == 0 {
+			ldelim = "\n"
+		}
+		dsize := len(ldelim)
+		bdelim := []byte(ldelim)
 
 		if globalThreadId > 0 {
-			padding := utils.Ternary(exChunkInit >= int64(dsize), exChunkInit-int64(dsize), exChunkInit)
+			padding := utils.Ternary(exChunkInit >= int64(dsize+esize), exChunkInit-int64(dsize+esize), 0)
 			if _, err = file.Seek(padding, 0); err != nil {
 				return ierror.Raise(err)
 			}
-			value := make([]byte, 256)
-			if dsize == 1 {
-			OUT:
-				for true {
-					if n, err := file.Read(value); err != nil && err != io.EOF {
-						return ierror.Raise(err)
-					} else if n == 0 {
-						break
-					} else {
-						for i := 0; i < n; i++ {
-							if value[i] == delim[0] {
-								break OUT
-							}
-							exChunkInit++
-						}
-					}
-				}
-			} else {
-				reader := bufio.NewReader(file)
-				if chunk, err := readBytes(reader, &buffer, bdelim); err != nil {
+
+			reader := bufio.NewReader(file)
+			for true {
+				if chunk, err := readBytes(reader, &buffer, bdelim, exs); err != nil && err != io.EOF {
 					return ierror.Raise(err)
 				} else {
-					exChunkInit = padding + int64(len(chunk))
+					padding += int64(len(chunk))
+				}
+				if exChunkInit <= padding {
+					break
 				}
 			}
+			exChunkInit = padding
+
 			if _, err = file.Seek(exChunkInit, 0); err != nil {
 				return ierror.Raise(err)
 			}
@@ -205,7 +233,7 @@ func (this *IIOImpl) plainOrTextFile(path string, minPartitions int64, delim str
 				threadGroup[id].Add(partition)
 				partitionInit = filepos
 			}
-			line, err := readBytes(reader, &buffer, bdelim)
+			line, err := readBytes(reader, &buffer, bdelim, exs)
 			eof := err == io.EOF
 			if err != nil && err != io.EOF {
 				return ierror.Raise(err)

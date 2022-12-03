@@ -6,6 +6,7 @@ import (
 	"ignis/executor/api/base"
 	"ignis/executor/core"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -39,19 +40,27 @@ func TestTextFileN(t *testing.T) {
 }
 
 func TestPlainFile1(t *testing.T) {
-	plainFileTest(ioModuleTest, t, 1, 1, "@")
+	plainFileTest(ioModuleTest, t, 1, 1, "@", "")
 }
 
 func TestPlainFileN(t *testing.T) {
-	plainFileTest(ioModuleTest, t, 8, 2, "@")
+	plainFileTest(ioModuleTest, t, 8, 2, "@", "")
 }
 
 func TestPlainFileS1(t *testing.T) {
-	plainFileTest(ioModuleTest, t, 1, 1, "@@")
+	plainFileTest(ioModuleTest, t, 1, 1, "@@", "")
 }
 
 func TestPlainFileSN(t *testing.T) {
-	plainFileTest(ioModuleTest, t, 8, 2, "@@")
+	plainFileTest(ioModuleTest, t, 8, 2, "@@", "")
+}
+
+func TestPlainFileSE1(t *testing.T) {
+	plainFileTest(ioModuleTest, t, 1, 1, "@@", "!")
+}
+
+func TestPlainFileSEN(t *testing.T) {
+	plainFileTest(ioModuleTest, t, 8, 2, "@@", "!")
 }
 
 func TestSaveAsTextFile(t *testing.T) {
@@ -94,16 +103,24 @@ func textFileTest(this *IIOModuleTest, t *testing.T, n int, cores int) {
 	}
 }
 
-func plainFileTest(this *IIOModuleTest, t *testing.T, n int, cores int, delim string) {
+func plainFileTest(this *IIOModuleTest, t *testing.T, n int, cores int, delim string, ex string) {
 	this.executorData.SetCores(cores)
 	path := "./plainfile.txt"
 	executors := this.executorData.GetContext().Executors()
 	file, err := os.Create(path)
 	require.Nil(t, err)
 	lines := (&IElemensString{}).create(10000, 0)
+	sep := delim
+	if len(ex) > 0 {
+		for i, _ := range lines {
+			lines[i] += ex + delim
+		}
+		ex = strings.ReplaceAll(ex, "!", "\\!")
+		delim = delim + "!" + ex
+	}
 
 	for _, line := range lines {
-		_, err := file.WriteString(line + delim)
+		_, err := file.WriteString(line + sep)
 		require.Nil(t, err)
 	}
 	require.Nil(t, file.Close())
