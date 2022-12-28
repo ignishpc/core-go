@@ -100,3 +100,7 @@ func (this *iTypeC[T]) Distinct(reduceImpl *impl.IReduceImpl, numPartitions int6
 }
 
 /*IRepartitionImpl*/
+
+func (this *iTypeC[T]) PartitionByHash(repartitionImpl *impl.IRepartitionImpl, numPartitions int64) error {
+	return impl.PartitionByHash[T](repartitionImpl, numPartitions)
+}

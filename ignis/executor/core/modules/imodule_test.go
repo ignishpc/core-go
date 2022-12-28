@@ -36,9 +36,9 @@ func rankVector[T any](executorData *core.IExecutorData, array []T) []T {
 	block := len(array) / execs
 	rem := len(array) % execs
 	if rank < rem {
-		return array[block*rank+rank : block*(rank+1)+rank+1]
+		return array[(block+rank)*rank : (block+rank+1)*(rank+1)]
 	} else {
-		return array[block*rank+rem : block*(rank+1)+rem]
+		return array[(block+rem)*rank : (block+rem)*(rank+1)]
 	}
 }
 

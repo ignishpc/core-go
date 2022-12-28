@@ -152,6 +152,6 @@ func GetHasher(p reflect.Type) Hasher {
 	}
 }
 
-func Hash[T comparable](e T, h Hasher) uint64 {
+func Hash[T any](e T, h Hasher) uint64 {
 	return h.Hash(unsafe.Pointer(&e))
 }

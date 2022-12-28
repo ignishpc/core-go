@@ -10,6 +10,7 @@ import (
 	"ignis/executor/api/iterator"
 	"ignis/executor/core"
 	"ignis/executor/core/utils"
+	"reflect"
 	"sort"
 	"testing"
 )
@@ -373,9 +374,9 @@ func TestRepartitionOrderedInt(t *testing.T) {
 func TestRepartitionUnorderedString(t *testing.T) {
 	repartitionTest[string](generalModuleTest, t, 2, "Memory", false, true, &IElemensString{})
 }
-
+*/
 func TestRepartitionLocalInt(t *testing.T) {
-	repartitionTest[int](generalModuleTest, t, 2, "Memory", false, false, &IElemensInt{})
+	repartitionTest[int64](generalModuleTest, t, 2, "Memory", false, false, &IElemensInt{})
 }
 
 type PartitionByStr struct {
@@ -394,12 +395,12 @@ func TestPartitionByString(t *testing.T) {
 }
 
 func TestPartitionByRandomInt(t *testing.T) {
-	partitionByRandomTest[int](generalModuleTest, t, 2, "Memory", &IElemensInt{})
+	partitionByRandomTest[int64](generalModuleTest, t, 2, "Memory", &IElemensInt{})
 }
 
 func TestPartitionByHashString(t *testing.T) {
 	partitionByHashTest[string](generalModuleTest, t, 2, "Memory", &IElemensString{})
-}*/
+}
 
 /* Implementations */
 func executeToTest(this *IGeneralModuleTest, t *testing.T, name string, partitionType string) {
@@ -954,17 +955,17 @@ func repartitionTest[T comparable](this *IGeneralModuleTest, t *testing.T, cores
 	elems := gen.create(100*cores*2*np, 0)
 	localElems := rankVector(this.executorData, elems)
 	if rank == np-1 {
-		localElems = append(localElems, localElems[:100]...)
+		localElems = append(localElems, elems[:100]...)
 	}
 	elems = append(elems, elems[:100]...)
 	loadToPartitions(t, this.executorData, localElems, cores*2)
 
-	require.Nil(t, this.general.Repartition(nil, int64(2+np+1), preserveOrdering, global))
+	require.Nil(t, this.general.Repartition(nil, int64(2*np-1), preserveOrdering, global))
 
 	group, err := core.GetPartitions[T](this.executorData)
 	require.Nil(t, err)
 	for _, part := range group.Iter() {
-		require.Greater(t, 50, part.Size())
+		require.Greater(t, part.Size(), int64(50))
 	}
 
 	result := getFromPartitions[T](t, this.executorData)
@@ -988,7 +989,7 @@ func repartitionTest[T comparable](this *IGeneralModuleTest, t *testing.T, cores
 				expected[e]--
 			}
 			for _, count := range expected {
-				require.Equal(t, 0, count)
+				require.Equal(t, int64(0), count)
 			}
 		}
 	}
@@ -1003,7 +1004,7 @@ func partitionByTest[T comparable](this *IGeneralModuleTest, t *testing.T, name 
 	elems := gen.create(100*cores*2*np, 0)
 	localElems := rankVector(this.executorData, elems)
 	if rank == np-1 {
-		localElems = append(localElems, localElems[:100]...)
+		localElems = append(localElems, elems[:100]...)
 	}
 	elems = append(elems, elems[:100]...)
 	loadToPartitions(t, this.executorData, localElems, cores*2)
@@ -1028,7 +1029,7 @@ func partitionByTest[T comparable](this *IGeneralModuleTest, t *testing.T, name 
 			expected[e]--
 		}
 		for _, count := range expected {
-			require.Equal(t, 0, count)
+			require.Equal(t, int64(0), count)
 		}
 	}
 }
@@ -1042,7 +1043,7 @@ func partitionByRandomTest[T comparable](this *IGeneralModuleTest, t *testing.T,
 	elems := gen.create(100*cores*2*np, 0)
 	localElems := rankVector(this.executorData, elems)
 	if rank == np-1 {
-		localElems = append(localElems, localElems[:100]...)
+		localElems = append(localElems, elems[:100]...)
 	}
 	elems = append(elems, elems[:100]...)
 	loadToPartitions(t, this.executorData, localElems, cores*2)
@@ -1067,7 +1068,7 @@ func partitionByRandomTest[T comparable](this *IGeneralModuleTest, t *testing.T,
 			expected[e]--
 		}
 		for _, count := range expected {
-			require.Equal(t, 0, count)
+			require.Equal(t, int64(0), count)
 		}
 	}
 }
@@ -1081,11 +1082,12 @@ func partitionByHashTest[T comparable](this *IGeneralModuleTest, t *testing.T, c
 	elems := gen.create(100*cores*2*np, 0)
 	localElems := rankVector(this.executorData, elems)
 	if rank == np-1 {
-		localElems = append(localElems, localElems[:100]...)
+		localElems = append(localElems, elems[:100]...)
 	}
 	elems = append(elems, elems[:100]...)
 	loadToPartitions(t, this.executorData, localElems, cores*2)
 
+	this.executorData.RegisterType(base.NewTypeC[T]())
 	require.Nil(t, this.general.PartitionByHash(nil, int64(2+np+1)))
 
 	result := getFromPartitions[T](t, this.executorData)
@@ -1106,7 +1108,7 @@ func partitionByHashTest[T comparable](this *IGeneralModuleTest, t *testing.T, c
 			expected[e]--
 		}
 		for _, count := range expected {
-			require.Equal(t, 0, count)
+			require.Equal(t, int64(0), count)
 		}
 	}
 }
