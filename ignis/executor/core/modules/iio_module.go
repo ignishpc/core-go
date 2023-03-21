@@ -36,12 +36,7 @@ func (this *IIOModule) LoadLibrary(ctx context.Context, path string) (_err error
 
 func (this *IIOModule) PartitionCount(ctx context.Context) (_r int64, _err error) {
 	defer this.moduleRecover(&_err)
-	group := this.executorData.GetPartitionsAny()
-	_r = 0
-	for i := 0; i < group.Size(); i++ {
-		_r += group.GetBase(i).Size()
-	}
-	return
+	return int64(this.executorData.GetPartitionsAny().Size()), nil
 }
 
 func (this *IIOModule) CountByPartition(ctx context.Context) (_r []int64, _err error) {
