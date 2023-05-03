@@ -50,7 +50,7 @@ func Bcast[T any](this *IMpi, part storage.IPartition[T], root int) error {
 			}
 			array := list.Array().([]T)
 			bytes := C_int(int(sz) * int(utils.TypeObj[T]().Size()))
-			if err := MPI_Bcast(PS(&array), bytes, MPI_BYTE, C_int(root), this.Native()); err != nil {
+			if err := MPI_Bcast(PA(&array), bytes, MPI_BYTE, C_int(root), this.Native()); err != nil {
 				return ierror.Raise(err)
 			}
 		} else {
@@ -265,7 +265,7 @@ func DriverScatter[T any](this *IMpi, group C_MPI_Comm, partGroup *storage.IPart
 	execs := int(aux) - 1
 	var sameProtocol bool
 	sz := int64(0)
-	src := P_NIL()
+	src := C_NULL()
 	partsv := []C_int{}
 	szv := []C_int{0}
 	displs := []C_int{0}
@@ -338,7 +338,7 @@ func DriverScatter[T any](this *IMpi, group C_MPI_Comm, partGroup *storage.IPart
 				}
 			}
 			array := partGroup.Get(0).Inner().(storage.IList).Array().([]T)
-			src = PS(&array)
+			src = PA(&array)
 		} else {
 			cmp, err := this.propertyParser.MsgCompression()
 			if err != nil {
@@ -417,7 +417,7 @@ func DriverScatter[T any](this *IMpi, group C_MPI_Comm, partGroup *storage.IPart
 				list := part.Inner().(storage.IList)
 				list.Resize(int(l)/int(utils.TypeObj[T]().Size()), true)
 				array := list.Array().([]T)
-				Memcpy(PS(&array), unsafe.Add(src, offset), int(l))
+				C_Memcpy(PA(&array), unsafe.Add(src, offset), int(l))
 				offset += int(l)
 				partGroup.Add(part)
 			}
@@ -609,12 +609,12 @@ func gatherImpl[T any](this *IMpi, group C_MPI_Comm, part storage.IPartition[T],
 				array := list.Array().([]T)
 				//Use same buffer to rcv elements
 				move[T](array, int(szv[rank])/elemSz, int(displs[rank])/elemSz)
-				if err := MPI_Gatherv(MPI_IN_PLACE, C_int(sz), MPI_BYTE, PS(&array), &szv[0], &displs[0], MPI_BYTE, C_int(root), group); err != nil {
+				if err := MPI_Gatherv(MPI_IN_PLACE, C_int(sz), MPI_BYTE, PA(&array), &szv[0], &displs[0], MPI_BYTE, C_int(root), group); err != nil {
 					return ierror.Raise(err)
 				}
 			} else {
 				array := list.Array().([]T)
-				if err := MPI_Gatherv(PS(&array), C_int(sz), MPI_BYTE, P_NIL(), nil, nil, MPI_BYTE, C_int(root), group); err != nil {
+				if err := MPI_Gatherv(PA(&array), C_int(sz), MPI_BYTE, C_NULL(), nil, nil, MPI_BYTE, C_int(root), group); err != nil {
 					return ierror.Raise(err)
 				}
 			}
@@ -795,7 +795,7 @@ func sendRecvImpl[T any](this *IMpi, group C_MPI_Comm, part storage.IPartition[T
 					return ierror.Raise(err)
 				}
 				array := list.Array().([]T)
-				if err := MPI_Send(PS(&array), C_int(int(sz)*elemSz), MPI_BYTE, C_int(dest),
+				if err := MPI_Send(PA(&array), C_int(int(sz)*elemSz), MPI_BYTE, C_int(dest),
 					C_int(tag), group); err != nil {
 					return ierror.Raise(err)
 				}
@@ -806,7 +806,7 @@ func sendRecvImpl[T any](this *IMpi, group C_MPI_Comm, part storage.IPartition[T
 				}
 				list.Resize(int(init)+int(sz), false)
 				array := list.Array().([]T)
-				if err := MPI_Recv(PS(&array), C_int(int(sz)*elemSz), MPI_BYTE, C_int(source), C_int(tag), group,
+				if err := MPI_Recv(PA(&array), C_int(int(sz)*elemSz), MPI_BYTE, C_int(source), C_int(tag), group,
 					MPI_STATUS_IGNORE); err != nil {
 					return ierror.Raise(err)
 				}

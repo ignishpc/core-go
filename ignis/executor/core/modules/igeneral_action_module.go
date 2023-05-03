@@ -36,7 +36,7 @@ func (this *IGeneralActionModule) Execute(ctx context.Context, src *rpc.ISource)
 	if fun, ok := basefun.(function.IVoidFunction0); ok {
 		return this.PackError(impl.Execute(this.pipeImpl, fun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "execute")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "execute")
 }
 
 func (this *IGeneralActionModule) Reduce(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -50,7 +50,7 @@ func (this *IGeneralActionModule) Reduce(ctx context.Context, src *rpc.ISource) 
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, any]); ok {
 		return this.PackError(impl.Reduce(this.reduceImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "reduce")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "reduce")
 }
 
 func (this *IGeneralActionModule) TreeReduce(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -64,7 +64,7 @@ func (this *IGeneralActionModule) TreeReduce(ctx context.Context, src *rpc.ISour
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, any]); ok {
 		return this.PackError(impl.TreeReduce(this.reduceImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "treeReduce")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "treeReduce")
 }
 
 func (this *IGeneralActionModule) Collect(ctx context.Context) (_err error) {
@@ -83,7 +83,7 @@ func (this *IGeneralActionModule) Aggregate(ctx context.Context, zero *rpc.ISour
 	} else if anyfun, ok := zerofun.(function.IFunction0[any]); ok {
 		err = impl.Zero(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(zerofun), "aggregate")
+		return this.CompatibilityError(reflect.TypeOf(zerofun), "aggregate")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -97,7 +97,7 @@ func (this *IGeneralActionModule) Aggregate(ctx context.Context, zero *rpc.ISour
 	} else if anyfun, ok := seqfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.Aggregate(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(seqfun), "aggregate")
+		return this.CompatibilityError(reflect.TypeOf(seqfun), "aggregate")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -111,7 +111,7 @@ func (this *IGeneralActionModule) Aggregate(ctx context.Context, zero *rpc.ISour
 	} else if anyfun, ok := combfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.Reduce(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(combfun), "aggregate")
+		return this.CompatibilityError(reflect.TypeOf(combfun), "aggregate")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -130,7 +130,7 @@ func (this *IGeneralActionModule) TreeAggregate(ctx context.Context, zero *rpc.I
 	} else if anyfun, ok := zerofun.(function.IFunction0[any]); ok {
 		err = impl.Zero(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(zerofun), "treeAggregate")
+		return this.CompatibilityError(reflect.TypeOf(zerofun), "treeAggregate")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -144,7 +144,7 @@ func (this *IGeneralActionModule) TreeAggregate(ctx context.Context, zero *rpc.I
 	} else if anyfun, ok := seqfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.TreeAggregate(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(seqfun), "treeAggregate")
+		return this.CompatibilityError(reflect.TypeOf(seqfun), "treeAggregate")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -158,7 +158,7 @@ func (this *IGeneralActionModule) TreeAggregate(ctx context.Context, zero *rpc.I
 	} else if anyfun, ok := combfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.TreeReduce(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(combfun), "treeAggregate")
+		return this.CompatibilityError(reflect.TypeOf(combfun), "treeAggregate")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -177,7 +177,7 @@ func (this *IGeneralActionModule) Fold(ctx context.Context, zero *rpc.ISource, s
 	} else if anyfun, ok := zerofun.(function.IFunction0[any]); ok {
 		err = impl.Zero(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(zerofun), "fold")
+		return this.CompatibilityError(reflect.TypeOf(zerofun), "fold")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -191,7 +191,7 @@ func (this *IGeneralActionModule) Fold(ctx context.Context, zero *rpc.ISource, s
 	} else if anyfun, ok := seqfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.Fold(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(seqfun), "fold")
+		return this.CompatibilityError(reflect.TypeOf(seqfun), "fold")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -210,7 +210,7 @@ func (this *IGeneralActionModule) TreeFold(ctx context.Context, zero *rpc.ISourc
 	} else if anyfun, ok := zerofun.(function.IFunction0[any]); ok {
 		err = impl.Zero(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(zerofun), "treeFold")
+		return this.CompatibilityError(reflect.TypeOf(zerofun), "treeFold")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -224,7 +224,7 @@ func (this *IGeneralActionModule) TreeFold(ctx context.Context, zero *rpc.ISourc
 	} else if anyfun, ok := seqfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.TreeFold(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(seqfun), "treeFold")
+		return this.CompatibilityError(reflect.TypeOf(seqfun), "treeFold")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -251,7 +251,7 @@ func (this *IGeneralActionModule) Foreach_(ctx context.Context, src *rpc.ISource
 	} else if anyfun, ok := basefun.(function.IVoidFunction[any]); ok {
 		return this.PackError(impl.Foreach(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "foreach")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "foreach")
 }
 
 func (this *IGeneralActionModule) ForeachPartition(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -265,7 +265,7 @@ func (this *IGeneralActionModule) ForeachPartition(ctx context.Context, src *rpc
 	} else if anyfun, ok := basefun.(function.IVoidFunction[iterator.IReadIterator[any]]); ok {
 		return this.PackError(impl.ForeachPartition(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "foreachPartition")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "foreachPartition")
 }
 
 func (this *IGeneralActionModule) ForeachExecutor(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -279,7 +279,7 @@ func (this *IGeneralActionModule) ForeachExecutor(ctx context.Context, src *rpc.
 	} else if anyfun, ok := basefun.(function.IVoidFunction[[][]any]); ok {
 		return this.PackError(impl.ForeachExecutor(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "foreachExecutor")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "foreachExecutor")
 }
 
 func (this *IGeneralActionModule) Top(ctx context.Context, num int64) (_err error) {
@@ -302,7 +302,7 @@ func (this *IGeneralActionModule) Top2(ctx context.Context, num int64, cmp *rpc.
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.TopBy(this.sortImpl, anyfun, num))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "top")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "top")
 }
 
 func (this *IGeneralActionModule) TakeOrdered(ctx context.Context, num int64) (_err error) {
@@ -325,7 +325,7 @@ func (this *IGeneralActionModule) TakeOrdered2(ctx context.Context, num int64, c
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.TakeOrderedBy(this.sortImpl, anyfun, num))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "takeOrdered")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "takeOrdered")
 }
 
 func (this *IGeneralActionModule) Keys(ctx context.Context) (_err error) {

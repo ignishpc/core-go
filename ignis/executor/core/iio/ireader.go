@@ -24,13 +24,16 @@ func GetNamePair(first any, second any) string {
 	return fmt.Sprintf(pairName, GetName(first), GetName(second))
 }
 
-var mapName = strings.Replace(utils.TypeName[map[any]any](), "any", "%s", -1)
+var mapName = strings.Replace(utils.TypeName[map[any]any](), utils.TypeName[any](), "%s", -1)
 
 func GetNameMap(key any, value any) string {
 	return fmt.Sprintf(mapName, GetName(key), GetName(value))
 }
 
 func GetName(obj any) string {
+	if obj == nil {
+		return utils.TypeName[any]()
+	}
 	return reflect.TypeOf(obj).String()
 }
 

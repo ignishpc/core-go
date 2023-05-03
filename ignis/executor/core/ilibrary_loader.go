@@ -87,6 +87,10 @@ func (this *ILibraryLoader) LoadLibrary(path string) ([]string, error) {
 	return ignis_library, nil
 }
 
+func (this *ILibraryLoader) CreateType(name string, path string) (string, error) {
+	return "", ierror.RaiseMsg("Not implemented yet") //TODO
+}
+
 func (this *ILibraryLoader) compile(str string) (string, error) {
 	return "", ierror.RaiseMsg("Not implemented yet") //TODO
 }

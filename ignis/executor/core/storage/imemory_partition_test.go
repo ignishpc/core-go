@@ -1,12 +1,15 @@
 package storage
 
 import (
+	"ignis/executor/core/iio"
 	"math/rand"
 	"strconv"
 )
 
 func init() {
 	CreateList[int64]()
+	iio.AddBasicType[int64]()
+	iio.AddBasicType[string]()
 	addPartitionTest(&IPartitionTest[int64]{
 		"IMemoryPartitionInt64Test",
 		func() IPartition[int64] {
@@ -22,7 +25,7 @@ func init() {
 		},
 	})
 	addPartitionTest(&IPartitionTest[any]{
-		"IMemoryPartitionAnyTest",
+		"IMemoryPartitionAnyIntTest",
 		func() IPartition[any] {
 			return NewIMemoryPartition[any](100, false)
 		},
@@ -36,7 +39,7 @@ func init() {
 		},
 	})
 	addPartitionTest(&IPartitionTest[any]{
-		"IMemoryPartitionAnyAnyTest",
+		"IMemoryPartitionAnyStrTest",
 		func() IPartition[any] {
 			return NewIMemoryPartition[any](100, false)
 		},

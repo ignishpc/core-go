@@ -22,8 +22,20 @@ func NewICacheContextModule(executorData *core.IExecutorData) *ICacheContextModu
 		logger.Error(err)
 	}
 	//load partition cache when the executor has previously crashed
-	if err := this.impl.LoadCacheFromDisk(); err != nil {
+	diskCache, err := this.impl.LoadCacheFromDisk()
+	if err != nil {
 		logger.Error(err)
+		return this
+	}
+	for i := 0; i < len(diskCache); i++ {
+		if tp, err := this.TypeFromName(diskCache[i][1]); err != nil {
+			logger.Error(err)
+		} else {
+			err = tp.LoadFromDisk(this.impl, diskCache[i])
+			if err != nil {
+				logger.Error(err)
+			}
+		}
 	}
 
 	return this

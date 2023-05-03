@@ -58,16 +58,16 @@ func (this *IPropertyParser) MsgCompression() (int8, error) {
 }
 
 func (this *IPropertyParser) NativeSerialization() (bool, error) {
-	/*value, err := this.GetString("ignis.partition.serialization")
+	value, err := this.GetString("ignis.partition.serialization")
 	if err != nil {
 		return false, err
 	}
-	return value == "native", nil*/
-	return false, nil //TODO
+	return value == "native", nil
 }
 
-func (this *IPropertyParser) PartitionCompression() (int64, error) {
-	return this.GetRangeNumber("ignis.partition.compression", 0, 9)
+func (this *IPropertyParser) PartitionCompression() (int8, error) {
+	n, err := this.GetRangeNumber("ignis.partition.compression", 0, 9)
+	return int8(n), err
 }
 
 func (this *IPropertyParser) TransportElemSize() (int64, error) {

@@ -76,6 +76,9 @@ func init() {
 func AddBasicType[T any]() {
 	tp := utils.TypeObj[T]()
 
+	//Native
+	newNativeType[T]()
+
 	//Basic
 	SetPrinter(utils.TypeName[T](), &IPrinterFmt[T]{})
 
@@ -159,6 +162,10 @@ func AddKeyType[K comparable, V any]() {
 	keyPrinter := akeyPrinter.(*IAnyPrinterType)
 	avalPrinter, _ := GetPrinterObj(reflect.New(valTp).Elem().Interface())
 	valPrinter := avalPrinter.(*IAnyPrinterType)
+
+	//Native
+	newNativeType[map[K]V]()
+	newNativeType[ipair.IPair[K, V]]()
 
 	//Map
 	SetWriter(name, &IMapWriterType[K, V]{

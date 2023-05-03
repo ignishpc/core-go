@@ -12,6 +12,7 @@ type ITypeFunctions interface {
 	AddType(tp api.IContextType)
 	LoadType()
 
+	LoadFromDisk(cacheImpl *impl.ICacheImpl, group []string) error
 	GetPartitions(commImpl *impl.ICommImpl, protocol int8, minPartitions int64) ([][]byte, error)
 	SetPartitions(commImpl *impl.ICommImpl, partitions [][]byte) error
 	DriverGather(commImpl *impl.ICommImpl, group string) error

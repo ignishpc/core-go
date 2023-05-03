@@ -40,7 +40,7 @@ func (this *IGeneralModule) ExecuteTo(ctx context.Context, src *rpc.ISource) (_e
 	} else if anyfun, ok := basefun.(function.IFunction0[[][]any]); ok {
 		return this.PackError(impl.ExecuteTo(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "executeTo")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "executeTo")
 }
 
 func (this *IGeneralModule) Map_(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -54,7 +54,7 @@ func (this *IGeneralModule) Map_(ctx context.Context, src *rpc.ISource) (_err er
 	} else if anyfun, ok := basefun.(function.IFunction[any, any]); ok {
 		return this.PackError(impl.Map(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "map")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "map")
 }
 
 func (this *IGeneralModule) Filter(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -68,7 +68,7 @@ func (this *IGeneralModule) Filter(ctx context.Context, src *rpc.ISource) (_err 
 	} else if anyfun, ok := basefun.(function.IFunction[any, bool]); ok {
 		return this.PackError(impl.Filter(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "filter")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "filter")
 }
 
 func (this *IGeneralModule) Flatmap(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -82,7 +82,7 @@ func (this *IGeneralModule) Flatmap(ctx context.Context, src *rpc.ISource) (_err
 	} else if anyfun, ok := basefun.(function.IFunction[any, []any]); ok {
 		return this.PackError(impl.Flatmap(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "flatmap")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "flatmap")
 }
 
 func (this *IGeneralModule) KeyBy(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -96,7 +96,7 @@ func (this *IGeneralModule) KeyBy(ctx context.Context, src *rpc.ISource) (_err e
 	} else if anyfun, ok := basefun.(function.IFunction[any, any]); ok {
 		return this.PackError(impl.KeyBy(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "keyBy")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "keyBy")
 }
 
 func (this *IGeneralModule) MapWithIndex(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -110,7 +110,7 @@ func (this *IGeneralModule) MapWithIndex(ctx context.Context, src *rpc.ISource) 
 	} else if anyfun, ok := basefun.(function.IFunction2[int64, any, any]); ok {
 		return this.PackError(impl.MapWithIndex(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "mapWithIndex")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "mapWithIndex")
 }
 
 func (this *IGeneralModule) MapPartitions(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -124,7 +124,7 @@ func (this *IGeneralModule) MapPartitions(ctx context.Context, src *rpc.ISource)
 	} else if anyfun, ok := basefun.(function.IFunction[iterator.IReadIterator[any], []any]); ok {
 		return this.PackError(impl.MapPartitions(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "mapPartitions")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "mapPartitions")
 }
 
 func (this *IGeneralModule) MapPartitionsWithIndex(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -138,7 +138,7 @@ func (this *IGeneralModule) MapPartitionsWithIndex(ctx context.Context, src *rpc
 	} else if anyfun, ok := basefun.(function.IFunction2[int64, iterator.IReadIterator[any], []any]); ok {
 		return this.PackError(impl.MapPartitionsWithIndex(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "mapPartitionsWithIndex")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "mapPartitionsWithIndex")
 }
 
 func (this *IGeneralModule) MapExecutor(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -152,7 +152,7 @@ func (this *IGeneralModule) MapExecutor(ctx context.Context, src *rpc.ISource) (
 	} else if anyfun, ok := basefun.(function.IVoidFunction[[][]any]); ok {
 		return this.PackError(impl.MapExecutor(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "mapExecutor")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "mapExecutor")
 }
 
 func (this *IGeneralModule) MapExecutorTo(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -166,7 +166,7 @@ func (this *IGeneralModule) MapExecutorTo(ctx context.Context, src *rpc.ISource)
 	} else if anyfun, ok := basefun.(function.IFunction[[][]any, [][]any]); ok {
 		return this.PackError(impl.MapExecutorTo(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "mapExecutorTo")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "mapExecutorTo")
 }
 
 func (this *IGeneralModule) GroupBy(ctx context.Context, src *rpc.ISource, numPartitions int64) (_err error) {
@@ -180,7 +180,7 @@ func (this *IGeneralModule) GroupBy(ctx context.Context, src *rpc.ISource, numPa
 	} else if anyfun, ok := basefun.(function.IFunction[any, any]); ok {
 		err = impl.KeyBy(this.pipeImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(basefun), "groupBy")
+		return this.CompatibilityError(reflect.TypeOf(basefun), "groupBy")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -221,7 +221,7 @@ func (this *IGeneralModule) SortBy(ctx context.Context, src *rpc.ISource, ascend
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.SortBy(this.sortImpl, anyfun, ascending))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "sortBy")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "sortBy")
 }
 
 func (this *IGeneralModule) SortBy3(ctx context.Context, src *rpc.ISource, ascending bool, numPartitions int64) (_err error) {
@@ -235,7 +235,7 @@ func (this *IGeneralModule) SortBy3(ctx context.Context, src *rpc.ISource, ascen
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.SortByWithPartitions(this.sortImpl, anyfun, ascending, numPartitions))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "sortBy")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "sortBy")
 }
 
 func (this *IGeneralModule) Union_(ctx context.Context, other string, preserveOrder bool) (_err error) {
@@ -322,7 +322,7 @@ func (this *IGeneralModule) PartitionBy(ctx context.Context, src *rpc.ISource, n
 	} else if anyfun, ok := basefun.(function.IFunction[any, int64]); ok {
 		return this.PackError(impl.PartitionBy(this.repartitionImpl, anyfun, numPartitions))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "partitionBy")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "partitionBy")
 }
 
 func (this *IGeneralModule) FlatMapValues(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -336,7 +336,7 @@ func (this *IGeneralModule) FlatMapValues(ctx context.Context, src *rpc.ISource)
 	} else if anyfun, ok := basefun.(function.IFunction[any, []any]); ok {
 		return this.PackError(impl.Map(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "flatMapValues")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "flatMapValues")
 }
 
 func (this *IGeneralModule) MapValues(ctx context.Context, src *rpc.ISource) (_err error) {
@@ -350,7 +350,7 @@ func (this *IGeneralModule) MapValues(ctx context.Context, src *rpc.ISource) (_e
 	} else if anyfun, ok := basefun.(function.IFunction[any, any]); ok {
 		return this.PackError(impl.Map(this.pipeImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "mapValues")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "mapValues")
 }
 
 func (this *IGeneralModule) GroupByKey(ctx context.Context, numPartitions int64) (_err error) {
@@ -382,7 +382,7 @@ func (this *IGeneralModule) ReduceByKey(ctx context.Context, src *rpc.ISource, n
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, any]); ok {
 		return this.PackError(impl.ReduceByKey[any](this.reduceImpl, anyfun, numPartitions, localReduce))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "reduceByKey")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "reduceByKey")
 }
 
 func (this *IGeneralModule) AggregateByKey(ctx context.Context, zero *rpc.ISource, seqOp *rpc.ISource, numPartitions int64) (_err error) {
@@ -396,7 +396,7 @@ func (this *IGeneralModule) AggregateByKey(ctx context.Context, zero *rpc.ISourc
 	} else if anyfun, ok := zerofun.(function.IFunction0[any]); ok {
 		err = impl.Zero(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(zerofun), "aggregateByKey")
+		return this.CompatibilityError(reflect.TypeOf(zerofun), "aggregateByKey")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -410,7 +410,7 @@ func (this *IGeneralModule) AggregateByKey(ctx context.Context, zero *rpc.ISourc
 	} else if anyfun, ok := seqfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.AggregateByKey[any](this.reduceImpl, anyfun, numPartitions, true)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(seqfun), "aggregateByKey")
+		return this.CompatibilityError(reflect.TypeOf(seqfun), "aggregateByKey")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -429,7 +429,7 @@ func (this *IGeneralModule) AggregateByKey4(ctx context.Context, zero *rpc.ISour
 	} else if anyfun, ok := zerofun.(function.IFunction0[any]); ok {
 		err = impl.Zero(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(zerofun), "aggregateByKey")
+		return this.CompatibilityError(reflect.TypeOf(zerofun), "aggregateByKey")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -443,7 +443,7 @@ func (this *IGeneralModule) AggregateByKey4(ctx context.Context, zero *rpc.ISour
 	} else if anyfun, ok := seqfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.AggregateByKey[any](this.reduceImpl, anyfun, numPartitions, false)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(seqfun), "aggregateByKey")
+		return this.CompatibilityError(reflect.TypeOf(seqfun), "aggregateByKey")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -457,7 +457,7 @@ func (this *IGeneralModule) AggregateByKey4(ctx context.Context, zero *rpc.ISour
 	} else if anyfun, ok := combfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.ReduceByKey[any](this.reduceImpl, anyfun, numPartitions, false)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(combfun), "aggregateByKey")
+		return this.CompatibilityError(reflect.TypeOf(combfun), "aggregateByKey")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -476,7 +476,7 @@ func (this *IGeneralModule) FoldByKey(ctx context.Context, zero *rpc.ISource, sr
 	} else if anyfun, ok := zerofun.(function.IFunction0[any]); ok {
 		err = impl.Zero(this.reduceImpl, anyfun)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(zerofun), "foldByKey")
+		return this.CompatibilityError(reflect.TypeOf(zerofun), "foldByKey")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -490,7 +490,7 @@ func (this *IGeneralModule) FoldByKey(ctx context.Context, zero *rpc.ISource, sr
 	} else if anyfun, ok := seqfun.(function.IFunction2[any, any, any]); ok {
 		err = impl.FoldByKey[any](this.reduceImpl, anyfun, numPartitions, localFold)
 	} else {
-		return this.CompatibilyError(reflect.TypeOf(seqfun), "foldByKey")
+		return this.CompatibilityError(reflect.TypeOf(seqfun), "foldByKey")
 	}
 	if err != nil {
 		return this.PackError(err)
@@ -527,7 +527,7 @@ func (this *IGeneralModule) SortByKey2b(ctx context.Context, src *rpc.ISource, a
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.SortByKeyBy[any, any](this.sortImpl, anyfun, ascending))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "sortByKey")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "sortByKey")
 }
 
 func (this *IGeneralModule) SortByKey3(ctx context.Context, src *rpc.ISource, ascending bool, numPartitions int64) (_err error) {
@@ -541,5 +541,5 @@ func (this *IGeneralModule) SortByKey3(ctx context.Context, src *rpc.ISource, as
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.SortByKeyByWithPartitions[any, any](this.sortImpl, anyfun, ascending, numPartitions))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "sortByKey")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "sortByKey")
 }

@@ -7,6 +7,7 @@ import (
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/logger"
 	"ignis/executor/core/storage"
+	"ignis/executor/core/utils"
 	"io/fs"
 	"os"
 	"strconv"
@@ -147,7 +148,6 @@ func (this *ICacheImpl) Cache(id int64, level int8) error {
 	}
 
 	groupCache := this.executorData.GetPartitionsAny()
-	sameLevel := true
 
 	if level == 1 { // PRESERVE
 		if this.executorData.GetPartitionTools().IsDiskGroup(groupCache) {
@@ -162,10 +162,9 @@ func (this *ICacheImpl) Cache(id int64, level int8) error {
 	if level == 2 { // MEMORY
 		logger.Info("CacheContext: saving partition in " + storage.IMemoryPartitionType + " cache")
 		if !this.executorData.GetPartitionTools().IsMemoryGroup(groupCache) {
-			sameLevel = false
 			group := groupCache.NewGroup()
 			for i := 0; i < groupCache.Size(); i++ {
-				group.AddMemoryPartition(0)
+				group.AddMemoryPartition(group.GetBase(i).Size())
 				if err := groupCache.GetBase(i).CopyTo(group.GetBase(i)); err != nil {
 					return ierror.Raise(err)
 				}
@@ -174,52 +173,119 @@ func (this *ICacheImpl) Cache(id int64, level int8) error {
 		}
 	} else if level == 3 { // RAW_MEMORY
 		logger.Info("CacheContext: saving partition in " + storage.IRawMemoryPartitionType + " cache")
-		return ierror.RaiseMsg("Not implemented yet") //TODO
-
+		if !this.executorData.GetPartitionTools().IsRawMemoryGroup(groupCache) {
+			group := groupCache.NewGroup()
+			compression, err := this.executorData.GetProperties().PartitionCompression()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for i := 0; i < groupCache.Size(); i++ {
+				part := group.GetBase(i)
+				if err := group.AddRawMemoryPartition(part.Bytes(), compression, part.Native()); err != nil {
+					return ierror.Raise(err)
+				}
+				if err := groupCache.GetBase(i).CopyTo(part); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			groupCache = group
+		}
 	} else if level == 4 { // DISK
+		if this.executorData.GetPartitionTools().IsDiskGroup(groupCache) {
+			for i := 0; i < groupCache.Size(); i++ {
+				groupCache.(storage.IDiskPreservation).Persist(true)
+			}
+		} else {
+			group := groupCache.NewGroup()
+			compression, err := this.executorData.GetProperties().PartitionCompression()
+			if err != nil {
+				return ierror.Raise(err)
+			}
+			for i := 0; i < groupCache.Size(); i++ {
+				path, err := this.executorData.GetPartitionTools().Diskpath("")
+				if err != nil {
+					return ierror.Raise(err)
+				}
+				part := group.GetBase(i)
+				if err = group.AddDiskPartition(path, compression, part.Native()); err != nil {
+					return ierror.Raise(err)
+				}
+				if err := groupCache.GetBase(i).CopyTo(part); err != nil {
+					return ierror.Raise(err)
+				}
+			}
+			groupCache = group
+		}
+		cpath, err := this.fileCache()
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		data := make([]byte, 0, 1000)
+		data = append(data, []byte(strconv.Itoa(int(id)))...)
+		data = append(data, 0)
+		if groupCache.Size() > 0 {
+			data = append(data, []byte(groupCache.(storage.IDiskPreservation).GetTypeName())...)
+		} else {
+			data = append(data, []byte(utils.TypeName[any]())...)
+		}
+		for i := 0; i < groupCache.Size(); i++ {
+			data = append(data, 0)
+			data = append(data, []byte(groupCache.(storage.IDiskPreservation).GetPath())...)
+		}
+		data = append(data, []byte("\n")...)
+
+		file, err := os.OpenFile(cpath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		defer file.Close()
+		if _, err = file.Write(data); err != nil {
+			return ierror.Raise(err)
+		}
+
 		logger.Info("CacheContext: saving partition in " + storage.IDiskPartitionType + " cache")
-		return ierror.RaiseMsg("Not implemented yet") //TODO
 	}
 
-	if sameLevel {
-		groupCache.SetCache(true)
-	}
-
+	groupCache.SetCache(true)
 	this.cache[id] = groupCache
 	return nil
 }
 
-func (this *ICacheImpl) LoadCacheFromDisk() error {
+func (this *ICacheImpl) LoadCacheFromDisk() ([][]string, error) {
 	cache, err := this.fileCache()
 	if err != nil {
-		return ierror.Raise(err)
+		return nil, ierror.Raise(err)
 	}
 	if _, err := os.Stat(cache); errors.Is(err, fs.ErrExist) {
 		logger.Info("CacheContext: cache file found, loading")
 		file, err := os.Open(cache)
 		if err != nil {
-			return ierror.Raise(err)
+			return nil, ierror.Raise(err)
 		}
 		defer file.Close()
 		scanner := bufio.NewScanner(file)
+		groups := make([][]string, 0, 100)
 		for scanner.Scan() {
 			fileds := strings.Split(scanner.Text(), "\x00")
-			id, err := strconv.ParseInt(fileds[0], 10, 0)
-			if err != nil {
-				ierror.Raise(err)
-			}
-			group := storage.NewIPartitionGroup[any]()
-			for _, path := range fileds[2:] {
-				part, err := storage.NewIDiskPartition[any](path, 0, false, true, true)
-				if err != nil {
-					return ierror.Raise(err)
-				}
-				group.Add(part)
-			}
-			this.cache[id] = group
+			groups = append(groups, fileds)
 		}
+		return groups, nil
+	} else {
+		return nil, err
 	}
+}
 
+func LoadFromDisk[T any](this *ICacheImpl, fileds []string) error {
+	id, err := strconv.ParseInt(fileds[0], 10, 0)
+	if err != nil {
+		return ierror.Raise(err)
+	}
+	group := storage.NewIPartitionGroup[T]()
+	for _, path := range fileds[2:] {
+		part, err := storage.NewIDiskPartition[T](path, 0, false, true, true)
+		if err != nil {
+			return ierror.Raise(err)
+		}
+		group.Add(part)
+	}
+	this.cache[id] = group
 	return nil
 }
 

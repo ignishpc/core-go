@@ -16,6 +16,7 @@ import (
 	"math"
 	"os"
 	"reflect"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -44,6 +45,7 @@ func NewIExecutorData() *IExecutorData {
 
 	this.libraryLoader.executorData = this
 	this.partitionTools.properties = &this.properties
+	this.partitionTools.context = this.context
 	this.properties.properties = this.context.properties
 
 	this.mpi_.propertyParser = &this.properties
@@ -60,6 +62,7 @@ func (this *IExecutorData) GetPartitionsAny() storage.IPartitionGroupBase {
 func (this *IExecutorData) SetPartitionsAny(group storage.IPartitionGroupBase) {
 	this.DeletePartitions()
 	this.partitions = group
+	_ = group.Sync()
 }
 
 func GetPartitions[T any](this *IExecutorData) (*storage.IPartitionGroup[T], error) {
@@ -95,6 +98,7 @@ func GetAndDeletePartitions[T any](this *IExecutorData) (*storage.IPartitionGrou
 func SetPartitions[T any](this *IExecutorData, group *storage.IPartitionGroup[T]) {
 	this.DeletePartitions()
 	this.partitions = group
+	_ = group.Sync()
 }
 
 func (this *IExecutorData) HasPartitions() bool {
@@ -232,6 +236,29 @@ func (this *IExecutorData) Duplicate(comm impi.C_MPI_Comm, threads int) ([]impi.
 		logger.Info("mpi group ", i, " ready")
 	}
 	return result, nil
+}
+
+func (this *IExecutorData) CreateType(name string) (api.IContextType, error) {
+	path, err := this.properties.ExecutorDirectory()
+	if err != nil {
+		return nil, err
+	}
+	path += "/gosrc"
+	if err = this.partitionTools.CreateDirectoryIfNotExists(path); err != nil {
+		return nil, ierror.Raise(err)
+	}
+	fileName := regexp.MustCompile(`[*:/]`).ReplaceAllString(name, ".")
+	src := rpc.NewISource()
+	src.Obj = rpc.NewIEncoded()
+	var id string
+	if id, err = this.libraryLoader.CreateType(name, path+"/"+fileName); err != nil {
+		return nil, ierror.Raise(err)
+	}
+	src.Obj.Name = &id
+	if _, err := this.LoadLibrary(src); err != nil {
+		return nil, ierror.Raise(err)
+	}
+	return this.LoadContextType(), nil
 }
 
 func (this *IExecutorData) LoadLibrary(src *rpc.ISource) (function.IBaseFunction, error) {

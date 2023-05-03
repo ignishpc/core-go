@@ -12,12 +12,16 @@ type IConvertPair interface {
 type IAbstractPair interface {
 	SetFirst(f any)
 	GetFirst() any
+	GetFirstType() reflect.Type
 	GetFirstPointer() unsafe.Pointer
 	SetSecond(f any)
 	GetSecond() any
+	GetSecondType() reflect.Type
 	GetSecondPointer() unsafe.Pointer
 	Copy(first any, second any) IAbstractPair
 	New(first any, second any) IAbstractPair
+	NewEmpty() IAbstractPair
+	Get() any
 }
 
 type IPair[T1 any, T2 any] struct {
@@ -41,6 +45,10 @@ func (this *IPair[T1, T2]) GetFirstPointer() unsafe.Pointer {
 	return unsafe.Pointer(&this.First)
 }
 
+func (this *IPair[T1, T2]) GetFirstType() reflect.Type {
+	return reflect.TypeOf(this.First)
+}
+
 func (this *IPair[T1, T2]) SetSecond(f any) {
 	this.Second = f.(T2)
 }
@@ -53,6 +61,10 @@ func (this *IPair[T1, T2]) GetSecondPointer() unsafe.Pointer {
 	return unsafe.Pointer(&this.Second)
 }
 
+func (this *IPair[T1, T2]) GetSecondType() reflect.Type {
+	return reflect.TypeOf(this.Second)
+}
+
 func (p IPair[T1, T2]) To() IAbstractPair {
 	return &p
 }
@@ -63,6 +75,13 @@ func (this *IPair[T1, T2]) Copy(first any, second any) IAbstractPair {
 
 func (this *IPair[T1, T2]) New(first any, second any) IAbstractPair {
 	return &IPair[T1, T2]{first.(T1), second.(T2)}
+}
+func (this *IPair[T1, T2]) NewEmpty() IAbstractPair {
+	return &IPair[T1, T2]{}
+}
+
+func (this *IPair[T1, T2]) Get() any {
+	return *this
 }
 
 func New[T1 any, T2 any](first T1, second T2) *IPair[T1, T2] {

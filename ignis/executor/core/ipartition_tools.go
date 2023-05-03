@@ -1,23 +1,29 @@
 package core
 
 import (
+	"ignis/executor/api"
 	"ignis/executor/api/ipair"
 	"ignis/executor/core/ierror"
+	"ignis/executor/core/itransport"
 	"ignis/executor/core/logger"
 	"ignis/executor/core/storage"
 	"os"
 	"reflect"
+	"strconv"
+	"sync/atomic"
 )
 
 type IPartitionTools struct {
 	properties     *IPropertyParser
-	partitionIdGen int
+	context        api.IContext
+	partitionIdGen atomic.Int32
 }
 
-func NewIPartitionTools(properties *IPropertyParser) *IPartitionTools {
+func NewIPartitionTools(properties *IPropertyParser, ctx api.IContext) *IPartitionTools {
 	return &IPartitionTools{
 		properties,
-		0,
+		ctx,
+		atomic.Int32{},
 	}
 }
 
@@ -33,9 +39,9 @@ func NewPartitionWithName[T any](this *IPartitionTools, name string) (storage.IP
 	if name == storage.IMemoryPartitionType {
 		return NewMemoryPartitionDef[T](this)
 	} else if name == storage.IRawMemoryPartitionType {
-		//return NewRawMemoryPartitionDef[T](this) //TODO
+		return NewRawMemoryPartitionDef[T](this)
 	} else if name == storage.IDiskPartitionType {
-		//return NewDiskPartitionDef[T](this) //TODO
+		return NewDiskPartitionDef[T](this)
 	}
 	return nil, ierror.RaiseMsg("unknown partition type: " + name)
 }
@@ -48,9 +54,9 @@ func NewPartitionWithOther[T any](this *IPartitionTools, other storage.IPartitio
 	if name == storage.IMemoryPartitionType {
 		return NewMemoryPartition[T](this, other.Size())
 	} else if name == storage.IRawMemoryPartitionType {
-		//return NewRawMemoryPartition[T](this, other.Bytes()) //TODO
+		return NewRawMemoryPartition[T](this, other.Bytes())
 	} else if name == storage.IDiskPartitionType {
-		//return NewDiskPartitionDef[T](this) //TODO
+		return NewDiskPartitionDef[T](this)
 	}
 	return nil, ierror.RaiseMsg("unknown partition type: " + name)
 }
@@ -99,20 +105,58 @@ func NewMemoryPartition[T any](this *IPartitionTools, sz int64) (*storage.IMemor
 	return storage.NewIMemoryPartition[T](sz, native), nil
 }
 
-func NewRawMemoryPartitionDef[T any](this *IPartitionTools, sz int64) (*storage.IRawMemoryPartition[T], error) {
-	return nil, ierror.RaiseMsg("Not implemented yet")
+func NewRawMemoryPartitionDef[T any](this *IPartitionTools) (*storage.IRawMemoryPartition[T], error) {
+	return NewRawMemoryPartition[T](this, 1024*1024*8)
 }
 
-func NewRawMemoryPartition[T any](this *IPartitionTools, sz int64) (*storage.IRawMemoryPartition[T], error) {
-	return nil, ierror.RaiseMsg("Not implemented yet")
+func NewRawMemoryPartition[T any](this *IPartitionTools, bytes int64) (*storage.IRawMemoryPartition[T], error) {
+	native, err := this.properties.NativeSerialization()
+	if err != nil {
+		return nil, ierror.Raise(err)
+	}
+	compression, err := this.properties.PartitionCompression()
+	if err != nil {
+		return nil, ierror.Raise(err)
+	}
+	return storage.NewIRawMemoryPartition[T](bytes, compression, native)
 }
 
 func NewDiskPartitionDef[T any](this *IPartitionTools) (*storage.IDiskPartition[T], error) {
-	return nil, ierror.RaiseMsg("Not implemented yet")
+	return NewDiskPartition[T](this, "", false, false)
 }
 
 func NewDiskPartition[T any](this *IPartitionTools, name string, persist bool, read bool) (*storage.IDiskPartition[T], error) {
-	return nil, ierror.RaiseMsg("Not implemented yet")
+	native, err := this.properties.NativeSerialization()
+	if err != nil {
+		return nil, ierror.Raise(err)
+	}
+	compression, err := this.properties.PartitionCompression()
+	if err != nil {
+		return nil, ierror.Raise(err)
+	}
+	path, err := this.Diskpath(name)
+	if err != nil {
+		return nil, ierror.Raise(err)
+	}
+	return storage.NewIDiskPartition[T](path, compression, native, persist, read)
+}
+
+func (this *IPartitionTools) Diskpath(name string) (string, error) {
+	path, err := this.properties.ExecutorDirectory()
+	if err != nil {
+		return "", ierror.Raise(err)
+	}
+	path += "/partitions"
+	_ = this.CreateDirectoryIfNotExists(path)
+	if len(name) == 0 {
+		path += "/partition"
+		path += strconv.Itoa(this.context.ExecutorId())
+		path += "."
+		path += strconv.Itoa(int(this.partitionIdGen.Add(1)))
+	} else {
+		path += "/" + name
+	}
+	return path, nil
 }
 
 func (this *IPartitionTools) IsMemory(part storage.IPartitionBase) bool {
@@ -154,29 +198,53 @@ func ConvertGroupPartitionTo[T any](this *IPartitionTools, other storage.IPartit
 		return nil, ierror.Raise(err)
 	}
 
-	if !group.Type().AssignableTo(other.Type()) && !other.Type().AssignableTo(group.Type()) {
-		pt := reflect.TypeOf(ipair.IPair[any, any]{})
-		if ipair.IsPairType(group.Type()) && ipair.IsPairType(other.Type()) && (group.Type() == pt || other.Type() == pt) {
-			if this.IsMemoryGroup(other) {
-				logger.Warn(other.Type().String() + " will be convert to " + group.Type().String())
+	if this.IsMemoryGroup(other) {
+		flag := true
+		if !group.Type().AssignableTo(other.Type()) && !other.Type().AssignableTo(group.Type()) {
+			pt := reflect.TypeOf(ipair.IPair[any, any]{})
+			if ipair.IsPairType(group.Type()) && ipair.IsPairType(other.Type()) && (group.Type() == pt || other.Type() == pt) {
+				if this.IsMemoryGroup(other) {
+					logger.Warn(other.Type().String() + " will be convert to " + group.Type().String())
+				}
+			} else {
+				flag = false
+				logger.Warn("Can't convert partition from " + other.Type().String() + " to " + group.Type().String() + "" +
+					", using a conversion wfrom bytes")
+			}
+		}
+		if flag {
+			for i := 0; i < other.Size(); i++ {
+				group.AddBase(storage.ConvIMemoryPartition[T](other.GetBase(i)))
 			}
 		} else {
-			return nil, ierror.RaiseMsg("Can't convert partition from " + other.Type().String() + " to " + group.Type().String())
+			buffer := itransport.NewIMemoryBuffer()
+			for i := 0; i < other.Size(); i++ {
+				if err := other.GetBase(i).Write(buffer, 0); err != nil {
+					return nil, ierror.Raise(err)
+				}
+				newPart, err := NewMemoryPartition[T](this, other.GetBase(i).Size())
+				if err != nil {
+					return nil, ierror.Raise(err)
+				}
+				group.AddBase(newPart)
+			}
 		}
-	}
-
-	var conv func(storage.IPartitionBase) storage.IPartitionBase
-
-	if this.IsMemoryGroup(other) {
-		conv = storage.ConvIMemoryPartition[T]
 	} else if this.IsRawMemoryGroup(other) {
-		return nil, ierror.RaiseMsg("Not implemented yet") //TODO
+		for i := 0; i < other.Size(); i++ {
+			part, err := storage.ConvIRawMemoryPartition[T](other.GetBase(i))
+			if err != nil {
+				return nil, ierror.Raise(err)
+			}
+			group.AddBase(part)
+		}
 	} else {
-		return nil, ierror.RaiseMsg("Not implemented yet") //TODO
-	}
-
-	for i := 0; i < other.Size(); i++ {
-		group.AddBase(conv(other.GetBase(i)))
+		for i := 0; i < other.Size(); i++ {
+			part, err := storage.ConvIDiskPartition[T](other.GetBase(i))
+			if err != nil {
+				return nil, ierror.Raise(err)
+			}
+			group.AddBase(part)
+		}
 	}
 
 	return group, nil

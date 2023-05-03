@@ -46,6 +46,12 @@ func typeAError() error {
 	return ierror.RaiseMsg("TypeA functions does not implement pair or comparable functions.")
 }
 
+/*ICacheImpl*/
+
+func (this *iTypeA[T]) LoadFromDisk(cacheImpl *impl.ICacheImpl, group []string) error {
+	return impl.LoadFromDisk[T](cacheImpl, group)
+}
+
 /*ICommImpl*/
 
 func (this *iTypeA[T]) GetPartitions(commImpl *impl.ICommImpl, protocol int8, minPartitions int64) ([][]byte, error) {

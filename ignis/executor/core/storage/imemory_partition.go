@@ -68,6 +68,9 @@ func (this *IMemoryPartition[T]) Read(transport thrift.TTransport) error {
 	}
 	proto := iprotocol.NewIObjectProtocol(zlibTrans)
 	elems, err := proto.ReadObject()
+	if err != nil {
+		return ierror.Raise(err)
+	}
 	if this.Size() == 0 && reflect.TypeOf((*T)(nil)).Elem().Kind() == reflect.Interface {
 		if constructor := registryList[reflect.TypeOf(elems).Elem().String()]; constructor != nil {
 			this.elems = constructor((this.elems).Cap())
@@ -192,6 +195,14 @@ func (this *IMemoryPartition[T]) Clear() error {
 func (this *IMemoryPartition[T]) Fit() error {
 	this.elems.Resize(this.elems.Size(), true)
 	return nil
+}
+
+func (this *IMemoryPartition[T]) Sync() error {
+	return nil
+}
+
+func (this *IMemoryPartition[T]) Compression() int8 {
+	return 0
 }
 
 func (this *IMemoryPartition[T]) Type() string {

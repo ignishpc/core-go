@@ -14,8 +14,11 @@ type IPartitionTestAbs interface {
 	GetName() string
 	TestItWriteItRead(t *testing.T)
 	TestItWriteTransRead(t *testing.T)
+	TestItWriteTransReadNative(t *testing.T)
 	TestTransWriteItRead(t *testing.T)
+	TestTransWriteNativeItRead(t *testing.T)
 	TestTransWriteTransRead(t *testing.T)
+	TestTransWriteNativeTransReadNative(t *testing.T)
 	TestClear(t *testing.T)
 	TestAppendItWrite(t *testing.T)
 	TestAppendTransRead(t *testing.T)
@@ -47,12 +50,24 @@ func TestItWriteTransRead(t *testing.T) {
 	executeTest(t, (IPartitionTestAbs).TestItWriteTransRead)
 }
 
+func TestItWriteTransReadNative(t *testing.T) {
+	executeTest(t, (IPartitionTestAbs).TestItWriteTransReadNative)
+}
+
 func TestTransWriteItRead(t *testing.T) {
 	executeTest(t, (IPartitionTestAbs).TestTransWriteItRead)
 }
 
+func TestTransWriteNativeItRead(t *testing.T) {
+	executeTest(t, (IPartitionTestAbs).TestTransWriteNativeItRead)
+}
+
 func TestTransWriteTransRead(t *testing.T) {
 	executeTest(t, (IPartitionTestAbs).TestTransWriteTransRead)
+}
+
+func TestTransWriteNativeTransReadNative(t *testing.T) {
+	executeTest(t, (IPartitionTestAbs).TestTransWriteNativeTransReadNative)
 }
 
 func TestClear(t *testing.T) {
@@ -81,7 +96,7 @@ type IPartitionTest[T any] struct {
 	elemens func(n int, seed int) []T
 }
 
-//from ... to ...
+// from ... to ...
 func (this *IPartitionTest[T]) writeIterator(t *testing.T, elems []T, part IPartition[T]) {
 	it, err := part.WriteIterator()
 	require.Nil(t, err)
@@ -115,7 +130,7 @@ func (this *IPartitionTest[T]) read(t *testing.T, elems []T, part IPartition[T],
 
 func (this *IPartitionTest[T]) write(t *testing.T, part IPartition[T], native bool) []T {
 	buffer := thrift.NewTMemoryBuffer()
-	part.WriteWithNative(buffer, 0, native)
+	require.Nil(t, part.WriteWithNative(buffer, 0, native))
 	zlib, err := itransport.NewIZlibTransport(buffer)
 	require.Nil(t, err)
 	proto := iprotocol.NewIObjectProtocol(zlib)
@@ -155,10 +170,28 @@ func (this *IPartitionTest[T]) TestItWriteTransRead(t *testing.T) {
 	require.Equal(t, elems, result)
 }
 
+func (this *IPartitionTest[T]) TestItWriteTransReadNative(t *testing.T) {
+	part := this.create()
+	elems := this.elemens(100, 0)
+	this.writeIterator(t, elems, part)
+	require.Equal(t, len(elems), int(part.Size()))
+	result := this.write(t, part, true)
+	require.Equal(t, elems, result)
+}
+
 func (this *IPartitionTest[T]) TestTransWriteItRead(t *testing.T) {
 	part := this.create()
 	elems := this.elemens(100, 0)
 	this.read(t, elems, part, false)
+	require.Equal(t, len(elems), int(part.Size()))
+	result := this.readIterator(t, part)
+	require.Equal(t, elems, result)
+}
+
+func (this *IPartitionTest[T]) TestTransWriteNativeItRead(t *testing.T) {
+	part := this.create()
+	elems := this.elemens(100, 0)
+	this.read(t, elems, part, true)
 	require.Equal(t, len(elems), int(part.Size()))
 	result := this.readIterator(t, part)
 	require.Equal(t, elems, result)
@@ -170,6 +203,15 @@ func (this *IPartitionTest[T]) TestTransWriteTransRead(t *testing.T) {
 	this.read(t, elems, part, false)
 	require.Equal(t, len(elems), int(part.Size()))
 	result := this.write(t, part, false)
+	require.Equal(t, elems, result)
+}
+
+func (this *IPartitionTest[T]) TestTransWriteNativeTransReadNative(t *testing.T) {
+	part := this.create()
+	elems := this.elemens(100, 0)
+	this.read(t, elems, part, true)
+	require.Equal(t, len(elems), int(part.Size()))
+	result := this.write(t, part, true)
 	require.Equal(t, elems, result)
 }
 

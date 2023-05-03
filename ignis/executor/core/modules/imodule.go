@@ -65,6 +65,13 @@ func (this *IModule) TypeFromName(name string) (base.ITypeFunctions, error) {
 	this.executorData.LoadContextType()
 	typeBase := this.executorData.GetType(name)
 	if typeBase == nil {
+		var err error
+		typeBase, err = this.executorData.CreateType(name)
+		if err != nil {
+			logger.Warn("Type '", name, "' can not be created, using generic type: "+err.Error())
+		}
+	}
+	if typeBase == nil {
 		pairName := utils.TypeName[ipair.IPair[any, any]]()
 		pairName = pairName[:strings.Index(pairName, "[")]
 		if strings.HasPrefix(name, pairName) {
@@ -79,7 +86,7 @@ func (this *IModule) TypeFromName(name string) (base.ITypeFunctions, error) {
 }
 
 func (this *IModule) TypeFromSource(src *rpc.ISource) (base.ITypeFunctions, error) {
-	if len(*src.Obj.Name) > 0 && (*src.Obj.Name)[0] == ':'{
+	if len(*src.Obj.Name) > 0 && (*src.Obj.Name)[0] == ':' {
 		return this.TypeFromName((*src.Obj.Name)[1:])
 	}
 	basefun, err := this.executorData.LoadLibrary(src)
@@ -98,7 +105,7 @@ func (this *IModule) TypeFromSource(src *rpc.ISource) (base.ITypeFunctions, erro
 	return typeBase.(base.ITypeFunctions), nil
 }
 
-func (this *IModule) CompatibilyError(f reflect.Type, m string) error {
+func (this *IModule) CompatibilityError(f reflect.Type, m string) error {
 	return this.PackError(ierror.RaiseMsg(f.String() + " is not compatible with " + m))
 }
 

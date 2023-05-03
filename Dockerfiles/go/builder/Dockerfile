@@ -5,7 +5,7 @@ ARG TAG=""
 FROM ${REGISTRY}${NAMESPACE}common-builder${TAG}
 ARG RELPATH=""
 
-ENV GO_VERSION=go1.18beta2
+ENV GO_VERSION=go1.20.4
 RUN cd ${IGNIS_HOME} && \
 	mkdir -p core/go && \
 	cd core/go && \

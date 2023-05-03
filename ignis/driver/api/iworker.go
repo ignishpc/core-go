@@ -169,6 +169,10 @@ func (this *IWorker) TextFile(path string) (*IDataFrame[string], error) {
 	}, nil
 }
 
+func TextFile(this *IWorker, path string) (*IDataFrame[string], error) {
+	return this.TextFile(path)
+}
+
 func (this *IWorker) TextFileN(path string, minPartitions int64) (*IDataFrame[string], error) {
 	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
@@ -183,6 +187,10 @@ func (this *IWorker) TextFileN(path string, minPartitions int64) (*IDataFrame[st
 		this,
 		id,
 	}, nil
+}
+
+func TextFileN(this *IWorker, path string, minPartitions int64) (*IDataFrame[string], error) {
+	return this.TextFileN(path, minPartitions)
 }
 
 func (this *IWorker) PlainFile(path string, delim string) (*IDataFrame[string], error) {
@@ -201,6 +209,10 @@ func (this *IWorker) PlainFile(path string, delim string) (*IDataFrame[string], 
 	}, nil
 }
 
+func PlainFile(this *IWorker, path string, delim string) (*IDataFrame[string], error) {
+	return this.PlainFile(path, delim)
+}
+
 func (this *IWorker) PlainFileN(path string, minPartitions int64, delim string) (*IDataFrame[string], error) {
 	client, err := Ignis.clientPool().GetClient()
 	if err != nil {
@@ -215,6 +227,10 @@ func (this *IWorker) PlainFileN(path string, minPartitions int64, delim string) 
 		this,
 		id,
 	}, nil
+}
+
+func PlainFileN(this *IWorker, path string, minPartitions int64, delim string) (*IDataFrame[string], error) {
+	return this.PlainFileN(path, minPartitions, delim)
 }
 
 func PartitionObjectFile[T any](this *IWorker, path string, src *ISource) (*IDataFrame[T], error) {
@@ -252,6 +268,10 @@ func (this *IWorker) PartitionTextFile(path string) (*IDataFrame[string], error)
 		this,
 		id,
 	}, nil
+}
+
+func PartitionTextFile(this *IWorker, path string) (*IDataFrame[string], error) {
+	return this.PartitionTextFile(path)
 }
 
 func PartitionJsonFile[T any](this *IWorker, path string) (*IDataFrame[T], error) {
@@ -315,6 +335,10 @@ func (this *IWorker) Execute(src *ISource) error {
 		return derror.NewGenericIDriverError(err)
 	}
 	return nil
+}
+
+func Execute(this *IWorker, src *ISource) error {
+	return this.Execute(src)
 }
 
 func ExecuteTo[T any](this *IWorker, src *ISource) (*IDataFrame[T], error) {

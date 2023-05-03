@@ -103,6 +103,10 @@ func (this *IMemoryBuffer) GetBuffer() []byte {
 	return this.buffer
 }
 
+func (this *IMemoryBuffer) GetBufferAsBytes() []byte {
+	return this.buffer[:this.wBase]
+}
+
 func (this *IMemoryBuffer) Bytes() []byte {
 	return this.buffer[0:this.wBase]
 }
@@ -173,6 +177,24 @@ func (this *IMemoryBuffer) SetBufferSize(newSize int64) error {
 	this.buffer = newBuffer
 	this.rBase = utils.Min(this.rBase, newSize)
 	this.wBase = utils.Min(this.wBase, newSize)
+	return nil
+}
+
+func (this *IMemoryBuffer) SetReadBuffer(pos int64) error {
+	if pos <= this.WriteEnd() {
+		this.rBase = pos
+	} else {
+		return ierror.RaiseMsg("seek read more than available")
+	}
+	return nil
+}
+
+func (this *IMemoryBuffer) SetWriteBuffer(pos int64) error {
+	if pos <= this.GetBufferSize() {
+		this.wBase = pos
+	} else {
+		return ierror.RaiseMsg("seek write more than available")
+	}
 	return nil
 }
 

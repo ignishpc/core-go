@@ -70,7 +70,7 @@ func (this *IMathModule) Max1(ctx context.Context, cmp *rpc.ISource) (_err error
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.MaxBy(this.sortImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "max")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "max")
 }
 
 func (this *IMathModule) Min1(ctx context.Context, cmp *rpc.ISource) (_err error) {
@@ -84,7 +84,7 @@ func (this *IMathModule) Min1(ctx context.Context, cmp *rpc.ISource) (_err error
 	} else if anyfun, ok := basefun.(function.IFunction2[any, any, bool]); ok {
 		return this.PackError(impl.MinBy(this.sortImpl, anyfun))
 	}
-	return this.CompatibilyError(reflect.TypeOf(basefun), "min")
+	return this.CompatibilityError(reflect.TypeOf(basefun), "min")
 }
 
 func (this *IMathModule) SampleByKey(ctx context.Context, withReplacement bool, fractions *rpc.ISource, seed int32) (_err error) {

@@ -20,9 +20,11 @@ type IPartitionBase interface {
 	Bytes() int64
 	Clear() error
 	Fit() error
+	Sync() error
 	Type() string
 	Inner() any
 	Native() bool
+	Compression() int8
 	First() any
 }
 
@@ -46,11 +48,12 @@ type IPartitionGroupBase interface {
 	Cache() bool
 	SetCache(e bool)
 	First() any
+	Sync() error
 	Type() reflect.Type
 	NewGroup() IPartitionGroupBase
 	AddMemoryPartition(sz int64)
-	//AddRawMemoryPartition() error TODO
-	//AddDiskPartition() error TODO
+	AddRawMemoryPartition(bytes int64, compression int8, native bool) error
+	AddDiskPartition(path string, compression int8, native bool) error
 }
 
 type IPartitionGroup[T any] struct {
@@ -158,6 +161,15 @@ func (this *IPartitionGroup[T]) First() any {
 	return nil
 }
 
+func (this *IPartitionGroup[T]) Sync() (err error) {
+	for _, part := range this.partitions {
+		if err2 := part.Sync(); err2 != nil {
+			err = err2
+		}
+	}
+	return
+}
+
 func (this *IPartitionGroup[T]) Type() reflect.Type {
 	return reflect.TypeOf((*T)(nil)).Elem()
 }
@@ -168,6 +180,18 @@ func (this *IPartitionGroup[T]) NewGroup() IPartitionGroupBase {
 
 func (this *IPartitionGroup[T]) AddMemoryPartition(sz int64) {
 	this.Add(NewIMemoryPartition[T](sz, false))
+}
+
+func (this *IPartitionGroup[T]) AddRawMemoryPartition(bytes int64, compression int8, native bool) error {
+	part, err := NewIRawMemoryPartition[T](bytes, compression, native)
+	this.Add(part)
+	return err
+}
+
+func (this *IPartitionGroup[T]) AddDiskPartition(path string, compression int8, native bool) error {
+	part, err := NewIDiskPartition[T](path, compression, native, false, false)
+	this.Add(part)
+	return err
 }
 
 func Copy[T any](rit iterator.IReadIterator[T], wit iterator.IWriteIterator[T]) error {

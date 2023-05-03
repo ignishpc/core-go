@@ -6,6 +6,6 @@
 IgnisHPC Go Core
 ================
 
-**!!!Alpha version!!!** - please keep in mind that this version is incomplete and may be subject to important changes.
+**Beta version** is stable but with some unimplemented parts.
 
 Documentation: `IgnisHPC docs <https://ignishpc.readthedocs.io>`_

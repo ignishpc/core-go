@@ -49,12 +49,8 @@ func SetWriter(id string, value IWriter) {
 	}
 }
 
-func GetWriter(id string) IWriter {
-	id = NameFix(id)
-	if writer, present := writers[id]; present {
-		return writer
-	}
-	return nil
+func GetWriter(id string) (IWriter, error) {
+	return getWriterAux(id)
 }
 
 func getWriterAux(id string) (IWriter, error) {
@@ -138,6 +134,10 @@ func (this *IWriterType) Type() int8 {
 	return this.tp
 }
 
+func AnyWrapper(valWriter IWriter) IWriter {
+	return &IAnyWriterType{valWriter: valWriter}
+}
+
 type IAnyWriterType struct {
 	rtp       reflect.Type
 	valWriter IWriter
@@ -145,6 +145,9 @@ type IAnyWriterType struct {
 }
 
 func (this *IAnyWriterType) Write(protocol thrift.TProtocol, tp reflect.Type, obj unsafe.Pointer) error {
+	if this.rtp == nil {
+		return this.valWriter.Write(protocol, tp, utils.GetAnyData((*any)(obj)))
+	}
 	return this.valWriter.Write(protocol, this.rtp, utils.GetAnyData((*any)(obj)))
 }
 
