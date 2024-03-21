@@ -2,14 +2,13 @@ package modules
 
 import (
 	"context"
-	"fmt"
 	"github.com/apache/thrift/lib/go/thrift"
 	"ignis/executor/core"
 	"ignis/executor/core/ierror"
 	"ignis/executor/core/impi"
 	"ignis/executor/core/logger"
-	"ignis/executor/core/utils"
 	"ignis/rpc/executor"
+	"net"
 	"os"
 	"time"
 )
@@ -19,6 +18,7 @@ type IExecutorServerModule struct {
 	server    *thrift.TSimpleServer
 	processor *thrift.TMultiplexedProcessor
 	services  IExecutorServerServices
+	usock     *string
 }
 
 type IExecutorServerServices func(processor *thrift.TMultiplexedProcessor)
@@ -29,19 +29,19 @@ func NewIExecutorServerModule(executorData *core.IExecutorData, services IExecut
 		nil,
 		nil,
 		services,
+		nil,
 	}
 }
 
-func (this *IExecutorServerModule) Serve(name string, port int, compression int, localMode bool) error {
+func (this *IExecutorServerModule) Serve(name string, usock string, compression int) error {
 	if this.server != nil {
 		return nil
 	}
 	this.processor = thrift.NewTMultiplexedProcessor()
-	address := utils.Ternary(localMode, "127.0.0.1", "0.0.0.0")
-	trans, err := thrift.NewTServerSocket(fmt.Sprintf("%s:%d", address, port))
-	if err != nil {
-		return err
-	}
+	this.usock = &usock
+	_ = os.Remove(usock)
+
+	trans := thrift.NewTServerSocketFromAddrTimeout(&net.UnixAddr{Name: "unix", Net: usock}, 0)
 	this.server = thrift.NewTSimpleServer4(
 		this.processor,
 		trans,
@@ -50,7 +50,7 @@ func (this *IExecutorServerModule) Serve(name string, port int, compression int,
 	)
 	this.processor.RegisterProcessor(name, executor.NewIExecutorServerModuleProcessor(this))
 	logger.Info("ServerModule: go executor started")
-	err = this.server.Serve()
+	err := this.server.Serve()
 	if err != nil {
 		err = ierror.RaiseMsgCause("ServerModule fails", err)
 	}
@@ -100,7 +100,10 @@ func (this *IExecutorServerModule) Stop(ctx context.Context) (_err error) {
 	}
 	go func() {
 		time.Sleep(5 * time.Second)
-		server.Stop()
+		_ = server.Stop()
+		if this.usock != nil {
+			_ = os.Remove(*this.usock)
+		}
 	}()
 	return nil
 }

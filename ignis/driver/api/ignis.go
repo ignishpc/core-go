@@ -2,11 +2,13 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"ignis/driver/api/derror"
 	"ignis/driver/core"
+	"ignis/executor/core/ierror"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strconv"
 	"sync"
 )
 
@@ -28,33 +30,37 @@ func (this *_Ignis) Start() error {
 	ctx := context.Background()
 	this.cmd = exec.CommandContext(ctx, "ignis-backend")
 	this.cmd.Stderr = os.Stderr
+	this.cmd.Stdout = os.Stdout
 	input, err := this.cmd.StdinPipe()
 	if err != nil {
 		this.cmd = nil
 		return derror.NewGenericIDriverError(err)
 	}
 	_ = input
-	output, err := this.cmd.StdoutPipe()
-	if err != nil {
-		return derror.NewGenericIDriverError(err)
-	}
 	err = this.cmd.Start()
 	go this.cmd.Wait()
 	if err != nil {
 		this.cmd = nil
 		return derror.NewGenericIDriverError(err)
 	}
-	var backendPort, backendCompression, callbackPort, callbackCompression int
-	if _, err := fmt.Fscanf(output, "%d\n%d\n%d\n%d\n", &backendPort, &backendCompression, &callbackPort, &callbackCompression); err != nil {
-		this.Stop()
-		return derror.NewGenericIDriverError(err)
+	var transport_cmp int
+	job_sockets := os.Getenv("IGNIS_JOB_SOCKETS")
+	if value, found := os.LookupEnv("IGNIS_TRANSPORT_COMPRESSION"); found {
+		var err error
+		transport_cmp, err = strconv.Atoi(value)
+		if err != nil {
+			return ierror.RaiseMsg("Executor arguments are not valid")
+		}
+	} else {
+		transport_cmp = 0
 	}
-	this.callback, err = core.NewICallBack(callbackPort, callbackCompression)
+
+	this.callback, err = core.NewICallBack(filepath.Join(job_sockets, "driver.sock"), transport_cmp)
 	if err != nil {
 		this.Stop()
 		return derror.NewGenericIDriverError(err)
 	}
-	this.pool = core.NewIClientPool(backendPort, backendCompression)
+	this.pool = core.NewIClientPool(filepath.Join(job_sockets, "driver.sock"), transport_cmp)
 	return nil
 }
 

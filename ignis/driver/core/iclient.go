@@ -1,10 +1,10 @@
 package core
 
 import (
-	"fmt"
 	"github.com/apache/thrift/lib/go/thrift"
 	"ignis/driver/api/derror"
 	"ignis/rpc/driver"
+	"net"
 	"time"
 )
 
@@ -17,8 +17,8 @@ type IClient struct {
 	dataframeService  *driver.IDataFrameServiceClient
 }
 
-func NewIClient(port int, compression int) (*IClient, error) {
-	socket := thrift.NewTSocketConf(fmt.Sprintf("localhost:%d", port), &thrift.TConfiguration{})
+func NewIClient(usock string, compression int) (*IClient, error) {
+	socket := thrift.NewTSocketFromAddrConf(&net.UnixAddr{Name: "unix", Net: usock}, &thrift.TConfiguration{})
 	trans, err2 := thrift.NewTZlibTransport(socket, compression)
 	if err2 != nil {
 		return nil, derror.NewGenericIDriverError(err2)

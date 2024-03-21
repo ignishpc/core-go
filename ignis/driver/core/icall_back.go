@@ -14,7 +14,7 @@ type ICallBack struct {
 	context *IDriverContext
 }
 
-func NewICallBack(port, compression int) (*ICallBack, error) {
+func NewICallBack(usock string, compression int) (*ICallBack, error) {
 	logger.Init()
 
 	executorData := core.NewIExecutorData()
@@ -27,7 +27,7 @@ func NewICallBack(port, compression int) (*ICallBack, error) {
 	}
 
 	server := modules.NewIExecutorServerModule(executorData, services)
-	go server.Serve("IExecutorServer", port, compression, true)
+	go server.Serve("IExecutorServer", usock, compression)
 	return &ICallBack{
 		server,
 		driverContext,

@@ -5,7 +5,7 @@ import (
 )
 
 type IClientPool struct {
-	port        int
+	usock       string
 	compression int
 	clients     []*IClient
 	queue       []*IClient
@@ -17,9 +17,9 @@ type IClientBound struct {
 	client *IClient
 }
 
-func NewIClientPool(port, compression int) *IClientPool {
+func NewIClientPool(usock string, compression int) *IClientPool {
 	return &IClientPool{
-		port,
+		usock,
 		compression,
 		make([]*IClient, 0),
 		make([]*IClient, 0),
@@ -41,7 +41,7 @@ func (this *IClientPool) GetClient() (*IClientBound, error) {
 	this.mu.Lock()
 	defer this.mu.Unlock()
 	if len(this.queue) == 0 {
-		client, err := NewIClient(this.port, this.compression)
+		client, err := NewIClient(this.usock, this.compression)
 		if err != nil {
 			return nil, err
 		}

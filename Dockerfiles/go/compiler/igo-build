@@ -1,5 +1,0 @@
-#!/bin/bash
-
-go mod edit -replace ignis=${IGNIS_GO}/ignis go.mod
-go get
-go build "$@"
