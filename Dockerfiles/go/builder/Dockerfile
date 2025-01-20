@@ -7,9 +7,10 @@ ARG DOCK_DIR=""
 
 ENV GO_VERSION=1.22
 RUN export DEBIAN_FRONTEND=noninteractive && \
-	apt update && \
-	apt -y --no-install-recommends install golang-${GO_VERSION} && \
-	rm -rf /var/lib/apt/lists/* && \
+    apt update && \
+    apt -y --no-install-recommends install golang-${GO_VERSION} && \
+    ln -s /usr/lib/go-${GO_VERSION}/bin/go /usr/bin/go && \
+    rm -rf /var/lib/apt/lists/* && \
 
 COPY / ${IGNIS_HOME}/core/go/core
 
